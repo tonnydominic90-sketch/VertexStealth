@@ -19,9 +19,16 @@ Preview deployments are automatically `noindex`.
 | Turn on paid wording | `site.config.json` -> `"paymentsLive": true` (only once checkout works in the app) |
 | Prices / free limit / trial | `site.config.json` -> `pricing` |
 | Legal text | replace the `.md` in `legal/`, push |
-| FAQ and pricing copy | `scripts/build.js` (`faq`, `pricingHtml`) |
+| Homepage FAQ and pricing copy | `scripts/build.js` (`faq`, `pricingHtml`) |
+| Antidetect / multi-profile pages | `src/pages/<slug>.html` (copy) and `<slug>.json` (title, description, FAQ, steps; FAQ and HowTo structured data are generated from it) |
+| Download page copy and FAQ | `scripts/build.js` (`dlSteps`, `dlFaq`) |
 | Page copy, CSS, JS | `src/index.main.html`, `src/styles.css`, `src/app.js` |
 | Social preview image | `src/static/og-image.png` (1200x630) |
 
 ## Local preview
 `npm install && npm run build && npm start` -> http://localhost:3000
+
+## Pages
+`/` home, `/antidetect-browser`, `/multi-profile-management`, `/download`, `/terms`, `/privacy`, `/eula`, 404. Every page emits JSON-LD (Organization, WebSite, WebPage; plus SoftwareApplication, HowTo, FAQPage and BreadcrumbList where relevant). Links between legal files such as `EULA.md` are rewritten to `/eula` automatically.
+
+After deploying, validate the structured data at https://validator.schema.org and re-run your SEO crawler.

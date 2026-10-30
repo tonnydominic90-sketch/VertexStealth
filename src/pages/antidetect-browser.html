@@ -1,0 +1,62 @@
+<section class="page"><div class="wrap legal">
+<a class="back" href="/">← Back to home</a>
+<div class="kicker">Antidetect browser</div>
+<h1>Antidetect browser for Windows</h1>
+<p class="lead">VertexStealth is an antidetect browser (also written anti-detect) for Windows. It runs separate Chrome and Firefox profiles, each with its own proxy and configurable fingerprint settings, so every profile presents its own browser environment instead of sharing yours.</p>
+<p><a class="btn primary" href="/download">Download for Windows <span>↓</span></a></p>
+
+<h2>What is an antidetect browser?</h2>
+<p>A website can read many details about the browser visiting it: the user agent, language, timezone, screen, fonts, graphics and WebRTC information, and more. Together these details form a browser fingerprint. An antidetect browser lets you choose them per profile and keeps each profile's cookies and storage apart, so separate sessions do not share an environment by accident.</p>
+<p>"Antidetect" names the category. It does not mean invisible: websites use many signals and their own rules, and no tool can promise otherwise.</p>
+
+<h2>How does VertexStealth work as an antidetect browser?</h2>
+<p>VertexStealth is not a new browser engine. It launches the Chrome or Firefox you already have installed, with a dedicated profile folder and the settings you chose for that profile. You keep the real browser and its updates, while VertexStealth manages the profile, proxy and fingerprint settings around it.</p>
+<ul>
+<li><b>Chrome:</b> started with its own data folder and launch settings, then configured through the browser's DevTools protocol.</li>
+<li><b>Firefox:</b> started with a prepared profile and a bundled extension, and controlled through Firefox's Marionette interface.</li>
+<li><b>Isolation:</b> each profile has its own cookies, local storage and cache, separate from your everyday browser.</li>
+</ul>
+
+<h2>Which browser signals can you configure?</h2>
+<table>
+<thead><tr><th>Setting</th><th>What you control</th></tr></thead>
+<tbody>
+<tr><td>Navigator and language</td><td>User agent, platform, Client Hints and browser language, which can follow the proxy's country</td></tr>
+<tr><td>Timezone and location</td><td>Timezone and geolocation, matched to the proxy IP or set by hand</td></tr>
+<tr><td>Proxy</td><td>HTTP, HTTPS or SOCKS5 per profile, including authentication</td></tr>
+<tr><td>WebRTC</td><td>Modes that control which IP addresses a page can see</td></tr>
+<tr><td>Fonts, display and hardware</td><td>Font list, screen and window settings, CPU cores, memory and media devices</td></tr>
+<tr><td>Rendering</td><td>Canvas, audio and WebGL details</td></tr>
+</tbody>
+</table>
+<p>Availability and behavior depend on the browser and on the profile's configuration.</p>
+
+<h2>Antidetect browser vs a regular browser</h2>
+<table>
+<thead><tr><th>Feature</th><th>Regular browser profiles</th><th>Private window</th><th>VertexStealth</th></tr></thead>
+<tbody>
+<tr><td>Separate cookies and storage</td><td>Yes</td><td>Until the window closes</td><td>Yes, per profile</td></tr>
+<tr><td>Per-profile proxy</td><td>Not built in</td><td>Not built in</td><td>Yes</td></tr>
+<tr><td>Configurable fingerprint signals</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Built-in fingerprint check</td><td>No</td><td>No</td><td>Yes</td></tr>
+<tr><td>Saved, reusable profiles</td><td>Yes</td><td>No</td><td>Yes</td></tr>
+</tbody>
+</table>
+
+<h2>How do I set up an antidetect profile?</h2>
+<ol class="dl-steps">
+<li><span><b>Create a profile.</b> Pick Chrome or Firefox and choose a Windows or mobile preset, or randomize the supported settings.</span></li>
+<li><span><b>Set the environment.</b> Add a proxy, let timezone, location and language follow it or set them by hand, and choose a WebRTC mode.</span></li>
+<li><span><b>Launch and check.</b> Open the profile and run Fingerprint Check to see what the browser reports before you use it.</span></li>
+</ol>
+
+<h2>What VertexStealth does not do</h2>
+<ul>
+<li>It does not guarantee anonymity, undetectability or protection from account restrictions.</li>
+<li>It is a Windows app only. There is no macOS, Linux, mobile or cloud version, and no team sharing of profiles.</li>
+<li>It is not meant for activity that breaks the law or the terms of the sites and platforms you use.</li>
+</ul>
+
+<p>Managing several profiles? See <a href="/multi-profile-management">multi-profile management</a>.</p>
+{{FAQ}}
+</div></section>

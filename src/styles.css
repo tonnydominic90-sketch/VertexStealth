@@ -59,3 +59,10 @@
 @media(max-width:740px){.links .m-only{display:block;font-weight:800;color:#087fc5}}
 @media(max-width:470px){.navright{display:none}.nav{justify-content:space-between}}
 @media(max-width:900px){.navright .login{display:none}.links{gap:12px}}
+.what-is{margin:0 auto;text-align:left}.what-is a{font-weight:800}
+@media(max-width:1000px){.menu{display:block}.links{display:none;position:absolute;left:0;right:0;top:75px;padding:18px 24px 24px;background:#fff;border-bottom:1px solid var(--line);align-items:stretch;flex-direction:column;gap:18px}.links.open{display:flex}.links .m-only{display:block;font-weight:800;color:#087fc5}.navright .login{display:none}.nav{justify-content:space-between}}
+@media(max-width:740px){.links{top:67px}}
+.hero h1{font-size:clamp(40px,4.7vw,60px);line-height:1.05}
+.legal a.btn{text-decoration:none}.legal a.btn.primary{color:#fff}.legal a.btn.outline{color:#1c2b3b}
+.legal table{display:table;width:100%}
+@media(max-width:700px){.legal table{display:block;overflow-x:auto}}
