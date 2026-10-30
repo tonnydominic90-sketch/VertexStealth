@@ -1,0 +1,10 @@
+{
+  "name": "VertexStealth",
+  "company": "Vertex Tech Solutions",
+  "email": "techinfo.vertex@gmail.com",
+  "siteUrl": "",
+  "downloadUrl": "",
+  "downloadVersion": "",
+  "paymentsLive": false,
+  "pricing": { "monthly": 10, "yearly": 89, "freeProfiles": 3, "trialDays": 3 }
+}
