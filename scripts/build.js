@@ -58,6 +58,9 @@ const faq = [
   ['Can I use my own proxy?', 'Yes. VertexStealth supports per-profile HTTP, HTTPS, and SOCKS5 proxy configuration, including authenticated proxy workflows. Proxy performance and behavior depend on the provider, network, and configuration.'],
   ['Which browsers and operating systems are supported?', 'VertexStealth is a Windows desktop app (Windows 10 and 11). It launches Google Chrome or Mozilla Firefox, which must already be installed on your computer. macOS and Linux versions are not available yet.'],
   ['Is VertexStealth free?', `You can use VertexStealth for free with up to ${P.freeProfiles} browser profiles. New accounts also start with a ${P.trialDays}-day trial without that limit. Paid plans cost ${money(P.monthly)} per month or ${money(P.yearly)} per year (USD) and remove the profile limit.` + (live ? '' : ' Paid checkout is not open yet.')],
+  ['How many browser profiles can I create?', `The free plan allows up to ${P.freeProfiles} browser profiles. New accounts also start with a ${P.trialDays}-day trial without that limit, and paid plans remove the profile limit.`],
+  ['How do I cancel a paid plan?', `You can cancel at any time from your payment provider's subscription settings or by emailing ${cfg.email}. Cancellation takes effect at the end of the current billing period, so you keep paid access until then. See the Terms of Service for refund details.`],
+  ['What can I not use VertexStealth for?', 'You may use VertexStealth only for lawful purposes. The Terms of Service prohibit fraud, identity theft, account takeover, credential stuffing, spam, unauthorised access to systems or accounts, illegal content and infringement of third-party rights. Whether running several accounts on a given website breaches that site\'s own terms is your responsibility.'],
   ['Do I need an account?', 'Yes. You create a VertexStealth account inside the app. The account holds your sign-in and plan details; your browser profiles, cookies and browsing data stay on your computer.'],
   ['What is a browser fingerprint?', 'A browser fingerprint is a collection of browser and device signals that websites may use to distinguish sessions. Examples include browser version, platform, screen dimensions, language, timezone, fonts, and graphics-related properties.'],
   ['Can VertexStealth guarantee anonymity or stop account bans?', 'No. Fingerprint configuration and profile separation do not guarantee anonymity, undetectability, or freedom from website restrictions. Sites can use many signals and their own policies. Use the software responsibly and follow applicable laws and platform terms.'],
@@ -141,7 +144,7 @@ function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null
     ...nodes,
     ...(crumb ? [{ '@type': 'BreadcrumbList', itemListElement: [['Home', '/'], ...(Array.isArray(crumb) ? crumb : [[crumb, canonicalPath]])].map(([n, u], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: siteUrl + u })) }] : []),
   ];
-  const jsonld = '\n<script type="application/ld+json">\n' + JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 1).replace(/</g, '\\u003c') + '\n</script>';
+  const jsonld = '\n<script type="application/ld+json">\n' + JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c') + '\n</script>';
   const html = `<!doctype html>
 <html lang="en">
 <head>
@@ -193,19 +196,73 @@ page({ file: 'index.html', title: defaultTitle, desc: homeDesc, canonicalPath: '
 const secs = {};
 for (const m of homeMain.matchAll(/<section class="[^"]*" id="([^"]+)">[\s\S]*?<\/section>/g)) secs[m[1]] = m[0];
 const sectionPages = [
-  { slug: 'features', ids: ['features', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features — Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'Everything in VertexStealth: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings, WebRTC options and fingerprint checks.' },
-  { slug: 'product-preview', ids: ['product-preview'], crumb: 'Product preview', title: 'Product Preview — Proxy, Fingerprint & Checks | VertexStealth', desc: 'A closer look at VertexStealth: proxy configuration, fingerprint settings and the built-in fingerprint check.' },
-  { slug: 'how-it-works', ids: ['how-it-works'], crumb: 'How it works', title: 'How VertexStealth Works — From Profile to Verified Session', desc: 'Create a browser profile, set its environment, launch it and inspect what the browser reports, in three steps.' },
-  { slug: 'use-cases', ids: ['use-cases'], crumb: 'Use cases', title: 'Use Cases — QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: QA and web testing, digital marketing, research and developer workflows.' },
-  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing — Free Plan, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: free with up to ' + P.freeProfiles + ' profiles, ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.', nodes: [software()] },
-  { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ — VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.', nodes: [faqNode(faq)] },
+  { slug: 'features', ids: ['features', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features — Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'Everything in VertexStealth: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings, WebRTC options and fingerprint checks.',
+    answer: 'VertexStealth is a Windows antidetect browser and multi-profile manager that launches your installed Chrome or Firefox with isolated profile folders, per-profile proxies and configurable fingerprint settings.',
+    faqs: [
+      ['How does VertexStealth keep browser profiles separate?', 'Each managed profile launches Chrome or Firefox with its own browser data folder, so cookies and browser storage stay separate from other VertexStealth profiles and from your regular browser profile.'],
+      ['Which proxy types does VertexStealth support?', 'VertexStealth supports HTTP, HTTPS and SOCKS5 proxies per profile, including authenticated proxies, and includes a connection test you can run before launching.'],
+      ['Which fingerprint signals can I configure?', 'Supported signals include user agent, platform, language, timezone, geolocation, screen resolution, fonts, hardware-related values, WebRTC behavior and selected Canvas, WebGL and audio overrides. Always verify what the browser actually reports with the built-in Fingerprint Check.'],
+      ['Does VertexStealth work on macOS or Linux?', 'Not yet. VertexStealth is a Windows 10 and 11 desktop app and launches Google Chrome or Mozilla Firefox, which must already be installed.'],
+    ], nodes: () => [software()] },
+  { slug: 'product-preview', ids: ['product-preview'], crumb: 'Product preview', title: 'Product Preview — Proxy, Fingerprint & Checks | VertexStealth', desc: 'A closer look at VertexStealth: proxy configuration, fingerprint settings and the built-in fingerprint check.',
+    answer: 'The VertexStealth interface brings the controls for each browser profile together: proxy configuration, supported fingerprint settings and a fingerprint check, all set per profile.',
+    faqs: [
+      ['What profile controls can I see in the VertexStealth interface?', 'Each profile has proxy settings (type, credentials and a connection test), fingerprint settings such as navigator, display, environment and location values, WebRTC options and a Fingerprint Check.'],
+      ['How does VertexStealth help keep browser profiles separate?', 'Every profile has its own settings and its own browser data folder, so one profile\'s cookies and storage are not shared with another.'],
+      ['What can I inspect before I use a profile?', 'After launching a profile you can inspect selected browser properties with the Fingerprint Check, and open external diagnostic pages to compare what the browser reports.'],
+    ], nodes: () => [software()] },
+  { slug: 'how-it-works', ids: ['how-it-works'], crumb: 'How it works', title: 'How VertexStealth Works — From Profile to Verified Session', desc: 'Create a browser profile, set its environment, launch it and inspect what the browser reports, in three steps.',
+    answer: 'VertexStealth works in three steps: create a profile for Chrome or Firefox, set its environment (proxy, timezone, WebRTC and other settings), then launch it and inspect what the browser reports.',
+    faqs: [
+      ['How do I create a VertexStealth profile?', 'Open the app, add a profile, give it a name, choose Chrome or Firefox and pick a supported desktop or mobile device preset, or randomize the supported settings.'],
+      ['What do I need installed before I start?', 'You need Windows 10 or 11 and Google Chrome or Mozilla Firefox already installed. You also create a VertexStealth account inside the app.'],
+      ['How do I check a profile after launching it?', 'Use the built-in Fingerprint Check to inspect selected browser properties, and open external diagnostic pages to confirm what the browser reports.'],
+    ], howto: { name: 'How to create and verify a VertexStealth profile', steps: [['Create a profile', 'Name the profile, select Chrome or Firefox, and choose a supported device preset or environment configuration.'], ['Set your environment', 'Configure a proxy if needed, then review timezone, geolocation, WebRTC, navigator and other available settings.'], ['Launch and inspect', 'Launch the isolated browser and use Fingerprint Check or external diagnostics to inspect selected properties.']] } },
+  { slug: 'use-cases', ids: ['use-cases'], crumb: 'Use cases', title: 'Use Cases — QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: QA and web testing, digital marketing, research and developer workflows.',
+    answer: 'VertexStealth is used for QA and web testing, digital marketing, research and developer workflows where separate browser sessions and controlled test environments are useful.',
+    faqs: [
+      ['Which workflows can VertexStealth support?', 'QA and web testing, digital marketing (keeping client or campaign sessions separate), research and analysis with dedicated sessions and proxies, and developer workflows such as inspecting browser properties and using supported local automation.'],
+      ['Can I use VertexStealth for any activity?', 'No. The Terms of Service allow only lawful use and prohibit fraud, identity theft, account takeover, credential stuffing, spam and unauthorised access. Many websites also restrict multiple accounts, and following their rules is your responsibility.'],
+      ['Does VertexStealth guarantee anonymity or prevent account bans?', 'No. Profile separation and fingerprint settings do not guarantee anonymity, undetectability or freedom from website restrictions.'],
+    ] },
+  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing — Free Plan, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: free with up to ' + P.freeProfiles + ' profiles, ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.',
+    answer: `VertexStealth is free for up to ${P.freeProfiles} browser profiles, and paid plans at ${money(P.monthly)} per month or ${money(P.yearly)} per year remove the profile limit.` + (live ? '' : ' Paid checkout is not open yet.'),
+    extra: `<section class="section wrap legal"><h2>How do the VertexStealth plans compare?</h2>
+<table><thead><tr><th></th><th>Free</th><th>Monthly</th><th>Yearly</th></tr></thead><tbody>
+<tr><th>Price (USD)</th><td>$0</td><td>${money(P.monthly)} per month</td><td>${money(P.yearly)} per year (save ${money(saving)})</td></tr>
+<tr><th>Browser profiles</th><td>Up to ${P.freeProfiles}</td><td>Unlimited</td><td>Unlimited</td></tr>
+<tr><th>Browsers</th><td>Chrome and Firefox</td><td>Chrome and Firefox</td><td>Chrome and Firefox</td></tr>
+<tr><th>Proxy, fingerprint and WebRTC settings, Fingerprint Check</th><td>Included</td><td>Included</td><td>Included</td></tr>
+<tr><th>Trial</th><td>${P.trialDays}-day trial without the profile limit for new accounts</td><td>Not applicable</td><td>Not applicable</td></tr>
+<tr><th>Billing period</th><td>None</td><td>1 month</td><td>12 months</td></tr>
+<tr><th>Renewal</th><td>Not applicable</td><td>Automatic for card and PayPal; crypto is a one-off payment</td><td>Automatic for card and PayPal; crypto is a one-off payment</td></tr>
+<tr><th>Payment methods</th><td>Not applicable</td><td>Card, PayPal, crypto (Binance Pay)</td><td>Card, PayPal, crypto (Binance Pay)</td></tr>
+<tr><th>Refund</th><td>Not applicable</td><td>Full refund within 7 days of your first purchase</td><td>Full refund within 7 days of your first purchase</td></tr>
+</tbody></table>
+<h2>How do cancellation and refunds work?</h2>
+<ul>
+<li>You can cancel at any time from your payment provider's subscription settings or by emailing <a href="${esc(mail('VertexStealth support'))}">${esc(cfg.email)}</a>.</li>
+<li>Cancellation takes effect at the end of the current billing period, so you keep paid access until then.</li>
+<li>If you are dissatisfied with your first purchase, you can ask for a full refund within 7 days.</li>
+<li>Price changes for future billing periods are announced at least 30 days in advance.</li>
+</ul>
+<p>Full details are in the <a href="/terms">Terms of Service</a>.${live ? '' : ' Paid checkout is not open yet.'}</p></section>`,
+    faqs: [
+      ['What does the VertexStealth free plan include?', `Up to ${P.freeProfiles} browser profiles with Chrome or Firefox, per-profile proxy, fingerprint and WebRTC settings, and the built-in Fingerprint Check. New accounts also get a ${P.trialDays}-day trial without the profile limit.`],
+      ['When should I upgrade from the free plan?', `Upgrade when you need more than ${P.freeProfiles} browser profiles. Paid plans remove the profile limit.`],
+      ['Which payment methods are accepted?', 'Credit or debit card, PayPal and cryptocurrency through Binance Pay. Card and PayPal subscriptions renew automatically; crypto payments are one-off and do not renew automatically.'],
+    ], nodes: () => [software()] },
+  { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ — VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.',
+    answer: 'These answers cover what VertexStealth is, how profiles and proxies work, which plans exist, and what the software cannot guarantee.', nodes: () => [faqNode(faq)] },
 ];
 for (const sp of sectionPages) {
-  let first = true;
   let body = sp.ids.map((id) => secs[id]).join('\n');
-  body = body.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/, (m, a, t) => `<h1${a}>${t}</h1>`);
+  body = body.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>(\s*(?:<\/div>\s*)?)<p([^>]*)>[\s\S]*?<\/p>/, (m, a, t, mid, pa) => `<h1${a}>${t}</h1>${mid}<p${pa}>${esc(sp.answer)}</p>`);
+  if (!/<h1/.test(body)) body = body.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/, (m, a, t) => `<h1${a}>${t}</h1>`);
   if (sp.slug === 'features') body = body.replace(/<a class="textlink"[^>]*>[^<]*<\/a>/g, '');
-  page({ file: sp.slug + '.html', title: sp.title, desc: sp.desc, canonicalPath: '/' + sp.slug, crumb: sp.crumb, nodes: sp.nodes || [], main: body + '\n' + finalCta });
+  const faqSec = sp.faqs ? `<section class="section pale"><div class="wrap legal">${faqBlock(sp.faqs)}</div></section>` : '';
+  const nodes = [...(sp.nodes ? sp.nodes() : []), ...(sp.faqs ? [faqNode(sp.faqs)] : []), ...(sp.howto ? [howtoNode(sp.howto)] : [])];
+  page({ file: sp.slug + '.html', title: sp.title, desc: sp.desc, canonicalPath: '/' + sp.slug, crumb: sp.crumb, nodes, main: body + '\n' + (sp.extra || '') + '\n' + faqSec + '\n' + finalCta });
 }
 
 // ---------- blog (src/blog/*.md with front matter) ----------
@@ -394,7 +451,7 @@ fs.writeFileSync(path.join(dist, 'sitemap.xml'),
 const problems = [];
 for (const f of fs.readdirSync(dist).filter((x) => x.endsWith('.html'))) {
   const t = fs.readFileSync(path.join(dist, f), 'utf8');
-  if (/\{\{|\}\}/.test(t)) problems.push(f + ': unreplaced template marker');
+  if (/\{\{|\}\}/.test(t.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, ''))) problems.push(f + ': unreplaced template marker');
   if (/example\.com|hello@/.test(t)) problems.push(f + ': placeholder domain/email left in page');
   if (/\sstyle="/.test(t)) problems.push(f + ': inline style (blocked by the CSP)');
 }
