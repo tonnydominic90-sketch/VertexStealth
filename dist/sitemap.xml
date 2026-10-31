@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>http://localhost:3000/</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/features</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/product-preview</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/how-it-works</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/use-cases</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/pricing</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/faq</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/antidetect-browser</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/multi-profile-management</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/download</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/blog</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/blog/antidetect-browser-vs-vpn-vs-incognito-mode</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/blog/http-vs-socks5-proxy-browser-profiles</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/blog/what-is-browser-fingerprinting</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/terms</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/privacy</loc><lastmod>2026-10-31</lastmod></url>
+  <url><loc>http://localhost:3000/eula</loc><lastmod>2026-10-31</lastmod></url>
+</urlset>

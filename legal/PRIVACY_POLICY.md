@@ -2,7 +2,7 @@
 
 **Effective date:** October 18, 2026
 **Controller:** Vertex Tech Solutions ("Vertex", "we", "us")
-**Privacy contact:** techinfo.vertex@gmail.com
+**Privacy contact:** support@vertexstealth.top
 
 This policy explains what personal data we collect when you use the VertexStealth desktop application and its account service, why we collect it, who we share it with, and the choices and rights you have.
 
@@ -55,10 +55,10 @@ Our providers may process data in countries other than your own, including count
 - **Server logs** are kept by our providers for their standard retention periods.
 
 ## 7. Your rights
-Depending on where you live, you may have the right to: access the data we hold about you; correct it; have it deleted; restrict or object to our processing; receive it in a portable format; withdraw consent where we rely on it; and complain to your data-protection authority. California residents may also request to know, delete and correct their data and to opt out of the sale or sharing of personal information; we do not sell or share it. You can switch off crash reports yourself at any time in Settings. To exercise a right, email techinfo.vertex@gmail.com. We may need to verify your identity, and we will respond within the time the law requires. A deletion request does not remove the ban record described in section 6 where we need it to prevent abuse.
+Depending on where you live, you may have the right to: access the data we hold about you; correct it; have it deleted; restrict or object to our processing; receive it in a portable format; withdraw consent where we rely on it; and complain to your data-protection authority. California residents may also request to know, delete and correct their data and to opt out of the sale or sharing of personal information; we do not sell or share it. You can switch off crash reports yourself at any time in Settings. To exercise a right, email support@vertexstealth.top. We may need to verify your identity, and we will respond within the time the law requires. A deletion request does not remove the ban record described in section 6 where we need it to prevent abuse.
 
 ## 8. Security
-We use a managed authentication service, row-level security and restricted database functions, and encrypted connections between the application and our servers. No system is perfectly secure, so please protect your device and password. If you find a security problem, tell us at techinfo.vertex@gmail.com.
+We use a managed authentication service, row-level security and restricted database functions, and encrypted connections between the application and our servers. No system is perfectly secure, so please protect your device and password. If you find a security problem, tell us at support@vertexstealth.top.
 
 ## 9. Cookies and websites
 The desktop application does not set advertising or tracking cookies. If we operate a website, it will carry its own cookie notice. This policy covers the desktop application and the account service.
@@ -67,4 +67,4 @@ The desktop application does not set advertising or tracking cookies. If we oper
 We may update this policy. For material changes we will notify you in the app or by email before they take effect, and the effective date above will change.
 
 ## 11. Contact
-Vertex Tech Solutions, techinfo.vertex@gmail.com
+Vertex Tech Solutions, support@vertexstealth.top

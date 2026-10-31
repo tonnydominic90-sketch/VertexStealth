@@ -92,23 +92,23 @@ function pricingHtml() {
 </section>`;
 }
 
-const finalCta = `<section class="final-cta" id="get-started"><div class="wrap cta-inner"><div><div class="eyebrow">Take control of your browser workspace</div><h2>Keep every profile in its own lane.</h2><p>Download VertexStealth for Windows and start with ${P.freeProfiles} free profiles.</p></div><div class="actions flush"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><a class="btn outline" href="/#features">Explore features</a></div></div></section>`;
+const finalCta = `<section class="final-cta" id="get-started"><div class="wrap cta-inner"><div><div class="eyebrow">Take control of your browser workspace</div><h2>Keep every profile in its own lane.</h2><p>Download VertexStealth for Windows and start with ${P.freeProfiles} free profiles.</p></div><div class="actions flush"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><a class="btn outline" href="/features">Explore features</a></div></div></section>`;
 
 // ---------- layout ----------
 const header = `<a class="skip" href="#top">Skip to content</a>
-<div class="announcement">A focused workspace for browser profile management. <strong>Meet VertexStealth.</strong> <a href="/#features">Explore the platform →</a></div>
+<div class="announcement">A focused workspace for browser profile management. <strong>Meet VertexStealth.</strong> <a href="/features">Explore the platform →</a></div>
 <header class="header">
  <div class="wrap nav">
   <a class="brand" href="/" aria-label="VertexStealth home"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a>
   <button class="menu" id="menu" aria-expanded="false" aria-controls="links">Menu</button>
   <nav class="links" id="links" aria-label="Main navigation">
-   <a href="/#features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/#pricing">Pricing</a><a href="/#faq">FAQ</a><a class="m-only" href="/download">Download</a>
+   <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a>
   </nav>
   <div class="navright"><a class="login" href="/download">Download</a><a class="btn primary" href="/download">Get VertexStealth <span>↗</span></a></div>
  </div>
 </header>`;
 
-const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/#features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/#pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/#product-preview">Product preview</a><a href="/#how-it-works">How it works</a><a href="/#use-cases">Use cases</a><a href="/#faq">FAQ</a></div><div class="footer-col"><strong>Company</strong><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
+const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a></div><div class="footer-col"><strong>Company</strong><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
 
 
 // ---------- structured data ----------
@@ -118,10 +118,10 @@ const software = () => ({
   description: 'An antidetect browser and multi-profile manager for Windows that launches installed Chrome or Firefox using isolated profile folders, with per-profile proxy configuration, configurable fingerprint settings, WebRTC options and live fingerprint inspection.',
   publisher: { '@id': siteUrl + '/#org' },
   offers: [
-    { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD', url: siteUrl + '/#pricing' },
+    { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD', url: siteUrl + '/pricing' },
     ...(live ? [
-      { '@type': 'Offer', name: 'Monthly', price: String(P.monthly), priceCurrency: 'USD', url: siteUrl + '/#pricing' },
-      { '@type': 'Offer', name: 'Yearly', price: String(P.yearly), priceCurrency: 'USD', url: siteUrl + '/#pricing' },
+      { '@type': 'Offer', name: 'Monthly', price: String(P.monthly), priceCurrency: 'USD', url: siteUrl + '/pricing' },
+      { '@type': 'Offer', name: 'Yearly', price: String(P.yearly), priceCurrency: 'USD', url: siteUrl + '/pricing' },
     ] : []),
   ],
 });
@@ -139,7 +139,7 @@ function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null
     { '@type': 'WebSite', '@id': siteUrl + '/#website', url: siteUrl + '/', name: cfg.name, inLanguage: 'en', publisher: { '@id': siteUrl + '/#org' } },
     { '@type': 'WebPage', '@id': url + '#webpage', url, name: title, description: desc, inLanguage: 'en', dateModified: buildDate, isPartOf: { '@id': siteUrl + '/#website' } },
     ...nodes,
-    ...(crumb ? [{ '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Home', item: siteUrl + '/' }, { '@type': 'ListItem', position: 2, name: crumb, item: url }] }] : []),
+    ...(crumb ? [{ '@type': 'BreadcrumbList', itemListElement: [['Home', '/'], ...(Array.isArray(crumb) ? crumb : [[crumb, canonicalPath]])].map(([n, u], i) => ({ '@type': 'ListItem', position: i + 1, name: n, item: siteUrl + u })) }] : []),
   ];
   const jsonld = '\n<script type="application/ld+json">\n' + JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }, null, 1).replace(/</g, '\\u003c') + '\n</script>';
   const html = `<!doctype html>
@@ -175,6 +175,7 @@ ${footer}
 </body>
 </html>
 `;
+  fs.mkdirSync(path.dirname(path.join(dist, file)), { recursive: true });
   fs.writeFileSync(path.join(dist, file), html);
 }
 
@@ -187,6 +188,76 @@ const homeMain = read('src/index.main.html')
   .replace('{{FAQ}}', faqHtml())
   .replace('{{FINAL_CTA}}', finalCta);
 page({ file: 'index.html', title: defaultTitle, desc: homeDesc, canonicalPath: '/', main: homeMain, nodes: [software(), faqNode(faq)] });
+
+// ---------- section pages (/features, /pricing, /faq ...) ----------
+const secs = {};
+for (const m of homeMain.matchAll(/<section class="[^"]*" id="([^"]+)">[\s\S]*?<\/section>/g)) secs[m[1]] = m[0];
+const sectionPages = [
+  { slug: 'features', ids: ['features', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features — Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'Everything in VertexStealth: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings, WebRTC options and fingerprint checks.' },
+  { slug: 'product-preview', ids: ['product-preview'], crumb: 'Product preview', title: 'Product Preview — Proxy, Fingerprint & Checks | VertexStealth', desc: 'A closer look at VertexStealth: proxy configuration, fingerprint settings and the built-in fingerprint check.' },
+  { slug: 'how-it-works', ids: ['how-it-works'], crumb: 'How it works', title: 'How VertexStealth Works — From Profile to Verified Session', desc: 'Create a browser profile, set its environment, launch it and inspect what the browser reports, in three steps.' },
+  { slug: 'use-cases', ids: ['use-cases'], crumb: 'Use cases', title: 'Use Cases — QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: QA and web testing, digital marketing, research and developer workflows.' },
+  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing — Free Plan, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: free with up to ' + P.freeProfiles + ' profiles, ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.', nodes: [software()] },
+  { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ — VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.', nodes: [faqNode(faq)] },
+];
+for (const sp of sectionPages) {
+  let first = true;
+  let body = sp.ids.map((id) => secs[id]).join('\n');
+  body = body.replace(/<h2([^>]*)>([\s\S]*?)<\/h2>/, (m, a, t) => `<h1${a}>${t}</h1>`);
+  if (sp.slug === 'features') body = body.replace(/<a class="textlink"[^>]*>[^<]*<\/a>/g, '');
+  page({ file: sp.slug + '.html', title: sp.title, desc: sp.desc, canonicalPath: '/' + sp.slug, crumb: sp.crumb, nodes: sp.nodes || [], main: body + '\n' + finalCta });
+}
+
+// ---------- blog (src/blog/*.md with front matter) ----------
+const fmt = (d) => new Date(d + 'T00:00:00Z').toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
+const blogDir = path.join(src, 'blog');
+const posts = (fs.existsSync(blogDir) ? fs.readdirSync(blogDir).filter((f) => f.endsWith('.md')) : []).map((f) => {
+  const raw = fs.readFileSync(path.join(blogDir, f), 'utf8');
+  const m = raw.match(/^---\n([\s\S]*?)\n---\n([\s\S]*)$/);
+  if (!m) throw new Error(`blog/${f}: missing front matter`);
+  const fm = Object.fromEntries(m[1].split('\n').map((l) => { const i = l.indexOf(':'); return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^"(.*)"$/, '$1')]; }));
+  for (const k of ['title', 'description', 'date']) if (!fm[k]) throw new Error(`blog/${f}: front matter "${k}" is required`);
+  const words = m[2].split(/\s+/).length;
+  return { slug: f.replace(/\.md$/, ''), ...fm, md: m[2], words, mins: Math.max(1, Math.round(words / 200)) };
+}).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
+
+page({
+  file: 'blog.html', title: 'Blog — Antidetect Browser & Multi-Profile Guides | VertexStealth', canonicalPath: '/blog', crumb: 'Blog',
+  desc: 'Guides on browser fingerprints, proxies and multi-profile browser management from the VertexStealth team.',
+  nodes: [{ '@type': 'Blog', '@id': siteUrl + '/blog#blog', url: siteUrl + '/blog', name: cfg.name + ' Blog', publisher: { '@id': siteUrl + '/#org' } }],
+  main: `<section class="page"><div class="wrap">
+<div class="section-head"><div class="kicker">Blog</div><h1>Guides on profiles, proxies and fingerprints</h1><p class="lead">Practical explainers for managing multiple browser profiles.</p></div>
+<div class="posts">
+${posts.map((p) => `<article class="post-card"><div class="post-meta">${fmt(p.date)} · ${p.mins} min read</div><h2><a href="/blog/${p.slug}">${esc(p.title)}</a></h2><p>${esc(p.description)}</p><a class="textlink" href="/blog/${p.slug}">Read article →</a></article>`).join('\n')}
+</div></div></section>`,
+});
+for (const p of posts) {
+  const url = siteUrl + '/blog/' + p.slug;
+  const used = new Set(); const heads = [];
+  let bodyHtml = marked.parse(p.md, { gfm: true }).replace(/<a href="(https?:\/\/[^"]+)"/g, '<a href="$1" rel="noopener"')
+    .replace(/<h2>([\s\S]*?)<\/h2>/g, (m, t) => {
+      let id = t.replace(/<[^>]+>/g, '').replace(/&[#a-z0-9]+;/gi, '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'section';
+      for (let n = 2; used.has(id); n++) id = id.replace(/-\d+$/, '') + '-' + n;
+      used.add(id); heads.push([id, t.replace(/<[^>]+>/g, '')]);
+      return `<h2 id="${id}">${t}</h2>`;
+    });
+  const toc = `<nav class="toc" aria-label="Table of contents"><strong>In this article</strong><ol>${heads.map(([id, t]) => `<li><a href="#${id}">${t}</a></li>`).join('')}</ol></nav>`;
+  page({
+    file: 'blog/' + p.slug + '.html', title: p.seoTitle || `${p.title} — ${cfg.name}`, desc: p.description, canonicalPath: '/blog/' + p.slug,
+    crumb: [['Blog', '/blog'], [p.title, '/blog/' + p.slug]],
+    nodes: [{ '@type': 'BlogPosting', '@id': url + '#post', headline: p.title, description: p.description, datePublished: p.date, dateModified: p.updated || p.date, wordCount: p.words, inLanguage: 'en', mainEntityOfPage: url, author: { '@id': siteUrl + '/#org' }, publisher: { '@id': siteUrl + '/#org' } }],
+    main: `<section class="page"><div class="wrap legal"><a class="back" href="/blog">← All articles</a>
+<h1>${esc(p.title)}</h1>
+<div class="post-meta">By the ${esc(cfg.name)} team · ${p.updated ? 'Updated ' + fmt(p.updated) : 'Published ' + fmt(p.date)} · ${p.mins} min read</div>
+${toc}
+${bodyHtml}
+<div class="post-cta"><strong>Try it yourself.</strong> <a href="/download">Download ${esc(cfg.name)} for Windows</a> and start with ${P.freeProfiles} free profiles, or see <a href="/features">all features</a> and <a href="/pricing">pricing</a>.</div>
+<h2>Keep reading</h2>
+<ul class="related">
+${posts.filter((x) => x.slug !== p.slug).map((x) => `<li><a href="/blog/${x.slug}">${esc(x.title)}</a></li>`).join('\n')}
+</ul></div></section>`,
+  });
+}
 
 // ---------- download ----------
 const dlUrl = (process.env.DOWNLOAD_URL || cfg.downloadUrl || '').trim();
@@ -281,7 +352,7 @@ if (missing.length && !process.env.ALLOW_MISSING_LEGAL) {
 }
 for (const { d, md } of legalPages) {
   const hasH1 = /^\s*#\s+\S/.test(md);
-  let body = marked.parse(md, { gfm: true });
+  let body = marked.parse(md, { gfm: true }).split('techinfo.vertex@gmail.com').join(cfg.email);
   // legal markdown links to its sibling files (e.g. EULA.md) -> clean site URLs
   body = body.replace(/href="(?:\.{0,2}\/)*(?:legal\/)?([A-Za-z_\-]+)\.md(#[^"]*)?"/g, (m, name, hash) => {
     const hit = legalDefs.find((x) => x.names.includes(name.toUpperCase()));
@@ -314,7 +385,7 @@ fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
   ? `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
-const urls = ['/', '/antidetect-browser', '/multi-profile-management', '/download', '/terms', '/privacy', '/eula'];
+const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/antidetect-browser', '/multi-profile-management', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
 fs.writeFileSync(path.join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((u) => `  <url><loc>${siteUrl}${u === '/' ? '/' : u}</loc><lastmod>${today}</lastmod></url>`).join('\n') + '\n</urlset>\n');

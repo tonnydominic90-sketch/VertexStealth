@@ -2,7 +2,7 @@
 
 **Effective date:** October 18, 2026
 **Operator:** Vertex Tech Solutions ("Vertex", "we", "us", "our")
-**Contact:** techinfo.vertex@gmail.com
+**Contact:** support@vertexstealth.top
 
 ## 1. Agreement
 These Terms of Service ("Terms") govern your access to and use of VertexStealth, including the desktop application, its browser-profile tools and the account service behind it (together, the "Service"). By creating an account, installing, or using the Service you agree to these Terms, the [End User License Agreement](EULA.md) ("EULA") and the [Privacy Policy](PRIVACY_POLICY.md). If you do not agree, do not use the Service.
@@ -15,7 +15,7 @@ VertexStealth lets you create and launch separate browser profiles, each with it
 ## 3. Your account
 - Give us accurate information and keep your password confidential. You are responsible for all activity under your account.
 - **One account per person and one account per device.** To enforce the free trial and to enforce bans, the first account that signs in on a device is bound to that device using a hashed device identifier (see the [Privacy Policy](PRIVACY_POLICY.md)). Creating additional accounts to obtain another trial, or to avoid a suspension or ban, is not permitted.
-- Tell us promptly at techinfo.vertex@gmail.com if you believe your account has been accessed without your permission.
+- Tell us promptly at support@vertexstealth.top if you believe your account has been accessed without your permission.
 - We may refuse registration or remove accounts that are fraudulent, duplicate or in breach of these Terms.
 
 ## 4. Plans, free trial and fees
@@ -36,11 +36,11 @@ Prices are in US dollars and exclude any applicable taxes (such as VAT or sales 
 
 **Renewal.** Card and PayPal subscriptions renew automatically at the end of each billing period at the then-current price until you cancel. Cryptocurrency payments are one-off payments for a single billing period and do not renew automatically; we will remind you before your access expires so you can pay again. Cryptocurrency payments are priced in US dollars and converted at the rate shown at checkout; network and exchange fees are your responsibility, and you must send the exact amount requested.
 
-**Cancellation.** You may cancel a subscription at any time from your payment provider's subscription settings or by emailing techinfo.vertex@gmail.com. Cancellation takes effect at the end of the current billing period; you keep paid access until then and are not charged again.
+**Cancellation.** You may cancel a subscription at any time from your payment provider's subscription settings or by emailing support@vertexstealth.top. Cancellation takes effect at the end of the current billing period; you keep paid access until then and are not charged again.
 
 **Price changes.** We may change prices for future billing periods by giving at least 30 days' notice. The new price applies from your next renewal, and you may cancel before then.
 
-**Refunds.** If you are dissatisfied with your first purchase of a paid plan, you may request a full refund within 7 days of that purchase by emailing techinfo.vertex@gmail.com, provided the Service has not been used in breach of these Terms. After that, fees are non-refundable, including for partly used billing periods and for accounts suspended or terminated for breach. Refunds are returned to the original payment method; for cryptocurrency, a refund is made in the same cryptocurrency or its US-dollar equivalent at the time of the refund, less network fees. Nothing in this section limits any right to a refund that the law gives you and that cannot be waived.
+**Refunds.** If you are dissatisfied with your first purchase of a paid plan, you may request a full refund within 7 days of that purchase by emailing support@vertexstealth.top, provided the Service has not been used in breach of these Terms. After that, fees are non-refundable, including for partly used billing periods and for accounts suspended or terminated for breach. Refunds are returned to the original payment method; for cryptocurrency, a refund is made in the same cryptocurrency or its US-dollar equivalent at the time of the refund, less network fees. Nothing in this section limits any right to a refund that the law gives you and that cannot be waived.
 
 **Failed payments.** If a payment fails or is reversed, we may suspend paid features until the amount is settled.
 
@@ -67,7 +67,7 @@ You are responsible for any proxy or third-party service you connect to the Serv
 ## 8. Suspension and termination
 We may warn, restrict, suspend or terminate an account, and may block the device bound to it, if we reasonably believe that you have breached these Terms or the law, abused the free trial, put the Service or other people at risk, or if we are required to by law. Where reasonable and lawful we will give you notice and an opportunity to respond, but we may act immediately in serious cases.
 
-You may stop using the Service and request deletion of your account at any time by emailing techinfo.vertex@gmail.com. When your account ends, your right to use the Service ends. Sections that by their nature should continue (including sections 6, 10, 11, 12, 13 and 14) survive termination.
+You may stop using the Service and request deletion of your account at any time by emailing support@vertexstealth.top. When your account ends, your right to use the Service ends. Sections that by their nature should continue (including sections 6, 10, 11, 12, 13 and 14) survive termination.
 
 ## 9. Intellectual property
 The Service, including its software, design, text and trademarks, belongs to Vertex Tech Solutions and its licensors and is licensed to you, not sold, under the [EULA](EULA.md). You may not use our name or logo without written permission. If you send us feedback or suggestions we may use them without restriction or payment.
@@ -87,9 +87,9 @@ Nothing in these Terms excludes or limits liability that cannot be excluded or l
 You will defend and indemnify Vertex Tech Solutions against third-party claims, and related losses, damages and reasonable legal costs, arising from your breach of these Terms, your unlawful use of the Service, or your activity on third-party websites and services, except to the extent caused by us.
 
 ## 14. Governing law and disputes
-These Terms are governed by the laws of the country in which Vertex Tech Solutions is established, without regard to its conflict-of-law rules. Before starting any formal proceeding, each party will first try in good faith to resolve the dispute informally: send us a written description of the dispute at techinfo.vertex@gmail.com and allow 30 days for a resolution. Subject to any mandatory consumer rights you have to bring a claim in the courts of your home country, the courts of that country have exclusive jurisdiction over disputes that are not resolved informally.
+These Terms are governed by the laws of the country in which Vertex Tech Solutions is established, without regard to its conflict-of-law rules. Before starting any formal proceeding, each party will first try in good faith to resolve the dispute informally: send us a written description of the dispute at support@vertexstealth.top and allow 30 days for a resolution. Subject to any mandatory consumer rights you have to bring a claim in the courts of your home country, the courts of that country have exclusive jurisdiction over disputes that are not resolved informally.
 
 ## 15. General
-These Terms, the EULA and the Privacy Policy are the entire agreement between you and us regarding the Service and replace any earlier agreement on that subject. If a provision is held unenforceable, the rest remain in force. Our failure to enforce a right is not a waiver of it. You may not assign these Terms without our written consent; we may assign them as part of a merger, acquisition or sale of the business. We are not liable for delay or failure caused by events beyond our reasonable control. Notices to you may be sent to your account email, and notices to us to techinfo.vertex@gmail.com.
+These Terms, the EULA and the Privacy Policy are the entire agreement between you and us regarding the Service and replace any earlier agreement on that subject. If a provision is held unenforceable, the rest remain in force. Our failure to enforce a right is not a waiver of it. You may not assign these Terms without our written consent; we may assign them as part of a merger, acquisition or sale of the business. We are not liable for delay or failure caused by events beyond our reasonable control. Notices to you may be sent to your account email, and notices to us to support@vertexstealth.top.
 
-**Contact:** Vertex Tech Solutions, techinfo.vertex@gmail.com
+**Contact:** Vertex Tech Solutions, support@vertexstealth.top

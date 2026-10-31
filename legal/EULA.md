@@ -2,7 +2,7 @@
 
 **Effective date:** October 18, 2026
 **Licensor:** Vertex Tech Solutions ("Licensor", "we", "us")
-**Contact:** techinfo.vertex@gmail.com
+**Contact:** support@vertexstealth.top
 
 This End User License Agreement is a legal agreement between you and Vertex Tech Solutions for the VertexStealth desktop software, including its updates and documentation (the "Software"). By installing or using the Software you accept this EULA. If you do not accept it, do not install or use the Software. Use of the online account service and paid plans is also governed by the [Terms of Service](TERMS_OF_SERVICE.md), and our handling of personal data is described in the [Privacy Policy](PRIVACY_POLICY.md).
 
@@ -46,4 +46,4 @@ You must comply with applicable export-control, sanctions and trade laws. You ma
 ## 11. General
 The governing law and the process for resolving disputes are those set out in the Terms of Service. If a provision of this EULA is unenforceable, the rest remains in force. This EULA and the Terms of Service are the entire agreement about the Software; if they conflict about the licence to the Software, this EULA governs. We may assign this EULA in connection with a merger, acquisition or sale of the business; you may not assign it without our written consent.
 
-**Contact:** Vertex Tech Solutions, techinfo.vertex@gmail.com
+**Contact:** Vertex Tech Solutions, support@vertexstealth.top
