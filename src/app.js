@@ -14,3 +14,13 @@ document.querySelectorAll('.demo-tab').forEach(tab=>tab.addEventListener('click'
  const d=demoData[tab.dataset.demo];document.getElementById('demoTitle').textContent=d.title;
  document.getElementById('demoBody').innerHTML=d.rows.map(r=>'<div class="demo-kv"><span>'+r[0]+'</span><b>'+r[1]+'</b></div>').join('');
 }));
+
+(function(){
+ try{if(localStorage.getItem('vs.session')){document.querySelectorAll('[data-auth-link]').forEach(function(l){l.textContent='Account';l.setAttribute('href','/account');});}}catch(e){}
+ var dl=document.querySelector('[data-dl]');
+ if(dl){dl.addEventListener('click',function(){var n=document.getElementById('dlStarted');if(n)n.hidden=false;var s=dl.querySelector('span');dl.firstChild.textContent='Starting download… ';if(s)s.textContent='✓';});}
+ var p=location.pathname;
+ if(navigator.doNotTrack==='1'||/^\/(admin|api)/.test(p))return;
+ try{var d=JSON.stringify({path:p.slice(0,200),ref:document.referrer?new URL(document.referrer).hostname:'',w:window.innerWidth});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/track',new Blob([d],{type:'application/json'}));}else{fetch('/api/track',{method:'POST',body:d,keepalive:true,headers:{'Content-Type':'application/json'}});}}catch(e){}
+})();

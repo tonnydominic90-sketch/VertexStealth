@@ -11,5 +11,11 @@
     "yearly": 89,
     "trialProfiles": 3,
     "trialDays": 3
-  }
+  },
+  "supabase": {
+    "url": "https://jtvjvogreelngfdseqee.supabase.co",
+    "anonKey": ""
+  },
+  "releasesRepo": "tonnydominic90-sketch/VertexStealth-Release",
+  "downloadAsset": "VertexStealth-Setup.exe"
 }

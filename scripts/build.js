@@ -106,9 +106,9 @@ const header = `<a class="skip" href="#top">Skip to content</a>
   <a class="brand" href="/" aria-label="VertexStealth home"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a>
   <button class="menu" id="menu" aria-expanded="false" aria-controls="links">Menu</button>
   <nav class="links" id="links" aria-label="Main navigation">
-   <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a>
+   <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a><a class="m-only" href="/login" data-auth-link>Sign in</a>
   </nav>
-  <div class="navright"><a class="login" href="/download">Download</a><a class="btn primary" href="/download">Get VertexStealth <span>↗</span></a></div>
+  <div class="navright"><a class="login" href="/download">Download</a><a class="login" href="/login" data-auth-link>Sign in</a><a class="btn primary" href="/download">Get VertexStealth <span>↗</span></a></div>
  </div>
 </header>`;
 
@@ -133,7 +133,7 @@ const howtoNode = (h) => ({ '@type': 'HowTo', name: h.name, step: h.steps.map(([
 const buildDate = new Date().toISOString().slice(0, 10);
 const faqBlock = (items) => `<h2>Frequently asked questions</h2>\n<div class="faq">\n${items.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n')}\n</div>`;
 
-function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null, index = true }) {
+function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null, index = true, bare = false, scripts = [], styles = [], pageId = '' }) {
   const url = siteUrl + canonicalPath;
   const robots = index && isProd ? 'index,follow,max-image-preview:large' : 'noindex,nofollow';
   const og = `${siteUrl}/og-image.png`;
@@ -166,15 +166,15 @@ function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null
 <meta name="twitter:title" content="${esc(title)}">
 <meta name="twitter:description" content="${esc(desc)}">
 <meta name="twitter:image" content="${esc(og)}">${jsonld}
-<link rel="stylesheet" href="${cssUrl}">
+<link rel="stylesheet" href="${cssUrl}">${styles.map((u) => `\n<link rel="stylesheet" href="${u}">`).join('')}
 </head>
-<body>
-${header}
+<body${pageId ? ` data-page="${pageId}"` : ''}>
+${bare ? '' : header}
 <main id="top">
 ${main}
 </main>
-${footer}
-<script src="${jsUrl}" defer></script>
+${bare ? '' : footer}
+<script src="${jsUrl}" defer></script>${scripts.map((u) => `\n<script src="${u}" defer></script>`).join('')}
 </body>
 </html>
 `;
@@ -320,8 +320,11 @@ ${posts.filter((x) => x.slug !== p.slug).map((x) => `<li><a href="/blog/${x.slug
 // ---------- download ----------
 const dlUrl = (process.env.DOWNLOAD_URL || cfg.downloadUrl || '').trim();
 if (dlUrl && !/^https:\/\//.test(dlUrl)) throw new Error('downloadUrl must start with https://');
+const dlRepo = (cfg.releasesRepo || '').trim();
+const dlAsset = (process.env.DOWNLOAD_ASSET || cfg.downloadAsset || '').trim();
+const dlDirect = dlUrl && dlRepo && dlAsset ? `https://github.com/${dlRepo}/releases/latest/download/${encodeURIComponent(dlAsset)}` : dlUrl;
 const dlCard = dlUrl
-  ? `<div class="dl-card"><h2>VertexStealth for Windows</h2><p>Official installer, hosted on our GitHub Releases page.</p><a class="btn primary" href="${esc(dlUrl)}" rel="noopener">Download installer <span>↓</span></a><div class="dl-meta"><span>Windows 10 / 11</span>${cfg.downloadVersion ? `<span>Version ${esc(cfg.downloadVersion)}</span>` : ''}<span>Hosted on GitHub</span></div></div>
+  ? `<div class="dl-card"><h2>VertexStealth for Windows</h2><p>Official installer, downloaded straight from our GitHub Releases page.</p><a class="btn primary" href="${esc(dlDirect)}" rel="noopener" data-dl>Download installer <span>↓</span></a><p class="dl-started" id="dlStarted" hidden>Your download is starting. When it finishes, open the file and follow the steps below. Not starting? <a href="${esc(dlUrl)}" rel="noopener">Open the releases page</a>.</p><div class="dl-meta"><span>Windows 10 / 11</span>${cfg.downloadVersion ? `<span>Version ${esc(cfg.downloadVersion)}</span>` : ''}<span>Hosted on GitHub</span></div></div>
 <div class="dl-notice"><strong>Windows may warn you when you open the installer.</strong> The installer is not code-signed yet, so Windows SmartScreen can show "Windows protected your PC". It is expected, and it takes about 10 seconds to continue. Follow the <a href="/download">steps below</a> or read <a href="/blog/windows-protected-your-pc-smartscreen-install">why this happens</a>.</div>`
   : `<div class="dl-card"><h2>VertexStealth for Windows</h2><div class="dl-soon">The Windows installer is not published yet. Email us and we will tell you as soon as it is available.</div><a class="btn primary" href="${esc(mail('VertexStealth download notification'))}">Notify me</a><div class="dl-meta"><span>Windows 10 / 11</span></div></div>`;
 const steps = [
@@ -455,9 +458,38 @@ page({
   main: '<section class="notfound"><div class="wrap"><div class="kicker">404</div><h1>This page is not here.</h1><p class="lead">The link may be old or mistyped.</p><a class="btn primary" href="/">Back to home</a></div></section>',
 });
 
+
+// ---------- accounts + admin (Supabase auth, serverless API) ----------
+const sbUrl = (process.env.SUPABASE_URL || (cfg.supabase && cfg.supabase.url) || '').trim();
+const sbAnon = (process.env.SUPABASE_ANON_KEY || (cfg.supabase && cfg.supabase.anonKey) || '').trim();
+if (!sbAnon) console.warn('WARNING: Supabase anon key is empty (site.config.json supabase.anonKey or SUPABASE_ANON_KEY). Sign-in pages will show "not configured".');
+fs.writeFileSync(path.join(dist, 'vs-config.js'), `window.VS_CONFIG=${JSON.stringify({ supabaseUrl: sbUrl, anonKey: sbAnon, siteUrl })};\n`);
+const authJs = emitAsset('auth.js');
+const adminJs = emitAsset('admin.js');
+const adminCss = emitAsset('admin.css');
+const authScripts = ['/vs-config.js', authJs];
+const authPage = (slug, title, body) => page({ file: slug + '.html', title: `${title} — ${cfg.name}`, desc: `${title} for your ${cfg.name} account.`, canonicalPath: '/' + slug, index: false, scripts: authScripts, pageId: slug, main: `<section class="auth-wrap"><div class="auth-card">${body}</div></section>` });
+const authNote = 'Your VertexStealth account works on this website and in the desktop app, with the same email and password.';
+authPage('login', 'Sign in', `<h1>Sign in</h1><p class="auth-sub">${authNote}</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><label class="field"><span>Password</span><input type="password" id="password" autocomplete="current-password" required></label><button class="btn primary auth-btn" type="submit">Sign in</button></form>
+<p class="auth-links"><a href="/forgot">Forgot password?</a><a href="/signup">Create an account</a></p>`);
+authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth-sub">${authNote} New accounts start with a ${P.trialDays}-day free trial.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><label class="field"><span>Password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm password</span><input type="password" id="password2" autocomplete="new-password" required></label>
+<label class="check-row"><input type="checkbox" id="terms" required><span>I am at least 18 and agree to the <a href="/terms">Terms of Service</a>, <a href="/eula">EULA</a> and <a href="/privacy">Privacy Policy</a>.</span></label><button class="btn primary auth-btn" type="submit">Create account</button></form>
+<p class="auth-links"><a href="/login">Already have an account? Sign in</a></p>`);
+authPage('forgot', 'Reset password', `<h1>Reset your password</h1><p class="auth-sub">Enter your email and we will send you a link to choose a new password.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><button class="btn primary auth-btn" type="submit">Send reset link</button></form>
+<p class="auth-links"><a href="/login">Back to sign in</a></p>`);
+authPage('account', 'Your account', `<h1>Your account</h1><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<div id="accountBody" hidden><dl class="acct"><div><dt>Email</dt><dd id="acctEmail"></dd></div><div><dt>Member since</dt><dd id="acctSince"></dd></div><div id="acctPlanRow" hidden><dt>Plan</dt><dd id="acctPlan"></dd></div></dl>
+<div class="acct-actions"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><button class="btn outline" type="button" id="signOut">Sign out</button></div>
+<h2 id="pwTitle">Change password</h2><form id="authForm" novalidate><label class="field"><span>New password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm new password</span><input type="password" id="password2" autocomplete="new-password" required></label><button class="btn outline auth-btn" type="submit">Update password</button></form>
+<p class="auth-links"><a href="${esc(mail('Account help'))}">Need help? ${esc(cfg.email)}</a></p></div>`);
+page({ file: 'admin.html', title: 'Admin — ' + cfg.name, desc: 'Administration.', canonicalPath: '/admin', index: false, bare: true, scripts: [...authScripts, adminJs], styles: [adminCss], pageId: 'admin', main: '<div id="adminRoot" class="adm-root"><p class="adm-boot">Loading…</p></div>' });
+
 // ---------- robots + sitemap ----------
 fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
-  ? `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
 const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/antidetect-browser', '/multi-profile-management', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
@@ -478,4 +510,5 @@ if (problems.length) { console.error('BUILD STOPPED:\n  ' + problems.join('\n  '
 console.log(`Built ${fs.readdirSync(dist).filter((x) => x.endsWith('.html')).length} pages -> dist/`);
 console.log(`Site URL: ${siteUrl}  (${isProd ? 'indexable' : 'preview: noindex'})`);
 console.log(`Download link: ${dlUrl || '(none yet - Download page shows "Notify me")'}`);
+if (dlDirect) console.log(`Direct download: ${dlDirect}`);
 console.log(`Payments: ${live ? 'LIVE wording' : 'not live (paid buttons say "Get notified")'}`);

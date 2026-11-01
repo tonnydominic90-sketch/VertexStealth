@@ -1,0 +1,15 @@
+{
+  "_note": "Maps the admin panel to your existing Supabase schema (supabase/schema.sql in the desktop app). Open Admin > Setup to see which of these exist. Edit the names here if they differ.",
+  "profilesTable": "profiles",
+  "columns": {
+    "email": "email",
+    "admin": "is_admin",
+    "banned": "is_banned",
+    "banReason": "ban_reason",
+    "plan": "plan",
+    "planExpires": "plan_expires_at"
+  },
+  "devices": { "table": "devices", "userColumn": "user_id", "bannedColumn": "is_banned" },
+  "paidPlanPattern": "month|year|paid|pro",
+  "trialDays": 3
+}
