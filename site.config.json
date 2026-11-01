@@ -4,7 +4,7 @@
   "email": "support@vertexstealth.top",
   "siteUrl": "",
   "downloadUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/latest",
-  "downloadVersion": "",
+  "downloadVersion": "0.2.1",
   "paymentsLive": false,
   "pricing": {
     "monthly": 10,
@@ -17,5 +17,5 @@
     "anonKey": ""
   },
   "releasesRepo": "tonnydominic90-sketch/VertexStealth-Release",
-  "downloadAsset": "VertexStealth-Setup.exe"
+  "downloadDirectUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.1/VertexStealth-Setup-0.2.1.exe"
 }

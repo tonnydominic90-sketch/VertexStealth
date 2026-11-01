@@ -9,7 +9,12 @@
     "plan": "plan",
     "planExpires": "plan_expires_at"
   },
-  "devices": { "table": "devices", "userColumn": "user_id", "bannedColumn": "is_banned" },
+  "devices": {
+    "table": "devices",
+    "userColumn": "user_id",
+    "bannedColumn": "is_banned"
+  },
   "paidPlanPattern": "month|year|paid|pro",
-  "trialDays": 3
+  "trialDays": 3,
+  "releasesRepo": "tonnydominic90-sketch/VertexStealth-Release"
 }

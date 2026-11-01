@@ -19,13 +19,15 @@ const db = {
     { id: 'u3', email: 'old@x.com', is_admin: false },
   ],
   devices: [{ user_id: 'u3', is_banned: false }],
-  site_events: [], user_locations: [{ user_id: 'u1', country: 'KE' }, { user_id: 'u2', country: 'US' }], admin_audit_log: [], email_campaigns: [], email_optouts: [{ email: 'paid.person@x.com' }],
+  site_events: [], user_locations: [{ user_id: 'u1', country: 'KE' }, { user_id: 'u2', country: 'US' }], admin_audit_log: [], email_campaigns: [], email_optouts: [{ email: 'paid.person@x.com' }], site_settings: [],
 };
 for (let i = 0; i < 30; i++) db.site_events.push({ created_at: iso(now - (i % 5) * 864e5), event: 'pageview', path: i % 2 ? '/pricing' : '/', country: i % 3 ? 'KE' : 'US', referrer_host: i % 4 ? '' : 'google.com', device: 'desktop' });
 const sent = []; const banUntil = {};
 const json = (o, s = 200) => ({ ok: s < 300, status: s, text: async () => JSON.stringify(o), json: async () => o });
 global.fetch = async (url, opt = {}) => {
   const u = new URL(url); const m = opt.method || 'GET'; const auth = (opt.headers || {}).Authorization || '';
+  if (u.host === 'github.com') return (opt.method === 'HEAD' && /\/0\.2\.[12]\//.test(u.pathname)) ? { ok: true, status: 200 } : { ok: false, status: 404 };
+  if (u.host === 'api.github.com') return json({ tag_name: 'v0.2.2', published_at: iso(now), assets: [{ name: 'VertexStealth-Setup-0.2.2.exe.blockmap', browser_download_url: 'x', size: 1 }, { name: 'VertexStealth-Setup-0.2.2.exe', browser_download_url: 'https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.2/VertexStealth-Setup-0.2.2.exe', size: 90000000 }] });
   if (u.host === 'api.resend.com') {
     if (u.pathname === '/emails/batch') { const arr = JSON.parse(opt.body); sent.push(...arr); return json({ data: arr.map((_, i) => ({ id: 'e' + i })) }); }
     return json({ data: [{ name: 'vertexstealth.top', status: 'verified' }] });
@@ -40,12 +42,12 @@ global.fetch = async (url, opt = {}) => {
     let rows = db[t].slice(); const sel = u.searchParams.get('select') || '*';
     for (const [k, v] of u.searchParams) { if (['select', 'limit', 'offset', 'order', 'on_conflict'].includes(k)) continue; const mm = String(v).match(/^(eq|gte)\.(.*)$/); if (mm) rows = rows.filter((r) => mm[1] === 'eq' ? String(r[k]) === mm[2] : String(r[k]) >= mm[2]); }
     if (m === 'GET') { if (sel !== '*') { for (const c of sel.split(',')) if (db[t].length && !(c in db[t][0]) && !['is_banned', 'ban_reason', 'plan', 'plan_expires_at'].includes(c)) { /* tolerate */ } if (sel.split(',').some((c) => c === 'nonexistent_col')) return json({ message: 'column does not exist' }, 400); } const off = Number(u.searchParams.get('offset') || 0), lim = Number(u.searchParams.get('limit') || 1000); return json(rows.slice(off, off + lim)); }
-    if (m === 'POST') { const b = JSON.parse(opt.body); const ex = db[t].find((r) => (t === 'user_locations' && r.user_id === b.user_id) || (t === 'email_optouts' && r.email === b.email)); if (ex) Object.assign(ex, b); else db[t].push(b); return json(null, 201); }
+    if (m === 'POST') { const b = JSON.parse(opt.body); const ex = db[t].find((r) => (t === 'user_locations' && r.user_id === b.user_id) || (t === 'email_optouts' && r.email === b.email) || (t === 'site_settings' && r.key === b.key)); if (ex) Object.assign(ex, b); else db[t].push(b); return json(null, 201); }
     if (m === 'PATCH') { const b = JSON.parse(opt.body); rows.forEach((r) => Object.assign(r, b)); return json(rows); }
   }
   return json({ message: 'unhandled ' + u.pathname }, 500);
 };
-const admin = require('../api/admin.js'), track = require('../api/track.js'), unsub = require('../api/unsub.js');
+const download = require('../api/download.js'), admin = require('../api/admin.js'), track = require('../api/track.js'), unsub = require('../api/unsub.js');
 const common = require('../api/_lib/common.js');
 const call = async (handler, body, token = 'tok-a1', method = 'POST', headers = {}) => {
   const res = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end(b) { this.body = b; } };
@@ -123,6 +125,18 @@ const call = async (handler, body, token = 'tok-a1', method = 'POST', headers = 
   const n2 = db.site_events.length; await call(track, { path: '/' }, '', 'POST', { 'user-agent': 'Googlebot' }); assert.strictEqual(db.site_events.length, n2, 'bots ignored');
   console.log('tracking OK');
 
+  // releases / download link
+  r = await call(download, {}, '', 'GET'); assert.strictEqual(r.data.url, null, 'nothing set yet');
+  r = await call(admin, { action: 'latestRelease' }); assert.strictEqual(r.data.version, '0.2.2'); assert(/\.exe$/.test(r.data.url) && !/blockmap/.test(r.data.url));
+  const good = 'https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.2/VertexStealth-Setup-0.2.2.exe';
+  assert.strictEqual((await call(admin, { action: 'setDownload', version: '0.2.2', url: 'https://evil.com/x.exe' })).status, 400, 'foreign host rejected');
+  assert.strictEqual((await call(admin, { action: 'setDownload', version: '0.2.2', url: good.replace('.exe', '.zip') })).status, 400, 'non-exe rejected');
+  assert.strictEqual((await call(admin, { action: 'setDownload', version: '9.9.9', url: good.replace(/0\.2\.2/g, '9.9.9') })).status, 400, 'missing file rejected');
+  assert.strictEqual((await call(admin, { action: 'setDownload', version: 'bad version!', url: good })).status, 400, 'bad version rejected');
+  assert.strictEqual((await call(admin, { action: 'setDownload', version: '0.2.2', url: good }, 'tok-u1')).status, 403, 'non-admin rejected');
+  r = await call(admin, { action: 'setDownload', version: '0.2.2', url: good }); assert.strictEqual(r.status, 200, JSON.stringify(r.data));
+  r = await call(download, {}, '', 'GET'); assert.strictEqual(r.data.url, good); assert.strictEqual(r.data.version, '0.2.2');
+  r = await call(admin, { action: 'getDownload' }); assert.strictEqual(r.data.current.version, '0.2.2'); console.log('releases OK');
   r = await call(admin, { action: 'setupCheck' }); assert.strictEqual(r.status, 200); assert(r.data.checks.length > 10); console.log('setup check OK:', r.data.checks.filter((c) => !c.ok).map((c) => c.name).join(', ') || 'all green');
   console.log('\nALL API TESTS PASSED');
 })().catch((e) => { console.error('TEST FAILED:', e); process.exit(1); });

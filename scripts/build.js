@@ -320,11 +320,10 @@ ${posts.filter((x) => x.slug !== p.slug).map((x) => `<li><a href="/blog/${x.slug
 // ---------- download ----------
 const dlUrl = (process.env.DOWNLOAD_URL || cfg.downloadUrl || '').trim();
 if (dlUrl && !/^https:\/\//.test(dlUrl)) throw new Error('downloadUrl must start with https://');
-const dlRepo = (cfg.releasesRepo || '').trim();
-const dlAsset = (process.env.DOWNLOAD_ASSET || cfg.downloadAsset || '').trim();
-const dlDirect = dlUrl && dlRepo && dlAsset ? `https://github.com/${dlRepo}/releases/latest/download/${encodeURIComponent(dlAsset)}` : dlUrl;
+const dlDirect = (process.env.DOWNLOAD_DIRECT_URL || cfg.downloadDirectUrl || '').trim() || dlUrl;
+if (dlDirect && !/^https:\/\//.test(dlDirect)) throw new Error('downloadDirectUrl must start with https://');
 const dlCard = dlUrl
-  ? `<div class="dl-card"><h2>VertexStealth for Windows</h2><p>Official installer, downloaded straight from our GitHub Releases page.</p><a class="btn primary" href="${esc(dlDirect)}" rel="noopener" data-dl>Download installer <span>↓</span></a><p class="dl-started" id="dlStarted" hidden>Your download is starting. When it finishes, open the file and follow the steps below. Not starting? <a href="${esc(dlUrl)}" rel="noopener">Open the releases page</a>.</p><div class="dl-meta"><span>Windows 10 / 11</span>${cfg.downloadVersion ? `<span>Version ${esc(cfg.downloadVersion)}</span>` : ''}<span>Hosted on GitHub</span></div></div>
+  ? `<div class="dl-card"><h2>VertexStealth for Windows</h2><p>Official installer, downloaded straight from our GitHub Releases page.</p><a class="btn primary" href="${esc(dlDirect)}" rel="noopener" data-dl>Download installer <span>↓</span></a><p class="dl-started" id="dlStarted" hidden>Your download is starting. When it finishes, open the file and follow the steps below. Not starting? <a href="${esc(dlUrl)}" rel="noopener">Open the releases page</a>.</p><div class="dl-meta"><span>Windows 10 / 11</span>${cfg.downloadVersion ? `<span data-dl-version>Version ${esc(cfg.downloadVersion)}</span>` : '<span data-dl-version hidden></span>'}<span>Hosted on GitHub</span></div></div>
 <div class="dl-notice"><strong>Windows may warn you when you open the installer.</strong> The installer is not code-signed yet, so Windows SmartScreen can show "Windows protected your PC". It is expected, and it takes about 10 seconds to continue. Follow the <a href="/download">steps below</a> or read <a href="/blog/windows-protected-your-pc-smartscreen-install">why this happens</a>.</div>`
   : `<div class="dl-card"><h2>VertexStealth for Windows</h2><div class="dl-soon">The Windows installer is not published yet. Email us and we will tell you as soon as it is available.</div><a class="btn primary" href="${esc(mail('VertexStealth download notification'))}">Notify me</a><div class="dl-meta"><span>Windows 10 / 11</span></div></div>`;
 const steps = [

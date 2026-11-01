@@ -3,7 +3,7 @@ const crypto = require('crypto');
 const MAP = require('./schema-map.json');
 
 const env = (k, d = '') => (process.env[k] || d).trim();
-const SB = () => env('SUPABASE_URL').replace(/\/$/, '');
+const SB = () => env('SUPABASE_URL', 'https://jtvjvogreelngfdseqee.supabase.co').replace(/\/$/, '');
 const SERVICE = () => env('SUPABASE_SERVICE_ROLE_KEY');
 const SITE = () => env('SITE_URL', 'https://www.vertexstealth.top').replace(/\/$/, '');
 
@@ -48,6 +48,7 @@ async function gotrueAdmin(path, { method = 'GET', body } = {}) {
 
 async function userFromToken(token) {
   if (!token) return null;
+  if (!SERVICE()) throw new HttpError(500, 'Server setup incomplete: SUPABASE_SERVICE_ROLE_KEY is not set in Vercel. Add it under Settings > Environment Variables, then redeploy.');
   const res = await fetch(SB() + '/auth/v1/user', { headers: { apikey: SERVICE(), Authorization: 'Bearer ' + token } });
   if (!res.ok) return null;
   const u = await res.json();

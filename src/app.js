@@ -24,3 +24,12 @@ document.querySelectorAll('.demo-tab').forEach(tab=>tab.addEventListener('click'
  try{var d=JSON.stringify({path:p.slice(0,200),ref:document.referrer?new URL(document.referrer).hostname:'',w:window.innerWidth});
   if(navigator.sendBeacon){navigator.sendBeacon('/api/track',new Blob([d],{type:'application/json'}));}else{fetch('/api/track',{method:'POST',body:d,keepalive:true,headers:{'Content-Type':'application/json'}});}}catch(e){}
 })();
+
+(function(){
+ var dl=document.querySelector('[data-dl]'); if(!dl)return;
+ fetch('/api/download',{headers:{Accept:'application/json'}}).then(function(r){return r.ok?r.json():null}).then(function(d){
+  if(!d||!d.url||d.url.indexOf('https://github.com/')!==0)return;
+  dl.setAttribute('href',d.url);
+  var v=document.querySelector('[data-dl-version]'); if(v&&d.version){v.textContent='Version '+d.version;v.hidden=false;}
+ }).catch(function(){});
+})();

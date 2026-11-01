@@ -73,7 +73,7 @@
   }
 
   // ---- layout ----
-  var TABS = [['overview', 'Overview'], ['users', 'Users'], ['locations', 'Locations'], ['email', 'Communication'], ['activity', 'Activity log'], ['setup', 'Setup check']];
+  var TABS = [['overview', 'Overview'], ['users', 'Users'], ['locations', 'Locations'], ['email', 'Communication'], ['releases', 'Releases'], ['activity', 'Activity log'], ['setup', 'Setup check']];
   var main;
   function shell(me) {
     clear(root);
@@ -85,7 +85,7 @@
     root.appendChild(h('div', { class: 'adm' }, side, main));
   }
   function head(t, s) { clear(main); main.appendChild(h('h1', { text: t })); main.appendChild(h('p', { class: 'adm-sub', text: s || '' })); }
-  function render() { ({ overview: vOverview, users: vUsers, locations: vLocations, email: vEmail, activity: vActivity, setup: vSetup })[state.tab](); }
+  function render() { ({ overview: vOverview, users: vUsers, locations: vLocations, email: vEmail, releases: vReleases, activity: vActivity, setup: vSetup })[state.tab](); }
 
   // ---- Overview ----
   async function vOverview() {
@@ -214,6 +214,26 @@
       h('div', { class: 'adm-box' }, h('h2', { text: 'Preview' }), prev)));
     main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: '3. Choose recipients' }), h('div', { class: 'adm-bar' }, aud), segBox, pickBox, count, h('div', { class: 'adm-bar' }, testBtn, sendBtn)));
     refreshCount();
+  }
+
+  // ---- Releases ----
+  async function vReleases() {
+    head('Releases', 'Choose which installer the website Download button gives out. Changes go live within about a minute, with no redeploy.');
+    var d = await safe(function () { return api('getDownload'); }); if (!d) return;
+    var cur = d.current;
+    main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: 'Currently live' }),
+      cur ? h('div', { class: 'adm-list' }, h('div', null, h('b', { text: 'Version ' + cur.version }), h('span', { text: ' · set ' + fdate(cur.updatedAt) })), h('a', { href: cur.url, rel: 'noopener', text: cur.url }))
+          : h('p', { class: 'adm-sub', text: 'Nothing set here yet, so the website uses the link built into the site. Save a release below to take over.' })));
+    main.appendChild(h('div', { class: 'adm-sub', text: ' ' }));
+    var ver = h('input', { type: 'text', placeholder: 'e.g. 0.2.2', value: cur ? cur.version : '' });
+    var url = h('input', { type: 'text', placeholder: d.prefix + '0.2.2/VertexStealth-Setup-0.2.2.exe', value: cur ? cur.url : '' }); url.style.width = '100%';
+    var info = h('p', { class: 'adm-sub', text: '' });
+    var det = h('button', { class: 'adm-btn', text: 'Detect latest from GitHub', onclick: async function () { det.disabled = true; var r = await safe(function () { return api('latestRelease'); }); det.disabled = false; if (r) { ver.value = r.version; url.value = r.url; info.textContent = 'Found ' + r.name + ' (' + (r.size / 1048576).toFixed(1) + ' MB), published ' + fdate(r.publishedAt) + '. Review, then Save.'; } } });
+    var save = h('button', { class: 'adm-btn pri', text: 'Save and publish', onclick: async function () { save.disabled = true; var r = await safe(function () { return api('setDownload', { version: ver.value, url: url.value }); }); save.disabled = false; if (r) { toast('Download updated to ' + r.version); vReleases(); } } });
+    main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: 'Publish a new version' }),
+      h('label', { class: 'f', text: 'Version' }), ver, h('p', { text: ' ' }), h('label', { class: 'f', text: 'Installer link (.exe on GitHub Releases)' }), url, info,
+      h('div', { class: 'adm-bar' }, det, save),
+      h('p', { class: 'adm-sub', text: 'Steps for each release: 1) publish the release on GitHub with the installer attached. 2) Click Detect latest (or paste the link). 3) Save and publish. The server checks that GitHub really has the file before saving.' })));
   }
 
   // ---- Activity ----

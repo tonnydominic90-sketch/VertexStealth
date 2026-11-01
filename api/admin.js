@@ -5,6 +5,7 @@ const { sendBatch } = require('./_lib/mailer');
 const { MAP, HttpError, sb, gotrueAdmin, listAllAuthUsers, isBannedNow, isPaid, audit, env, SITE } = C;
 const col = MAP.columns;
 const FOREVER = '876000h';
+const releasePrefix = () => `https://github.com/${MAP.releasesRepo}/releases/download/`;
 const PLAN_VALUES = Object.assign({ free: 'free', monthly: 'monthly', yearly: 'yearly' }, MAP.planValues || {});
 
 async function fetchAll(path, cap = 20000) {
@@ -156,6 +157,34 @@ const ACTIONS = {
     return { ok: true, plan, expires };
   },
 
+  async getDownload() {
+    const rows = await sb('/site_settings?key=eq.download&select=value,updated_at,updated_by').catch(() => []);
+    const v = rows && rows[0] ? rows[0].value : null;
+    return { current: v ? { url: v.url, version: v.version, updatedAt: rows[0].updated_at } : null, repo: MAP.releasesRepo, prefix: releasePrefix() };
+  },
+
+  async latestRelease() {
+    const r = await fetch(`https://api.github.com/repos/${MAP.releasesRepo}/releases/latest`, { headers: { 'User-Agent': 'vertexstealth-admin', Accept: 'application/vnd.github+json' } });
+    if (r.status === 404) throw new HttpError(404, 'No published release found yet in ' + MAP.releasesRepo + '. Publish one on GitHub first (drafts do not count).');
+    if (!r.ok) throw new HttpError(502, 'GitHub did not answer (HTTP ' + r.status + '). Paste the link by hand instead.');
+    const d = await r.json();
+    const asset = (d.assets || []).find((a) => /\.exe$/i.test(a.name) && !/blockmap/i.test(a.name));
+    if (!asset) throw new HttpError(404, `Release ${d.tag_name} has no .exe file attached.`);
+    return { version: String(d.tag_name || '').replace(/^v/i, ''), url: asset.browser_download_url, name: asset.name, size: asset.size, publishedAt: d.published_at };
+  },
+
+  async setDownload(b, admin) {
+    const url = String(b.url || '').trim(); const version = String(b.version || '').trim();
+    if (!url.startsWith(releasePrefix()) || !/\.exe$/i.test(url) || /\s/.test(url) || url.length > 300) throw new HttpError(400, 'The link must be a .exe file in your releases repo: ' + releasePrefix() + '…');
+    if (!/^[0-9A-Za-z.+-]{1,30}$/.test(version)) throw new HttpError(400, 'Enter a version like 0.2.2.');
+    let ok = false, code = 0;
+    try { const h = await fetch(url, { method: 'HEAD', redirect: 'follow' }); ok = h.ok; code = h.status; } catch (e) { code = 0; }
+    if (!ok) throw new HttpError(400, `GitHub could not find that file (HTTP ${code || 'no answer'}). Check the version and file name.`);
+    await sb('/site_settings?on_conflict=key', { method: 'POST', prefer: 'resolution=merge-duplicates', body: { key: 'download', value: { url, version }, updated_at: new Date().toISOString(), updated_by: admin.id } });
+    await audit(admin, 'set_download', null, { url, version });
+    return { ok: true, url, version };
+  },
+
   async templates() { return { templates: TEMPLATES }; },
 
   async audienceCount(b) { const r = await resolveRecipients(b.audience, b.category || 'service'); return { count: r.length, sample: r.slice(0, 5).map((x) => x.email) }; },
@@ -194,7 +223,7 @@ const ACTIONS = {
     for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'RESEND_API_KEY', 'EMAIL_FROM']) add('Environment variables', k, !!env(k), env(k) ? 'set' : 'missing in Vercel > Settings > Environment Variables');
     add('Environment variables', 'SITE_URL', !!env('SITE_URL'), env('SITE_URL') ? 'set' : 'not set, defaulting to https://www.vertexstealth.top');
     const probe = async (table, c) => { try { await sb(`/${table}?select=${c}&limit=1`); return true; } catch (e) { return String(e.message); } };
-    for (const t of ['site_events', 'user_locations', 'admin_audit_log', 'email_campaigns', 'email_optouts']) { const r = await probe(t, '*'); add('Tables from supabase/site-admin.sql', t, r === true, r === true ? 'found' : 'missing: run supabase/site-admin.sql in the Supabase SQL Editor'); }
+    for (const t of ['site_events', 'user_locations', 'admin_audit_log', 'email_campaigns', 'email_optouts', 'site_settings']) { const r = await probe(t, '*'); add('Tables from supabase/site-admin.sql', t, r === true, r === true ? 'found' : 'missing: run supabase/site-admin.sql in the Supabase SQL Editor'); }
     for (const [k, c] of Object.entries(col)) { const r = await probe(MAP.profilesTable, c); add(`Existing table "${MAP.profilesTable}" columns`, `${k} -> ${c}`, r === true, r === true ? 'found' : 'not found: edit api/_lib/schema-map.json to match your schema'); }
     if (MAP.devices) { const r = await probe(MAP.devices.table, `${MAP.devices.userColumn},${MAP.devices.bannedColumn}`); add('Existing devices table', `${MAP.devices.table}.${MAP.devices.userColumn}/${MAP.devices.bannedColumn}`, r === true, r === true ? 'found' : 'not found: banning will skip devices until this matches your schema'); }
     if (env('RESEND_API_KEY')) {

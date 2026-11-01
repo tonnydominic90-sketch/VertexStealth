@@ -1,13 +1,15 @@
 # Accounts, admin panel and direct download: setup
 
-## 1. Direct download (GitHub)
-The Download button points to `https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/latest/download/VertexStealth-Setup.exe`.
-GitHub serves that straight to the browser, so the download just starts. It needs **a fixed installer file name** on every release.
-In the desktop app's `electron-builder.config.js` set, under `nsis`:
+## 1. Direct download (managed from the admin page)
+The Download button links straight to the installer on GitHub, so the download just starts. The link built into the site is
+`https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.1/VertexStealth-Setup-0.2.1.exe`.
 
-    nsis: { artifactName: "VertexStealth-Setup.exe" }
-
-(or change `downloadAsset` in `site.config.json` to your real file name). Check the result by opening the link above in a browser after publishing a release.
+For every new release you do NOT need to redeploy the website:
+1. Run `supabase/site-admin.sql` (or `sql/07-site-settings.sql`) once.
+2. Publish the new release on GitHub with the installer attached (`npm run release:github` in the app).
+3. Open `/admin` > **Releases** > **Detect latest from GitHub** (or paste the link), check the version, then **Save and publish**.
+The server checks that GitHub really has the file before saving. The site picks up the new link within about a minute.
+Only links inside `tonnydominic90-sketch/VertexStealth-Release` ending in `.exe` are accepted.
 
 ## 2. Website sign-in (same accounts as the app)
 1. In `site.config.json` set `supabase.anonKey` to your project's **anon** key (it is public; the desktop app already contains it), or set `SUPABASE_ANON_KEY` in Vercel.

@@ -74,3 +74,13 @@ language sql security definer set search_path = public as $$
   delete from public.site_events where created_at < now() - interval '180 days';
 $$;
 revoke all on function public.purge_old_site_events() from public, anon, authenticated;
+
+-- 07: settings the admin panel can change at runtime (currently the download link). Run once in the Supabase SQL Editor.
+create table if not exists public.site_settings (
+  key        text primary key,
+  value      jsonb not null,
+  updated_at timestamptz not null default now(),
+  updated_by uuid
+);
+alter table public.site_settings enable row level security;
+revoke all on public.site_settings from anon, authenticated;
