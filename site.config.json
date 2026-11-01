@@ -3,8 +3,13 @@
   "company": "Vertex Tech Solutions",
   "email": "support@vertexstealth.top",
   "siteUrl": "",
-  "downloadUrl": "",
+  "downloadUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/latest",
   "downloadVersion": "",
   "paymentsLive": false,
-  "pricing": { "monthly": 10, "yearly": 89, "freeProfiles": 3, "trialDays": 3 }
+  "pricing": {
+    "monthly": 10,
+    "yearly": 89,
+    "trialProfiles": 3,
+    "trialDays": 3
+  }
 }

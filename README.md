@@ -17,7 +17,7 @@ Preview deployments are automatically `noindex`.
 |---|---|
 | Installer link | `site.config.json` -> `downloadUrl` (https only) and `downloadVersion`, or env var `DOWNLOAD_URL` |
 | Turn on paid wording | `site.config.json` -> `"paymentsLive": true` (only once checkout works in the app) |
-| Prices / free limit / trial | `site.config.json` -> `pricing` |
+| Prices / trial profile limit / trial days | `site.config.json` -> `pricing` |
 | Legal text | replace the `.md` in `legal/`, push |
 | Homepage FAQ and pricing copy | `scripts/build.js` (`faq`, `pricingHtml`) |
 | Antidetect / multi-profile pages | `src/pages/<slug>.html` (copy) and `<slug>.json` (title, description, FAQ, steps; FAQ and HowTo structured data are generated from it) |

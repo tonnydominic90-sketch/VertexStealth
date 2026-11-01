@@ -57,10 +57,11 @@ const faq = [
   ['How does profile isolation work?', 'Each managed profile uses its own application-managed browser data folder. This keeps profile cookies and browser storage separate from other VertexStealth profiles and from your regular Chrome or Firefox profile.'],
   ['Can I use my own proxy?', 'Yes. VertexStealth supports per-profile HTTP, HTTPS, and SOCKS5 proxy configuration, including authenticated proxy workflows. Proxy performance and behavior depend on the provider, network, and configuration.'],
   ['Which browsers and operating systems are supported?', 'VertexStealth is a Windows desktop app (Windows 10 and 11). It launches Google Chrome or Mozilla Firefox, which must already be installed on your computer. macOS and Linux versions are not available yet.'],
-  ['Is VertexStealth free?', `You can use VertexStealth for free with up to ${P.freeProfiles} browser profiles. New accounts also start with a ${P.trialDays}-day trial without that limit. Paid plans cost ${money(P.monthly)} per month or ${money(P.yearly)} per year (USD) and remove the profile limit.` + (live ? '' : ' Paid checkout is not open yet.')],
-  ['How many browser profiles can I create?', `The free plan allows up to ${P.freeProfiles} browser profiles. New accounts also start with a ${P.trialDays}-day trial without that limit, and paid plans remove the profile limit.`],
+  ['Is there a free trial?', `Yes. Every new account gets a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles. After the trial you need a paid plan (${money(P.monthly)} per month or ${money(P.yearly)} per year, USD) to keep using your profiles. Your profiles are not deleted: they are locked and become usable again once a paid plan is active.` + (live ? '' : ' Paid checkout is not open yet.')],
+  ['How many browser profiles can I create?', `During the ${P.trialDays}-day trial you can have up to ${P.trialProfiles} browser profiles at a time. Paid plans remove the profile limit.`],
   ['How do I cancel a paid plan?', `You can cancel at any time from your payment provider's subscription settings or by emailing ${cfg.email}. Cancellation takes effect at the end of the current billing period, so you keep paid access until then. See the Terms of Service for refund details.`],
   ['What can I not use VertexStealth for?', 'You may use VertexStealth only for lawful purposes. The Terms of Service prohibit fraud, identity theft, account takeover, credential stuffing, spam, unauthorised access to systems or accounts, illegal content and infringement of third-party rights. Whether running several accounts on a given website breaches that site\'s own terms is your responsibility.'],
+  ['Why does Windows say "Windows protected your PC" when I install?', 'The installer is not code-signed yet, and Windows SmartScreen warns about new files with no reputation. Choose More info, then Run anyway. The Download page has step-by-step instructions.'],
   ['Do I need an account?', 'Yes. You create a VertexStealth account inside the app. The account holds your sign-in and plan details; your browser profiles, cookies and browsing data stay on your computer.'],
   ['What is a browser fingerprint?', 'A browser fingerprint is a collection of browser and device signals that websites may use to distinguish sessions. Examples include browser version, platform, screen dimensions, language, timezone, fonts, and graphics-related properties.'],
   ['Can VertexStealth guarantee anonymity or stop account bans?', 'No. Fingerprint configuration and profile separation do not guarantee anonymity, undetectability, or freedom from website restrictions. Sites can use many signals and their own policies. Use the software responsibly and follow applicable laws and platform terms.'],
@@ -85,17 +86,17 @@ function pricingHtml() {
     ? ' Pay by card, PayPal or crypto (Binance Pay); crypto payments are one-off and do not renew automatically.'
     : ' Paid plans are opening soon: email us and we will let you know.');
   return `<section class="section wrap" id="pricing">
- <div class="section-head"><div class="kicker">Plans &amp; pricing</div><h2>Start free, upgrade when you need more profiles</h2><p>Try VertexStealth with ${P.freeProfiles} profiles at no cost. Paid plans remove the limit.</p></div>
+ <div class="section-head"><div class="kicker">Plans &amp; pricing</div><h2>Try it free for ${P.trialDays} days, then choose a plan</h2><p>Every new account gets a ${P.trialDays}-day trial with up to ${P.trialProfiles} profiles. After the trial, a paid plan is needed to keep using your profiles.</p></div>
  <div class="pricing-note">${esc(note)}</div>
  <div class="plans">
-  <article class="plan"><h3>Free</h3><p>For trying isolated browser profiles and core settings.</p><div class="price">$0 <small>forever</small></div><div class="features-list"><span><b class="check">✓</b> Up to ${P.freeProfiles} browser profiles</span><span><b class="check">✓</b> Chrome and Firefox launch</span><span><b class="check">✓</b> Proxy, fingerprint and WebRTC settings</span></div><a class="btn outline" href="/download">Download free</a><p class="plan-note">Includes a ${P.trialDays}-day trial without the profile limit.</p></article>
-  <article class="plan"><h3>Monthly</h3><p>Unlimited profiles, billed every month.</p><div class="price">${money(P.monthly)} <small>/ month</small></div><div class="features-list"><span><b class="check">✓</b> Unlimited browser profiles</span><span><b class="check">✓</b> Everything in Free</span><span><b class="check">✓</b> App updates included</span></div>${paidBtn('outline')}<p class="plan-note">${live ? 'Card, PayPal or crypto.' : 'Checkout opens soon.'}</p></article>
-  <article class="plan featured"><span class="plan-badge">BEST VALUE</span><h3>Yearly</h3><p>Unlimited profiles, billed once a year.</p><div class="price">${money(P.yearly)} <small>/ year</small></div><div class="features-list"><span><b class="check">✓</b> Unlimited browser profiles</span><span><b class="check">✓</b> Everything in Free</span><span><b class="check">✓</b> Save ${money(saving)} compared with monthly</span></div>${paidBtn('primary')}<p class="plan-note">${live ? 'Card, PayPal or crypto.' : 'Checkout opens soon.'}</p></article>
+  <article class="plan"><h3>Free trial</h3><p>For trying isolated browser profiles and core settings.</p><div class="price">$0 <small>for ${P.trialDays} days</small></div><div class="features-list"><span><b class="check">✓</b> Up to ${P.trialProfiles} browser profiles</span><span><b class="check">✓</b> Chrome and Firefox launch</span><span><b class="check">✓</b> Proxy, fingerprint and WebRTC settings</span></div><a class="btn outline" href="/download">Start free trial</a><p class="plan-note">Then pick Monthly or Yearly. Your profiles are locked, not deleted, until you do.</p></article>
+  <article class="plan"><h3>Monthly</h3><p>Unlimited profiles, billed every month.</p><div class="price">${money(P.monthly)} <small>/ month</small></div><div class="features-list"><span><b class="check">✓</b> Unlimited browser profiles</span><span><b class="check">✓</b> Everything in the trial</span><span><b class="check">✓</b> App updates included</span></div>${paidBtn('outline')}<p class="plan-note">${live ? 'Card, PayPal or crypto.' : 'Checkout opens soon.'}</p></article>
+  <article class="plan featured"><span class="plan-badge">BEST VALUE</span><h3>Yearly</h3><p>Unlimited profiles, billed once a year.</p><div class="price">${money(P.yearly)} <small>/ year</small></div><div class="features-list"><span><b class="check">✓</b> Unlimited browser profiles</span><span><b class="check">✓</b> Everything in the trial</span><span><b class="check">✓</b> Save ${money(saving)} compared with monthly</span></div>${paidBtn('primary')}<p class="plan-note">${live ? 'Card, PayPal or crypto.' : 'Checkout opens soon.'}</p></article>
  </div>
 </section>`;
 }
 
-const finalCta = `<section class="final-cta" id="get-started"><div class="wrap cta-inner"><div><div class="eyebrow">Take control of your browser workspace</div><h2>Keep every profile in its own lane.</h2><p>Download VertexStealth for Windows and start with ${P.freeProfiles} free profiles.</p></div><div class="actions flush"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><a class="btn outline" href="/features">Explore features</a></div></div></section>`;
+const finalCta = `<section class="final-cta" id="get-started"><div class="wrap cta-inner"><div><div class="eyebrow">Take control of your browser workspace</div><h2>Keep every profile in its own lane.</h2><p>Download VertexStealth for Windows and try it free for ${P.trialDays} days.</p></div><div class="actions flush"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><a class="btn outline" href="/features">Explore features</a></div></div></section>`;
 
 // ---------- layout ----------
 const header = `<a class="skip" href="#top">Skip to content</a>
@@ -121,7 +122,6 @@ const software = () => ({
   description: 'An antidetect browser and multi-profile manager for Windows that launches installed Chrome or Firefox using isolated profile folders, with per-profile proxy configuration, configurable fingerprint settings, WebRTC options and live fingerprint inspection.',
   publisher: { '@id': siteUrl + '/#org' },
   offers: [
-    { '@type': 'Offer', name: 'Free', price: '0', priceCurrency: 'USD', url: siteUrl + '/pricing' },
     ...(live ? [
       { '@type': 'Offer', name: 'Monthly', price: String(P.monthly), priceCurrency: 'USD', url: siteUrl + '/pricing' },
       { '@type': 'Offer', name: 'Yearly', price: String(P.yearly), priceCurrency: 'USD', url: siteUrl + '/pricing' },
@@ -225,15 +225,16 @@ const sectionPages = [
       ['Can I use VertexStealth for any activity?', 'No. The Terms of Service allow only lawful use and prohibit fraud, identity theft, account takeover, credential stuffing, spam and unauthorised access. Many websites also restrict multiple accounts, and following their rules is your responsibility.'],
       ['Does VertexStealth guarantee anonymity or prevent account bans?', 'No. Profile separation and fingerprint settings do not guarantee anonymity, undetectability or freedom from website restrictions.'],
     ] },
-  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing — Free Plan, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: free with up to ' + P.freeProfiles + ' profiles, ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.',
-    answer: `VertexStealth is free for up to ${P.freeProfiles} browser profiles, and paid plans at ${money(P.monthly)} per month or ${money(P.yearly)} per year remove the profile limit.` + (live ? '' : ' Paid checkout is not open yet.'),
+  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing — Free Trial, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: a ' + P.trialDays + '-day free trial with up to ' + P.trialProfiles + ' profiles, then ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.',
+    answer: `VertexStealth offers a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles, then paid plans at ${money(P.monthly)} per month or ${money(P.yearly)} per year with no profile limit.` + (live ? '' : ' Paid checkout is not open yet.'),
     extra: `<section class="section wrap legal"><h2>How do the VertexStealth plans compare?</h2>
-<table><thead><tr><th></th><th>Free</th><th>Monthly</th><th>Yearly</th></tr></thead><tbody>
-<tr><th>Price (USD)</th><td>$0</td><td>${money(P.monthly)} per month</td><td>${money(P.yearly)} per year (save ${money(saving)})</td></tr>
-<tr><th>Browser profiles</th><td>Up to ${P.freeProfiles}</td><td>Unlimited</td><td>Unlimited</td></tr>
+<table><thead><tr><th></th><th>Free trial</th><th>Monthly</th><th>Yearly</th></tr></thead><tbody>
+<tr><th>Price (USD)</th><td>$0 for ${P.trialDays} days</td><td>${money(P.monthly)} per month</td><td>${money(P.yearly)} per year (save ${money(saving)})</td></tr>
+<tr><th>Browser profiles</th><td>Up to ${P.trialProfiles}</td><td>Unlimited</td><td>Unlimited</td></tr>
 <tr><th>Browsers</th><td>Chrome and Firefox</td><td>Chrome and Firefox</td><td>Chrome and Firefox</td></tr>
 <tr><th>Proxy, fingerprint and WebRTC settings, Fingerprint Check</th><td>Included</td><td>Included</td><td>Included</td></tr>
-<tr><th>Trial</th><td>${P.trialDays}-day trial without the profile limit for new accounts</td><td>Not applicable</td><td>Not applicable</td></tr>
+<tr><th>Availability</th><td>One trial per account and per device</td><td>After the trial</td><td>After the trial</td></tr>
+<tr><th>When it ends</th><td>A paid plan is required; profiles are locked, not deleted</td><td>Cancel any time; access continues to the end of the period</td><td>Cancel any time; access continues to the end of the period</td></tr>
 <tr><th>Billing period</th><td>None</td><td>1 month</td><td>12 months</td></tr>
 <tr><th>Renewal</th><td>Not applicable</td><td>Automatic for card and PayPal; crypto is a one-off payment</td><td>Automatic for card and PayPal; crypto is a one-off payment</td></tr>
 <tr><th>Payment methods</th><td>Not applicable</td><td>Card, PayPal, crypto (Binance Pay)</td><td>Card, PayPal, crypto (Binance Pay)</td></tr>
@@ -248,8 +249,8 @@ const sectionPages = [
 </ul>
 <p>Full details are in the <a href="/terms">Terms of Service</a>.${live ? '' : ' Paid checkout is not open yet.'}</p></section>`,
     faqs: [
-      ['What does the VertexStealth free plan include?', `Up to ${P.freeProfiles} browser profiles with Chrome or Firefox, per-profile proxy, fingerprint and WebRTC settings, and the built-in Fingerprint Check. New accounts also get a ${P.trialDays}-day trial without the profile limit.`],
-      ['When should I upgrade from the free plan?', `Upgrade when you need more than ${P.freeProfiles} browser profiles. Paid plans remove the profile limit.`],
+      ['What does the VertexStealth free trial include?', `A ${P.trialDays}-day trial with up to ${P.trialProfiles} browser profiles, Chrome or Firefox launch, per-profile proxy, fingerprint and WebRTC settings, and the built-in Fingerprint Check. There is one trial per account and per device.`],
+      ['What happens when the trial ends?', `You need a paid plan to keep using your profiles. Your profiles are not deleted: they are locked and become usable again as soon as a paid plan is active.`],
       ['Which payment methods are accepted?', 'Credit or debit card, PayPal and cryptocurrency through Binance Pay. Card and PayPal subscriptions renew automatically; crypto payments are one-off and do not renew automatically.'],
     ], nodes: () => [software()] },
   { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ — VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.',
@@ -308,7 +309,7 @@ for (const p of posts) {
 <div class="post-meta">By the ${esc(cfg.name)} team · ${p.updated ? 'Updated ' + fmt(p.updated) : 'Published ' + fmt(p.date)} · ${p.mins} min read</div>
 ${toc}
 ${bodyHtml}
-<div class="post-cta"><strong>Try it yourself.</strong> <a href="/download">Download ${esc(cfg.name)} for Windows</a> and start with ${P.freeProfiles} free profiles, or see <a href="/features">all features</a> and <a href="/pricing">pricing</a>.</div>
+<div class="post-cta"><strong>Try it yourself.</strong> <a href="/download">Download ${esc(cfg.name)} for Windows</a> and try it free for ${P.trialDays} days, or see <a href="/features">all features</a> and <a href="/pricing">pricing</a>.</div>
 <h2>Keep reading</h2>
 <ul class="related">
 ${posts.filter((x) => x.slug !== p.slug).map((x) => `<li><a href="/blog/${x.slug}">${esc(x.title)}</a></li>`).join('\n')}
@@ -320,25 +321,31 @@ ${posts.filter((x) => x.slug !== p.slug).map((x) => `<li><a href="/blog/${x.slug
 const dlUrl = (process.env.DOWNLOAD_URL || cfg.downloadUrl || '').trim();
 if (dlUrl && !/^https:\/\//.test(dlUrl)) throw new Error('downloadUrl must start with https://');
 const dlCard = dlUrl
-  ? `<div class="dl-card"><h2>VertexStealth for Windows</h2><p>Free to start with ${P.freeProfiles} profiles.</p><a class="btn primary" href="${esc(dlUrl)}" rel="noopener">Download installer <span>↓</span></a><div class="dl-meta"><span>Windows 10 / 11</span>${cfg.downloadVersion ? `<span>Version ${esc(cfg.downloadVersion)}</span>` : ''}</div></div>`
+  ? `<div class="dl-card"><h2>VertexStealth for Windows</h2><p>Official installer, hosted on our GitHub Releases page.</p><a class="btn primary" href="${esc(dlUrl)}" rel="noopener">Download installer <span>↓</span></a><div class="dl-meta"><span>Windows 10 / 11</span>${cfg.downloadVersion ? `<span>Version ${esc(cfg.downloadVersion)}</span>` : ''}<span>Hosted on GitHub</span></div></div>
+<div class="dl-notice"><strong>Windows may warn you when you open the installer.</strong> The installer is not code-signed yet, so Windows SmartScreen can show "Windows protected your PC". It is expected, and it takes about 10 seconds to continue. Follow the <a href="/download">steps below</a> or read <a href="/blog/windows-protected-your-pc-smartscreen-install">why this happens</a>.</div>`
   : `<div class="dl-card"><h2>VertexStealth for Windows</h2><div class="dl-soon">The Windows installer is not published yet. Email us and we will tell you as soon as it is available.</div><a class="btn primary" href="${esc(mail('VertexStealth download notification'))}">Notify me</a><div class="dl-meta"><span>Windows 10 / 11</span></div></div>`;
-const dlSteps = {
-  name: 'How to install VertexStealth on Windows',
-  steps: [
-    ['Install', 'Run the installer. You need Windows 10 or 11 and Google Chrome or Mozilla Firefox already installed.'],
-    ['Sign in', `Create your VertexStealth account inside the app. New accounts start with a ${P.trialDays}-day trial.`],
-    ['Create a profile', 'Pick Chrome or Firefox, set a proxy if you need one, launch, and use Fingerprint Check to see what the browser reports.'],
-  ],
-};
+const steps = [
+  ['Download the installer', 'Click Download installer and save the .exe file from our official GitHub Releases page. Your browser may say the file is not commonly downloaded: open the download list and choose Keep (or Keep anyway).', 'Click <b>Download installer</b> and save the <b>.exe</b> file from our official GitHub Releases page. Your browser may say the file is not commonly downloaded: open the download list and choose <b>Keep</b> (or <b>Keep anyway</b>).'],
+  ['Open the installer', 'Double-click the downloaded VertexStealth setup file in your Downloads folder.', 'Double-click the downloaded <b>VertexStealth</b> setup file in your Downloads folder.'],
+  ['Click More info', 'If Windows shows "Windows protected your PC", do not close it. Click the small More info link under the message.', 'If Windows shows <b>"Windows protected your PC"</b>, do not close it. Click the small <b>More info</b> link under the message.'],
+  ['Click Run anyway', 'Check that the app name shows the VertexStealth setup file. The publisher will say Unknown publisher because the installer is not code-signed yet. Click Run anyway.', 'Check that the app name shows the VertexStealth setup file. The publisher will say <b>Unknown publisher</b> because the installer is not code-signed yet. Click <b>Run anyway</b>.'],
+  ['Allow the installer and finish', 'If User Account Control asks for permission, click Yes, then follow the installer steps.', 'If User Account Control asks for permission, click <b>Yes</b>, then follow the installer steps.'],
+  ['Sign in and start', `Open VertexStealth and create your account inside the app. New accounts start with a ${P.trialDays}-day trial.`, `Open VertexStealth and create your account inside the app. New accounts start with a ${P.trialDays}-day trial.`],
+];
+const dlSteps = { name: 'How to install VertexStealth on Windows and pass the SmartScreen warning', steps: steps.map(([n, t]) => [n, t]) };
+const svgA = `<svg viewBox="0 0 520 250" role="img" aria-label="Illustration: the Windows protected your PC window with the More info link highlighted"><rect width="520" height="250" rx="10" fill="#1f5ca9"/><text x="28" y="60" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="24" font-weight="700">Windows protected your PC</text><text x="28" y="94" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="13.5">Microsoft Defender SmartScreen prevented an unrecognized app</text><text x="28" y="114" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="13.5">from starting. Running this app might put your PC at risk.</text><rect x="20" y="132" width="86" height="28" rx="5" fill="none" stroke="#ffd23f" stroke-width="3"/><text x="28" y="152" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="700" text-decoration="underline">More info</text><rect x="350" y="196" width="140" height="32" fill="#fff" fill-opacity=".9"/><text x="420" y="217" text-anchor="middle" fill="#1b2a3a" font-family="Segoe UI,Arial,sans-serif" font-size="14">Don't run</text></svg>`;
+const svgB = `<svg viewBox="0 0 520 250" role="img" aria-label="Illustration: the SmartScreen window after More info, with the Run anyway button highlighted"><rect width="520" height="250" rx="10" fill="#1f5ca9"/><text x="28" y="50" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="24" font-weight="700">Windows protected your PC</text><text x="28" y="82" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="13.5">Microsoft Defender SmartScreen prevented an unrecognized app</text><text x="28" y="102" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="13.5">from starting. Running this app might put your PC at risk.</text><text x="28" y="136" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="13.5">App: VertexStealth Setup</text><text x="28" y="157" fill="#fff" font-family="Segoe UI,Arial,sans-serif" font-size="13.5">Publisher: Unknown publisher</text><rect x="196" y="190" width="150" height="40" rx="3" fill="#fff"/><rect x="194" y="188" width="154" height="44" rx="5" fill="none" stroke="#ffd23f" stroke-width="3"/><text x="271" y="215" text-anchor="middle" fill="#1b2a3a" font-family="Segoe UI,Arial,sans-serif" font-size="14" font-weight="700">Run anyway</text><rect x="360" y="190" width="130" height="40" fill="#fff" fill-opacity=".9"/><text x="425" y="215" text-anchor="middle" fill="#1b2a3a" font-family="Segoe UI,Arial,sans-serif" font-size="14">Don't run</text></svg>`;
 const dlFaq = [
-  ['Is VertexStealth free?', `You can use VertexStealth for free with up to ${P.freeProfiles} browser profiles. New accounts also start with a ${P.trialDays}-day trial without that limit.`],
+  ['Why does Windows say "Windows protected your PC"?', 'Windows SmartScreen checks the reputation of downloaded files. The VertexStealth installer is not code-signed yet and new files start with no reputation, so Windows shows a warning for unrecognized apps. Choose More info, then Run anyway.'],
+  ['Is the VertexStealth installer safe to run?', 'We publish the installer only on our official GitHub Releases page. The warning appears because the file is new and unsigned, not because Windows found malware. You can also scan the file with Microsoft Defender or an online scanner before running it.'],
+  ['Is there a free trial?', `Yes. New accounts get a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles. After the trial you need a paid plan to keep using your profiles.`],
   ['Which browsers does it work with?', 'VertexStealth launches Google Chrome or Mozilla Firefox, which must already be installed on your computer.'],
   ['Is there a version for macOS or Linux?', 'Not yet. VertexStealth is a Windows 10 and 11 desktop app.'],
   ['Do I need an account?', 'Yes. You create a VertexStealth account inside the app. Your browser profiles and browsing data stay on your computer.'],
 ];
 page({
   file: 'download.html', title: 'Download VertexStealth Antidetect Browser for Windows', canonicalPath: '/download', crumb: 'Download',
-  desc: 'Download VertexStealth for Windows, an antidetect browser and multi-profile manager. Free plan with up to ' + P.freeProfiles + ' browser profiles; uses your installed Chrome or Firefox.',
+  desc: 'Download VertexStealth for Windows, an antidetect browser and multi-profile manager. Free ' + P.trialDays + '-day trial with up to ' + P.trialProfiles + ' browser profiles; uses your installed Chrome or Firefox.',
   nodes: [software(), howtoNode(dlSteps), faqNode(dlFaq)],
   main: `<section class="page"><div class="wrap page-narrow">
 <div class="kicker">Download</div>
@@ -346,16 +353,27 @@ page({
 <p class="lead">VertexStealth for Windows is an antidetect browser and multi-profile manager. It launches your installed Chrome or Firefox with separate profile folders, proxies and fingerprint settings.</p>
 ${dlCard}
 <h2 class="dl-h2">How do I install VertexStealth on Windows?</h2>
-<ol class="dl-steps">
-${dlSteps.steps.map(([n, t]) => `<li><span><b>${esc(n)}.</b> ${esc(t)}</span></li>`).join('\n')}
+<p class="dl-intro">Windows will probably show a blue "Windows protected your PC" window the first time. Here is exactly what to do.</p>
+<ol class="sm-steps">
+${steps.map(([n, , h]) => `<li><strong>${esc(n)}</strong><span>${h}</span></li>`).join('\n')}
 </ol>
+<div class="sm-figs"><figure class="sm-fig">${svgA}<figcaption>Step 3: click <b>More info</b>. Illustration, your screen may look slightly different.</figcaption></figure><figure class="sm-fig">${svgB}<figcaption>Step 4: click <b>Run anyway</b>.</figcaption></figure></div>
+<h2 class="dl-h2">Why does Windows show this warning?</h2>
+<div class="legal"><p>Windows Defender SmartScreen checks the reputation of every downloaded installer. Microsoft says that when a file is not signed, reputation has to build from zero for each new version. Code signing needs a paid certificate, and we are exploring solutions. Until then, new releases may show this warning. Read the full explanation in <a href="/blog/windows-protected-your-pc-smartscreen-install">Windows Protected Your PC: How to Install VertexStealth</a>.</p></div>
+<h2 class="dl-h2">How do I make sure I have the real installer?</h2>
+<div class="legal"><ul>
+<li>Download it only from this page or from our GitHub Releases page: <a href="${esc(dlUrl || '/download')}" rel="noopener">VertexStealth-Release on GitHub</a>.</li>
+<li>Do not run copies from other websites, chats or file-sharing links.</li>
+<li>Do not turn off SmartScreen or Windows Security to install. You do not need to.</li>
+<li>If Windows shows a message that blocks the app with no Run anyway button, contact <a href="${esc(mail('VertexStealth install help'))}">${esc(cfg.email)}</a> and tell us your Windows version.</li>
+</ul></div>
 <h2 class="dl-h2">What do you get with VertexStealth?</h2>
 <div class="legal"><ul>
 <li>Isolated Chrome and Firefox profiles, each with its own cookies, storage and settings</li>
 <li>A proxy per profile (HTTP, HTTPS or SOCKS5) with a built-in connection test</li>
 <li>Configurable fingerprint settings, timezone and location that can follow the proxy, and WebRTC modes</li>
 <li>A built-in Fingerprint Check, plus shortcuts to outside testers</li>
-<li>A free plan with up to ${P.freeProfiles} profiles, and a ${P.trialDays}-day trial without the limit</li>
+<li>A ${P.trialDays}-day free trial with up to ${P.trialProfiles} profiles, then Monthly or Yearly plans</li>
 </ul></div>
 <h2 class="dl-h2">System requirements</h2>
 <div class="legal"><ul>
@@ -376,7 +394,7 @@ for (const slug of pillars) {
   const meta = JSON.parse(read(`src/pages/${slug}.json`));
   const main = read(`src/pages/${slug}.html`)
     .replace('{{FAQ}}', faqBlock(meta.faq))
-    .replace(/\{\{FREE\}\}/g, P.freeProfiles).replace(/\{\{TRIAL\}\}/g, P.trialDays)
+    .replace(/\{\{FREE\}\}/g, P.trialProfiles).replace(/\{\{TRIAL\}\}/g, P.trialDays)
     .replace(/\{\{MONTHLY\}\}/g, money(P.monthly)).replace(/\{\{YEARLY\}\}/g, money(P.yearly))
     .replace('{{PAID_NOTE}}', live ? '' : ' Paid checkout is not open yet.');
   page({
