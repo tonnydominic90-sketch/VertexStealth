@@ -123,3 +123,5 @@
 .acct div{display:flex;justify-content:space-between;gap:16px;border-bottom:1px solid var(--line);padding-bottom:10px;font-size:14px}
 .acct dt{color:var(--muted)}.acct dd{margin:0;font-weight:700;text-align:right;word-break:break-all}
 .acct-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+.answer-lead{font-size:18px;line-height:1.55;font-weight:600;color:#27384b;border-left:4px solid #169ee8;padding:2px 0 2px 16px;margin:0 0 28px}
