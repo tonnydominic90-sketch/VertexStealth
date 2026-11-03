@@ -1,0 +1,8 @@
+# Add to supabase/config.toml (public functions are called straight from the website, with no Supabase login)
+[functions.partner-apply]
+verify_jwt = false
+[functions.partner-click]
+verify_jwt = false
+[functions.partner-portal]
+verify_jwt = false
+# partner-admin-review keeps the default (verify_jwt = true): only a signed-in user can call it, and Postgres checks is_admin().
