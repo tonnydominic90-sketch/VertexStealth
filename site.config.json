@@ -19,6 +19,10 @@
     "minPayout": 50,
     "reviewTime": "3 business days",
     "termsUpdated": "3 November 2026",
-    "applyEndpoint": ""
+    "applyEndpoint": "",
+    "backendLive": false,
+    "functionsUrl": "https://jtvjvogreelngfdseqee.supabase.co/functions/v1",
+    "supabaseUrl": "https://jtvjvogreelngfdseqee.supabase.co",
+    "supabaseAnonKey": ""
   }
 }

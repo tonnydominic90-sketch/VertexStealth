@@ -27,10 +27,20 @@ document.querySelectorAll('.demo-tab').forEach(tab=>tab.addEventListener('click'
   btn.disabled=true;st.className='pp-status';st.textContent='Sending…';
   try{
    const r=await fetch(pf.dataset.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:d.name,email:d.email,country:d.country,channel_url:d.channel_url||'',promotion_plan:d.promotion_plan})});
-   if(!r.ok)throw new Error('HTTP '+r.status);
+   if(!r.ok){let m='';try{m=(await r.json()).message||''}catch(x){}throw new Error(m||'HTTP '+r.status)}
    pf.reset();st.className='pp-status ok';st.textContent='Thank you! We received your application and will email you within '+pf.dataset.review+'.';
   }catch(err){
-   st.className='pp-status err';st.textContent='Something went wrong. Please try again, or email us instead.';
+   st.className='pp-status err';st.textContent=(err&&err.message&&!/^HTTP /.test(err.message))?err.message:'Something went wrong. Please try again, or email us instead.';
   }finally{btn.disabled=false}
  });
+})();
+
+(function(){
+ const el=document.getElementById('ref-note');
+ if(!el)return;
+ try{
+  const v=JSON.parse(localStorage.getItem('vs_ref')||'null');
+  const days=Number(el.dataset.days)||30;
+  if(v&&/^[A-Z0-9]{8}$/.test(v.code)&&Date.now()-v.ts<days*864e5){el.querySelector('[data-code]').textContent=v.code;el.hidden=false}
+ }catch(e){}
 })();

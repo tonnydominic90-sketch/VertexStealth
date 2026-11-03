@@ -42,12 +42,16 @@ function emitAsset(file) {
 }
 const cssUrl = emitAsset('styles.css');
 const jsUrl = emitAsset('app.js');
+const refJs = emitAsset('ref.js');
+const portalJs = emitAsset('partner.js');
+const adminJs = emitAsset('partner-admin.js');
 for (const f of fs.readdirSync(path.join(src, 'static'))) {
   fs.copyFileSync(path.join(src, 'static', f), path.join(dist, f));
 }
 
 // ---------- content ----------
 const P = cfg.pricing;
+const PP = cfg.partners || {};
 const live = !!cfg.paymentsLive;
 const mail = (subject) => `mailto:${cfg.email}?subject=${encodeURIComponent(subject)}`;
 const saving = P.monthly * 12 - P.yearly;
@@ -130,7 +134,7 @@ const howtoNode = (h) => ({ '@type': 'HowTo', name: h.name, step: h.steps.map(([
 const buildDate = new Date().toISOString().slice(0, 10);
 const faqBlock = (items) => `<h2>Frequently asked questions</h2>\n<div class="faq">\n${items.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n')}\n</div>`;
 
-function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null, index = true }) {
+function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null, index = true, scripts = [] }) {
   const url = siteUrl + canonicalPath;
   const robots = index && isProd ? 'index,follow,max-image-preview:large' : 'noindex,nofollow';
   const og = `${siteUrl}/og-image.png`;
@@ -171,7 +175,7 @@ ${header}
 ${main}
 </main>
 ${footer}
-<script src="${jsUrl}" defer></script>
+<script src="${jsUrl}" defer></script>${scripts.map((u) => `\n<script src="${u}" defer></script>`).join("")}
 </body>
 </html>
 `;
@@ -216,6 +220,7 @@ page({
 <div class="kicker">Download</div>
 <h1>Download VertexStealth for Windows</h1>
 <p class="lead">VertexStealth for Windows is an antidetect browser and multi-profile manager. It launches your installed Chrome or Firefox with separate profile folders, proxies and fingerprint settings.</p>
+<div class="pp-note" id="ref-note" data-days="${PP.attributionDays ?? 30}" hidden>You were referred by a VertexStealth partner. When you create your account, enter this referral code: <b data-code></b></div>
 ${dlCard}
 <h2 class="dl-h2">How do I install VertexStealth on Windows?</h2>
 <ol class="dl-steps">
@@ -243,12 +248,14 @@ ${faqBlock(dlFaq)}</div>
 });
 
 // ---------- pillar pages (src/pages/<slug>.html + .json) ----------
-const PP = cfg.partners || {};
 const pct = PP.commissionPercent ?? 20;
 const usd = (n) => '$' + n.toFixed(2);
 const countries = JSON.parse(read('src/countries.json'));
-const applyUrl = (process.env.PARTNER_APPLY_URL || PP.applyEndpoint || '').trim();
-if (applyUrl && !/^https:\/\//.test(applyUrl)) throw new Error('partners.applyEndpoint must start with https://');
+const backendLive = !!PP.backendLive || process.env.PARTNER_BACKEND_LIVE === '1';
+const fnUrl = (process.env.PARTNER_FUNCTIONS_URL || PP.functionsUrl || '').replace(/\/+$/, '');
+if (backendLive && !/^(https:\/\/|http:\/\/localhost)/.test(fnUrl)) throw new Error('partners.functionsUrl must start with https:// when backendLive is true');
+const applyUrl = (process.env.PARTNER_APPLY_URL || PP.applyEndpoint || (backendLive ? fnUrl + '/partner-apply' : '')).trim();
+if (applyUrl && !/^(https:\/\/|http:\/\/localhost)/.test(applyUrl)) throw new Error('partners.applyEndpoint must start with https://');
 const reviewTime = PP.reviewTime || '3 business days';
 
 function partnerForm() {
@@ -290,6 +297,61 @@ for (const slug of pillars) {
     file: slug + '.html', title: meta.title, desc: meta.desc, canonicalPath: '/' + slug, crumb: meta.crumb, main,
     nodes: [...(meta.noSoftware ? [] : [software()]), ...(meta.howto ? [howtoNode(meta.howto)] : []), faqNode(meta.faq)],
   });
+}
+
+
+// ---------- referral landing, partner portal, partner admin ----------
+const liveFn = backendLive ? fnUrl : '';
+page({
+  file: 'r.html', title: 'Redirecting to VertexStealth', desc: 'Redirecting to VertexStealth.', canonicalPath: '/r', index: false, scripts: [refJs],
+  main: `<section class="notfound"><div class="wrap" id="ref" data-fn="${esc(liveFn)}"><p class="lead">Taking you to VertexStealth…</p><p><a class="btn primary" href="/download">Continue</a></p></div></section>`,
+});
+
+const tbl = (id, head) => `<div class="pp-scroll"><table class="pp-table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody id="${id}"></tbody></table></div>`;
+const portalBody = !backendLive
+  ? `<div class="pp-note">The partner portal opens when the program launches. <a class="ul" href="/partners-program">Learn about the partner program</a>.</div>`
+  : `<div data-view="loading"><p class="lead">Loading…</p></div>
+<div data-view="login" hidden>
+<p class="lead">Enter the email address you applied with and we will send you a one-time sign-in link.</p>
+<form class="pp-form" id="login-form"><label>Email<input id="f-email" type="email" required maxlength="160" autocomplete="email"></label><div><button class="btn primary" type="submit">Email me a sign-in link</button></div><p class="pp-status" id="login-status" role="status"></p></form>
+<p class="pp-fine">Not a partner yet? <a class="ul" href="/partners-program#apply">Apply here</a>.</p></div>
+<div data-view="sent" hidden><div class="pp-note">If that email belongs to an approved partner, a sign-in link is on its way. It works once and expires in 20 minutes.</div></div>
+<div data-view="badlink" hidden><div class="pp-note">That sign-in link is invalid or has expired. <a class="ul" href="/partner">Request a new one</a>.</div></div>
+<div data-view="error" hidden><div class="pp-note">Something went wrong loading your portal. Please refresh, or email <a class="ul" href="mailto:${esc(cfg.email)}">${esc(cfg.email)}</a>.</div></div>
+<div data-view="dash" hidden>
+<h2 class="pp-h3">Welcome, <span id="p-name"></span></h2>
+<p>Your referral link (${'`'}<span id="p-pct"></span>${'`'} commission on each customer's first payment). Referral code: <b id="p-code"></b></p>
+<div class="pp-linkrow"><input id="p-link" readonly aria-label="Your referral link"><button class="btn primary" type="button" id="copy">Copy link</button></div>
+<div class="pp-dash-grid"><div class="pp-stat sm"><b id="s-clicks">0</b><span>link visits, last 30 days</span></div><div class="pp-stat sm"><b id="s-signups">0</b><span>sign-ups</span></div><div class="pp-stat sm"><b id="s-upgrades">0</b><span>upgrades</span></div></div>
+<div class="pp-dash-grid"><div class="pp-stat sm"><b id="b-pending">$0.00</b><span>pending</span></div><div class="pp-stat sm"><b id="b-approved">$0.00</b><span>approved, payable</span></div><div class="pp-stat sm"><b id="b-paid">$0.00</b><span>paid</span></div></div>
+<div class="pp-note" id="b-owed" hidden></div>
+<p class="pp-fine">Commissions stay pending for <span id="hold"></span> days, then become approved. Payouts are monthly once your approved balance reaches $<span id="minp"></span>.</p>
+<h3 class="pp-h3">Referrals</h3>${tbl('t-referrals', ['Date', 'Referral', 'Via', 'Status'])}
+<h3 class="pp-h3">Commissions</h3>${tbl('t-commissions', ['Date', 'Payment', 'Commission', 'Status', 'Note'])}
+<h3 class="pp-h3">Payouts</h3>${tbl('t-payouts', ['Date', 'Amount', 'Method', 'Reference'])}
+<h3 class="pp-h3">Payout details</h3>
+<form class="pp-form" id="payout-form"><div class="pp-grid2"><label>Method<select id="f-method" required><option value="paypal">PayPal</option><option value="usdt">USDT (crypto)</option><option value="bank">Bank transfer</option><option value="other">Other</option></select></label><label>Account / address / email<input id="f-details" required minlength="3" maxlength="500"></label></div><div><button class="btn primary" type="submit">Save payout details</button></div><p class="pp-status" id="payout-status" role="status"></p></form>
+<p class="pp-fine"><button class="btn outline" type="button" id="logout">Sign out</button> &nbsp; <a class="ul" href="/partners-program#terms">Partner Program Terms</a></p>
+</div>`;
+page({
+  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: [portalJs],
+  main: `<section class="page"><div class="wrap pp-narrow" id="portal" data-fn="${esc(liveFn)}"><div class="kicker">Partner portal</div><h1>Your partner portal</h1>${portalBody}</div></section>`,
+});
+
+const adminKey = (process.env.PARTNER_ADMIN_ANON_KEY || PP.supabaseAnonKey || '').trim();
+const sbUrl = (process.env.PARTNER_SUPABASE_URL || PP.supabaseUrl || '').replace(/\/+$/, '');
+let adminBuilt = false;
+if (adminKey && sbUrl && backendLive) {
+  adminBuilt = true;
+  page({
+    file: 'partner-admin.html', title: 'Partner admin — VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, scripts: [adminJs],
+    main: `<section class="page"><div class="wrap pp-wide" id="padmin" data-sb="${esc(sbUrl)}" data-anon="${esc(adminKey)}" data-fn="${esc(fnUrl)}"><div class="kicker">Partner admin</div><h1>Partner program admin</h1>
+<div id="login"><form class="pp-form" id="login-form"><div class="pp-grid2"><label>Admin email<input id="a-email" type="email" required autocomplete="username"></label><label>Password<input id="a-pass" type="password" required autocomplete="current-password"></label></div><div><button class="btn primary" type="submit">Sign in</button></div><p class="pp-status" id="login-status" role="status"></p></form></div>
+<div id="app" hidden><div class="pa-tabs"><button class="btn primary" data-tab="applications" type="button">Applications</button><button class="btn outline" data-tab="partners" type="button">Partners</button><button class="btn outline" data-tab="commissions" type="button">Commissions</button><button class="btn outline" data-tab="payouts" type="button">Payouts</button><select id="filter" aria-label="Filter"></select><button class="btn outline" id="signout" type="button">Sign out</button></div><p class="pp-status" id="msg" role="status"></p><div id="content"></div></div>
+</div></section>`,
+  });
+} else {
+  console.warn('NOTE: partner-admin page not built (needs partners.backendLive=true, partners.supabaseUrl and partners.supabaseAnonKey).');
 }
 
 // ---------- legal pages from legal/*.md ----------
@@ -346,7 +408,7 @@ page({
 
 // ---------- robots + sitemap ----------
 fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
-  ? `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  ? `User-agent: *\nAllow: /\nDisallow: /partner\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
 const urls = ['/', '/antidetect-browser', '/multi-profile-management', '/partners-program', '/download', '/terms', '/privacy', '/eula'];
@@ -367,4 +429,5 @@ if (problems.length) { console.error('BUILD STOPPED:\n  ' + problems.join('\n  '
 console.log(`Built ${fs.readdirSync(dist).filter((x) => x.endsWith('.html')).length} pages -> dist/`);
 console.log(`Site URL: ${siteUrl}  (${isProd ? 'indexable' : 'preview: noindex'})`);
 console.log(`Download link: ${dlUrl || '(none yet - Download page shows "Notify me")'}`);
+console.log(`Partner backend: ${backendLive ? 'LIVE (' + fnUrl + ')' : 'not live (apply form falls back to email)'}${adminBuilt ? ', admin page built' : ''}`);
 console.log(`Payments: ${live ? 'LIVE wording' : 'not live (paid buttons say "Get notified")'}`);
