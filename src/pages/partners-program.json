@@ -1,0 +1,32 @@
+{
+  "title": "Partner Program — Earn {{PCT}}% Commission with VertexStealth",
+  "desc": "Join the VertexStealth Partner Program. Share your personal link and earn {{PCT}}% of the first payment from every customer you refer who upgrades. Free to join.",
+  "crumb": "Partner program",
+  "noSoftware": true,
+  "howto": {
+    "name": "How to join the VertexStealth Partner Program",
+    "steps": [
+      ["Apply", "Fill in the short application form with your name, email, country and how you plan to share your link."],
+      ["Get approved", "Our team reviews every application and approves or declines it, usually within {{REVIEW_TIME}}."],
+      ["Receive your link", "Approved partners get a personal referral link and code, plus access to the partner portal."],
+      ["Share and earn", "When someone you refer signs up and upgrades, you earn {{PCT}}% of their first payment."]
+    ]
+  },
+  "faq": [
+    ["Who can join the VertexStealth Partner Program?", "Bloggers, creators, influencers, community owners, consultants, agencies and individuals can apply. You do not need a large audience or a website; we review how you plan to share your link and whether it fits our guidelines."],
+    ["Does it cost anything to join?", "No. Joining is free, and there are no fees or minimum sales to stay in the program."],
+    ["How much do I earn?", "You earn {{PCT}}% of the first payment of every customer you refer who upgrades to a paid plan, calculated on the price paid excluding taxes. That is {{EX_MONTHLY}} on a {{MONTHLY}} monthly plan and {{EX_YEARLY}} on an {{YEARLY}} yearly plan."],
+    ["Do I earn on renewals?", "No. Commission is paid once per referred customer, on their first payment. Renewals and later purchases do not earn commission."],
+    ["Do I earn when someone only signs up for the free plan?", "No. Commission is earned only when a referred person upgrades to a paid plan. Free sign-ups and trials do not earn commission, but they can turn into paid upgrades later within the attribution window."],
+    ["How do I get my referral link?", "Apply through the form on this page. When our team approves your application you receive your personal referral link and code by email and in your partner portal."],
+    ["How long does approval take?", "We review every application manually and usually reply within {{REVIEW_TIME}}. You get an email whether the application is approved or declined."],
+    ["How does tracking work?", "Your link and code attribute sign-ups to you. A person is credited to you if they create an account within {{COOKIE_DAYS}} days of using your link or code, and the most recent link or code used before sign-up is the one credited."],
+    ["When and how do I get paid?", "Commissions become approved after a {{HOLD_DAYS}}-day review period that covers refunds. Approved earnings are paid monthly once your balance reaches ${{MIN_PAYOUT}}, using the payout methods shown in your partner portal."],
+    ["What happens if a customer gets a refund?", "If the payment behind a commission is refunded or charged back, that commission is cancelled. This is why commissions stay pending for {{HOLD_DAYS}} days before they are approved."],
+    ["Can I use my own link to buy VertexStealth?", "No. Self-referrals, purchases by accounts you control, and referrals within the same household or company are not eligible and may lead to removal from the program."],
+    ["Can I run paid ads to my link?", "You can use paid channels that follow the program terms, but you may not bid on VertexStealth brand terms, use look-alike domains, or disguise your link. Ask us in writing if you are unsure."],
+    ["What am I not allowed to claim when promoting VertexStealth?", "Do not claim that VertexStealth guarantees anonymity, undetectability, or protection from account restrictions, and do not promise income. Describe it honestly as a browser profile manager with fingerprint controls, and disclose that you earn commission."],
+    ["Which tools do I get as a partner?", "Approved partners get a partner portal with their link and code, clicks, sign-ups and upgrades, commission status, payout history and payout settings."],
+    ["Can I apply if I live outside the United States?", "Yes, applicants from most countries can apply. We may decline applicants in locations where we cannot legally or practically pay commissions."]
+  ]
+}

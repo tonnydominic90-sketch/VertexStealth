@@ -1,21 +1,24 @@
 {
   "name": "VertexStealth",
   "company": "Vertex Tech Solutions",
-  "email": "support@vertexstealth.top",
+  "email": "techinfo.vertex@gmail.com",
   "siteUrl": "",
-  "downloadUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/latest",
-  "downloadVersion": "0.2.1",
+  "downloadUrl": "",
+  "downloadVersion": "",
   "paymentsLive": false,
   "pricing": {
     "monthly": 10,
     "yearly": 89,
-    "trialProfiles": 3,
+    "freeProfiles": 3,
     "trialDays": 3
   },
-  "supabase": {
-    "url": "https://jtvjvogreelngfdseqee.supabase.co",
-    "anonKey": ""
-  },
-  "releasesRepo": "tonnydominic90-sketch/VertexStealth-Release",
-  "downloadDirectUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.1/VertexStealth-Setup-0.2.1.exe"
+  "partners": {
+    "commissionPercent": 20,
+    "attributionDays": 30,
+    "holdDays": 14,
+    "minPayout": 50,
+    "reviewTime": "3 business days",
+    "termsUpdated": "3 November 2026",
+    "applyEndpoint": ""
+  }
 }
