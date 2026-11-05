@@ -16,31 +16,20 @@ document.querySelectorAll('.demo-tab').forEach(tab=>tab.addEventListener('click'
 }));
 
 (function(){
- const pf=document.getElementById('partner-form');
- if(!pf)return;
- const st=pf.querySelector('.pp-status'),btn=pf.querySelector('button[type="submit"]');
- pf.addEventListener('submit',async function(e){
-  e.preventDefault();
-  if(!pf.checkValidity()){pf.reportValidity();return}
-  const d=Object.fromEntries(new FormData(pf).entries());
-  if(d.company_website)return;
-  btn.disabled=true;st.className='pp-status';st.textContent='Sending…';
-  try{
-   const r=await fetch(pf.dataset.endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:d.name,email:d.email,country:d.country,channel_url:d.channel_url||'',promotion_plan:d.promotion_plan})});
-   if(!r.ok){let m='';try{m=(await r.json()).message||''}catch(x){}throw new Error(m||'HTTP '+r.status)}
-   pf.reset();st.className='pp-status ok';st.textContent='Thank you! We received your application and will email you within '+pf.dataset.review+'.';
-  }catch(err){
-   st.className='pp-status err';st.textContent=(err&&err.message&&!/^HTTP /.test(err.message))?err.message:'Something went wrong. Please try again, or email us instead.';
-  }finally{btn.disabled=false}
- });
+ try{if(localStorage.getItem('vs.session')){document.querySelectorAll('[data-auth-link]').forEach(function(l){l.textContent='Account';l.setAttribute('href','/account');});}}catch(e){}
+ var dl=document.querySelector('[data-dl]');
+ if(dl){dl.addEventListener('click',function(){var n=document.getElementById('dlStarted');if(n)n.hidden=false;var s=dl.querySelector('span');dl.firstChild.textContent='Starting download… ';if(s)s.textContent='✓';});}
+ var p=location.pathname;
+ if(navigator.doNotTrack==='1'||/^\/(admin|api)/.test(p))return;
+ try{var d=JSON.stringify({path:p.slice(0,200),ref:document.referrer?new URL(document.referrer).hostname:'',w:window.innerWidth});
+  if(navigator.sendBeacon){navigator.sendBeacon('/api/track',new Blob([d],{type:'application/json'}));}else{fetch('/api/track',{method:'POST',body:d,keepalive:true,headers:{'Content-Type':'application/json'}});}}catch(e){}
 })();
 
 (function(){
- const el=document.getElementById('ref-note');
- if(!el)return;
- try{
-  const v=JSON.parse(localStorage.getItem('vs_ref')||'null');
-  const days=Number(el.dataset.days)||30;
-  if(v&&/^[A-Z0-9]{8}$/.test(v.code)&&Date.now()-v.ts<days*864e5){el.querySelector('[data-code]').textContent=v.code;el.hidden=false}
- }catch(e){}
+ var dl=document.querySelector('[data-dl]'); if(!dl)return;
+ fetch('/api/download',{headers:{Accept:'application/json'}}).then(function(r){return r.ok?r.json():null}).then(function(d){
+  if(!d||!d.url||d.url.indexOf('https://github.com/')!==0)return;
+  dl.setAttribute('href',d.url);
+  var v=document.querySelector('[data-dl-version]'); if(v&&d.version){v.textContent='Version '+d.version;v.hidden=false;}
+ }).catch(function(){});
 })();
