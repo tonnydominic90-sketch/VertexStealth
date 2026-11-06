@@ -2,12 +2,12 @@ import { createClient, type SupabaseClient } from "npm:@supabase/supabase-js@2";
 
 export const env = (k: string, fallback = ""): string => Deno.env.get(k) ?? fallback;
 
-export const siteUrl = (): string => env("SITE_URL", "https://vertexstealth.vercel.app").replace(/\/+$/, "");
+export const siteUrl = (): string => env("SITE_URL", "https://www.vertexstealth.top").replace(/\/+$/, "");
 
 /** Origins allowed to call the public functions from a browser. */
 export function allowedOrigins(): string[] {
   const list = env("ALLOWED_ORIGINS");
-  return (list ? list.split(",") : [siteUrl()]).map((s) => s.trim().replace(/\/+$/, "")).filter(Boolean);
+  return (list ? list.split(",") : [siteUrl(), "https://vertexstealth.top", "https://www.vertexstealth.top"]).map((s) => s.trim().replace(/\/+$/, "")).filter(Boolean);
 }
 
 export function corsHeaders(req: Request): Record<string, string> {

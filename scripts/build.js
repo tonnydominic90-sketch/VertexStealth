@@ -45,6 +45,7 @@ const jsUrl = emitAsset('app.js');
 const refJs = emitAsset('ref.js');
 const portalJs = emitAsset('partner.js');
 const partnerAdminJs = emitAsset('partner-admin.js');
+const partnerApplyJs = emitAsset('partner-apply.js');
 for (const f of fs.readdirSync(path.join(src, 'static'))) {
   fs.copyFileSync(path.join(src, 'static', f), path.join(dist, f));
 }
@@ -465,6 +466,7 @@ for (const slug of pillars) {
   const main = fill(read(`src/pages/${slug}.html`)).replace('{{FAQ}}', faqBlock(meta.faq));
   page({
     file: slug + '.html', title: meta.title, desc: meta.desc, canonicalPath: '/' + slug, crumb: meta.crumb, main,
+    scripts: slug === 'partners-program' ? [partnerApplyJs] : [],
     nodes: [...(meta.noSoftware ? [] : [software()]), ...(meta.howto ? [howtoNode(meta.howto)] : []), faqNode(meta.faq)],
   });
 }
