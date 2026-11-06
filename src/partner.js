@@ -25,7 +25,10 @@
   function fillRows(tbodyId, rows, cols, emptyText) {
     const tb = $(tbodyId); tb.textContent = '';
     if (!rows.length) { const tr = document.createElement('tr'), td = document.createElement('td'); td.colSpan = cols.length; td.textContent = emptyText; tr.appendChild(td); tb.appendChild(tr); return; }
-    rows.forEach((row) => { const tr = document.createElement('tr'); cols.forEach((c) => { const td = document.createElement('td'); td.textContent = c(row); tr.appendChild(td); }); tb.appendChild(tr); });
+    const statuses = new Set(Object.values(label));
+    rows.forEach((row) => { const tr = document.createElement('tr'); cols.forEach((c) => { const td = document.createElement('td'); const t = c(row);
+      if (statuses.has(t)) { const sp = document.createElement('span'); sp.className = 'pp-badge st-' + t.toLowerCase().replace(/[^a-z]/g, ''); sp.textContent = t; td.appendChild(sp); } else td.textContent = t;
+      tr.appendChild(td); }); tb.appendChild(tr); });
   }
 
   function render(d) {

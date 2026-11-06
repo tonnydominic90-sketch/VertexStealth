@@ -46,6 +46,7 @@ const refJs = emitAsset('ref.js');
 const portalJs = emitAsset('partner.js');
 const partnerAdminJs = emitAsset('partner-admin.js');
 const partnerApplyJs = emitAsset('partner-apply.js');
+const partnersCss = emitAsset('partners.css');
 for (const f of fs.readdirSync(path.join(src, 'static'))) {
   fs.copyFileSync(path.join(src, 'static', f), path.join(dist, f));
 }
@@ -437,15 +438,15 @@ function partnerForm() {
   }
   return `<form class="pp-form" id="partner-form" data-endpoint="${esc(applyUrl)}" data-review="${esc(reviewTime)}" novalidate>
 <div class="pp-grid2">
-<label>Full name<input name="name" required maxlength="120" autocomplete="name"></label>
-<label>Email<input type="email" name="email" required maxlength="160" autocomplete="email"></label>
-<label>Country<input name="country" list="pp-countries" required maxlength="80" autocomplete="country-name"><datalist id="pp-countries">${countries.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
-<label>Website or main channel (optional)<input type="url" name="channel_url" maxlength="300" placeholder="https://"></label>
+<label><span>Full name</span><input name="name" required maxlength="120" autocomplete="name" placeholder="Your full name"></label>
+<label><span>Email</span><input type="email" name="email" required maxlength="160" autocomplete="email" placeholder="Your email address"></label>
+<label><span>Country</span><input name="country" list="pp-countries" required maxlength="80" autocomplete="country-name" placeholder="Start typing your country"><datalist id="pp-countries">${countries.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
+<label><span>Website or main channel <i>Optional</i></span><input type="url" name="channel_url" maxlength="300" placeholder="https://"></label>
 </div>
-<label>How do you plan to share and promote your link?<textarea name="promotion_plan" required minlength="40" maxlength="1500" rows="6" placeholder="Tell us where you will share it, who your audience is and what you will create."></textarea></label>
-<label class="pp-check"><input type="checkbox" name="agree" required> <span>I have read and agree to the Partner Program Terms.</span></label>
+<label><span>How do you plan to share and promote your link?</span><textarea name="promotion_plan" required minlength="40" maxlength="1500" rows="6" placeholder="Tell us where you will share it, who your audience is and what you will create."></textarea></label>
+<label class="pp-check"><input type="checkbox" name="agree" required><span>I have read and agree to the Partner Program Terms.</span></label>
 <input class="pp-hp" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true">
-<div><button class="btn primary" type="submit">Submit application</button></div>
+<button class="btn primary" type="submit">Submit application <span>→</span></button>
 <p class="pp-status" role="status" aria-live="polite"></p>
 </form>`;
 }
@@ -468,6 +469,7 @@ for (const slug of pillars) {
   page({
     file: slug + '.html', title: meta.title, desc: meta.desc, canonicalPath: '/' + slug, crumb: meta.crumb, main,
     scripts: slug === 'partners-program' ? [partnerApplyJs] : [],
+    styles: slug === 'partners-program' ? [partnersCss] : [],
     nodes: [...(meta.noSoftware ? [] : [software()]), ...(meta.howto ? [howtoNode(meta.howto)] : []), faqNode(meta.faq)],
   });
 }
@@ -486,7 +488,7 @@ const portalBody = !backendLive
   : `<div data-view="loading"><p class="lead">Loading…</p></div>
 <div data-view="login" hidden>
 <p class="lead">Enter the email address you applied with and we will send you a one-time sign-in link.</p>
-<form class="pp-form" id="login-form"><label>Email<input id="f-email" type="email" required maxlength="160" autocomplete="email"></label><div><button class="btn primary" type="submit">Email me a sign-in link</button></div><p class="pp-status" id="login-status" role="status"></p></form>
+<div class="pp-formcard"><form class="pp-form" id="login-form"><label><span>Email</span><input id="f-email" type="email" required maxlength="160" autocomplete="email" placeholder="Your email address"></label><div><button class="btn primary" type="submit">Email me a sign-in link</button></div><p class="pp-status" id="login-status" role="status"></p></form></div>
 <p class="pp-fine">Not a partner yet? <a class="ul" href="/partners-program#apply">Apply here</a>.</p></div>
 <div data-view="sent" hidden><div class="pp-note">If that email belongs to an approved partner, a sign-in link is on its way. It works once and expires in 20 minutes.</div></div>
 <div data-view="badlink" hidden><div class="pp-note">That sign-in link is invalid or has expired. <a class="ul" href="/partner">Request a new one</a>.</div></div>
@@ -503,11 +505,11 @@ const portalBody = !backendLive
 <h3 class="pp-h3">Commissions</h3>${tbl('t-commissions', ['Date', 'Payment', 'Commission', 'Status', 'Note'])}
 <h3 class="pp-h3">Payouts</h3>${tbl('t-payouts', ['Date', 'Amount', 'Method', 'Reference'])}
 <h3 class="pp-h3">Payout details</h3>
-<form class="pp-form" id="payout-form"><div class="pp-grid2"><label>Method<select id="f-method" required><option value="paypal">PayPal</option><option value="usdt">USDT (crypto)</option><option value="bank">Bank transfer</option><option value="other">Other</option></select></label><label>Account / address / email<input id="f-details" required minlength="3" maxlength="500"></label></div><div><button class="btn primary" type="submit">Save payout details</button></div><p class="pp-status" id="payout-status" role="status"></p></form>
+<form class="pp-form" id="payout-form"><div class="pp-grid2"><label><span>Method</span><select id="f-method" required><option value="paypal">PayPal</option><option value="usdt">USDT (crypto)</option><option value="bank">Bank transfer</option><option value="other">Other</option></select></label><label><span>Account / address / email</span><input id="f-details" required minlength="3" maxlength="500"></label></div><div><button class="btn primary" type="submit">Save payout details</button></div><p class="pp-status" id="payout-status" role="status"></p></form>
 <p class="pp-fine"><button class="btn outline" type="button" id="logout">Sign out</button> &nbsp; <a class="ul" href="/partners-program#terms">Partner Program Terms</a></p>
 </div>`;
 page({
-  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: [portalJs],
+  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: [portalJs], styles: [partnersCss],
   main: `<section class="page"><div class="wrap pp-narrow" id="portal" data-fn="${esc(liveFn)}"><div class="kicker">Partner portal</div><h1>Your partner portal</h1>${portalBody}</div></section>`,
 });
 
@@ -517,11 +519,30 @@ let adminBuilt = false;
 if (adminKey && partnerSbUrl && backendLive) {
   adminBuilt = true;
   page({
-    file: 'partner-admin.html', title: 'Partner admin — VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, scripts: [partnerAdminJs],
-    main: `<section class="page"><div class="wrap pp-wide" id="padmin" data-sb="${esc(partnerSbUrl)}" data-anon="${esc(adminKey)}" data-fn="${esc(fnUrl)}"><div class="kicker">Partner admin</div><h1>Partner program admin</h1>
-<div id="login"><form class="pp-form" id="login-form"><div class="pp-grid2"><label>Admin email<input id="a-email" type="email" required autocomplete="username"></label><label>Password<input id="a-pass" type="password" required autocomplete="current-password"></label></div><div><button class="btn primary" type="submit">Sign in</button></div><p class="pp-status" id="login-status" role="status"></p></form></div>
-<div id="app" hidden><div class="pa-tabs"><button class="btn primary" data-tab="applications" type="button">Applications</button><button class="btn outline" data-tab="partners" type="button">Partners</button><button class="btn outline" data-tab="commissions" type="button">Commissions</button><button class="btn outline" data-tab="payouts" type="button">Payouts</button><select id="filter" aria-label="Filter"></select><button class="btn outline" id="signout" type="button">Sign out</button></div><p class="pp-status" id="msg" role="status"></p><div id="content"></div></div>
-</div></section>`,
+    file: 'partner-admin.html', title: 'Partner admin — VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, bare: true, scripts: [partnerAdminJs], styles: [partnersCss], pageId: 'partner-admin',
+    main: `<div id="padmin" data-sb="${esc(partnerSbUrl)}" data-anon="${esc(adminKey)}" data-fn="${esc(fnUrl)}">
+<div class="pa-login" id="login"><div class="pa-login-card">
+<div class="pa-brand"><i>V</i><span>Vertex<span>Stealth</span></span></div>
+<h1>Partner admin</h1><p>Sign in with your admin account to review applications and manage partners.</p>
+<form class="pp-form" id="login-form"><label><span>Admin email</span><input id="a-email" type="email" required autocomplete="username" placeholder="Your admin email"></label><label><span>Password</span><input id="a-pass" type="password" required autocomplete="current-password"></label><button class="btn primary" type="submit">Sign in</button><p class="pp-status" id="login-status" role="status"></p></form>
+</div></div>
+<div class="pa" id="app" hidden>
+<aside class="pa-side">
+<div class="pa-brand"><i>V</i><span>Vertex<span>Stealth</span></span></div>
+<div class="pa-eyebrow">Partner program</div>
+<button class="pa-nav on" data-tab="applications" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H8l-4 4z"/><path d="M8 9h8M8 13h5"/></svg>Applications<span class="pa-count" id="pending-count" hidden></span></button>
+<button class="pa-nav" data-tab="partners" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5a5 5 0 014.5 5"/></svg>Partners</button>
+<button class="pa-nav" data-tab="commissions" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M14.5 9.2c-.6-.8-1.5-1.2-2.5-1.2-1.4 0-2.5.8-2.5 2s1 1.7 2.5 2 2.5.8 2.5 2-1.1 2-2.5 2c-1 0-2-.4-2.6-1.2M12 6.5V8m0 8v1.5"/></svg>Commissions</button>
+<button class="pa-nav" data-tab="payouts" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="6" width="18" height="12" rx="2.5"/><circle cx="12" cy="12" r="2.6"/><path d="M6.5 12h.01M17.5 12h.01"/></svg>Payouts</button>
+<div class="pa-side-foot"><a href="/admin">Main admin</a><a href="/partners-program">View public page</a><button class="pa-btn sm" id="signout" type="button">Sign out</button></div>
+</aside>
+<main class="pa-main">
+<header class="pa-top"><div><h1 id="pa-title">Applications</h1><p id="pa-sub"></p></div><div class="pa-tools"><select id="filter" aria-label="Filter"></select></div></header>
+<div class="pa-stats" id="pa-stats"></div>
+<div id="content"></div>
+</main>
+</div>
+</div>`,
   });
 } else {
   console.warn('NOTE: partner-admin page not built (needs partners.backendLive=true, partners.supabaseUrl and partners.supabaseAnonKey).');
