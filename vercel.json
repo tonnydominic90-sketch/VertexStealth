@@ -75,7 +75,20 @@
       ]
     },
     {
-      "source": "/(partner|partner-admin|r)(.*)",
+      "source": "/(partner|partner-admin)",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        },
+        {
+          "key": "Cache-Control",
+          "value": "no-store"
+        }
+      ]
+    },
+    {
+      "source": "/r/:code",
       "headers": [
         {
           "key": "X-Robots-Tag",

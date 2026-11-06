@@ -51,8 +51,9 @@
   var api = {
     cfg: cfg, configured: configured, session: session, nice: nice,
     signIn: async function (email, password) { var d = await gotrue('/token?grant_type=password', { body: { email: email, password: password } }); return store(d); },
-    signUp: async function (email, password) {
-      var d = await gotrue('/signup?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/login'), { body: { email: email, password: password, data: { source: 'website' } } });
+    signUp: async function (email, password, ref) {
+      var meta = { source: 'website' }; if (ref && ref.code) { meta.ref = ref.code; meta.ref_src = ref.src; }
+      var d = await gotrue('/signup?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/login'), { body: { email: email, password: password, data: meta } });
       return { session: store(d), needsConfirm: !d.access_token };
     },
     recover: function (email) { return gotrue('/recover?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/account'), { body: { email: email } }); },
@@ -70,6 +71,32 @@
     }
   };
   window.VS = api;
+
+
+  // ---- partner referral: the code comes from /r/CODE (saved as vs_ref), a typed code, or the account's sign-up metadata
+  var CODE_RE = /^[A-Z0-9]{8}$/;
+  function cleanCode(v) { return String(v || '').toUpperCase().replace(/[\s-]/g, ''); }
+  function savedRef() {
+    try { var v = JSON.parse(localStorage.getItem('vs_ref') || 'null'); if (v && CODE_RE.test(cleanCode(v.code)) && Date.now() - (v.ts || 0) < 14 * 864e5) return { code: cleanCode(v.code), src: v.src === 'code' ? 'code' : 'link' }; } catch (e) {}
+    return null;
+  }
+  function pendingRef(user) {
+    var l = savedRef(); if (l) return l;
+    var m = user && user.user_metadata; if (m && CODE_RE.test(cleanCode(m.ref))) return { code: cleanCode(m.ref), src: m.ref_src === 'link' ? 'link' : 'code' };
+    return null;
+  }
+  async function claimReferral(user) {
+    try {
+      var s = await session(); if (!s) return;
+      var u = user || s.user || {}; var doneKey = 'vs_ref_done_' + (u.id || '');
+      if (u.id && localStorage.getItem(doneKey)) return;
+      var p = pendingRef(u); if (!p) return;
+      var r = await fetch(cfg.supabaseUrl + '/rest/v1/rpc/claim_referral', { method: 'POST', headers: { apikey: cfg.anonKey, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify({ p_code: p.code, p_source: p.src }) });
+      if (!r.ok) return; // keep it and try again next time
+      var b = await r.json().catch(function () { return null; });
+      if (b && b.status) { localStorage.removeItem('vs_ref'); if (u.id) localStorage.setItem(doneKey, '1'); }
+    } catch (e) {}
+  }
 
   function msg(text, ok) { var m = $('authMsg'); if (!m) return; m.textContent = text; m.className = 'auth-msg' + (ok ? ' ok' : ''); m.hidden = !text; }
   function busy(on) { var b = document.querySelector('#authForm button[type=submit]'); if (b) { b.disabled = on; b.style.opacity = on ? '.6' : ''; } }
@@ -104,16 +131,21 @@
     form(async function () {
       var email = val('email'), pw = $('password').value;
       if (!validEmail(email) || !pw) throw { message: 'Enter your email and password.' };
-      await api.signIn(email, pw); api.track(); location.replace(nextUrl());
+      var si = await api.signIn(email, pw); api.track(); await claimReferral(si && si.user); location.replace(nextUrl());
     });
   } else if (page === 'signup') {
+    var rc = $('refcode'), sv = savedRef(); if (rc && sv) rc.value = sv.code;
     form(async function () {
       var email = val('email'), pw = $('password').value;
       if (!validEmail(email)) throw { message: 'Enter a valid email address.' };
       if (pw.length < 8) throw { message: 'Use a password with at least 8 characters.' };
       if (pw !== $('password2').value) throw { message: 'The passwords do not match.' };
       if (!$('terms').checked) throw { message: 'Please accept the terms to continue.' };
-      var r = await api.signUp(email, pw);
+      var typed = cleanCode(val('refcode')), ref = null;
+      if (typed) { if (!CODE_RE.test(typed)) throw { message: 'The referral code should be 8 letters and numbers, or leave it empty.' }; ref = { code: typed, src: (sv && sv.code === typed) ? sv.src : 'code' }; }
+      var r = await api.signUp(email, pw, ref);
+      if (ref) { try { localStorage.setItem('vs_ref', JSON.stringify({ code: ref.code, src: ref.src, ts: Date.now() })); } catch (e) {} }
+      if (r.session) await claimReferral(r.session.user);
       if (r.needsConfirm) { msg('Almost done. We sent a confirmation link to ' + email + '. Open it, then sign in here or in the desktop app.', true); $('authForm').hidden = true; }
       else { location.replace('/account'); }
     });
@@ -131,7 +163,7 @@
       $('acctSince').textContent = u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
       $('accountBody').hidden = false;
       if (hashType === 'recovery') { msg('Choose a new password below.', true); $('pwTitle').textContent = 'Set a new password'; }
-      api.track();
+      api.track(); claimReferral(u);
       try {
         var rows = await api.rest('/profiles?select=*&id=eq.' + encodeURIComponent(u.id));
         var p = rows && rows[0];

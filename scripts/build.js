@@ -370,6 +370,7 @@ page({
 <h1>Download VertexStealth for Windows</h1>
 <p class="lead">VertexStealth for Windows is an antidetect browser and multi-profile manager. It launches your installed Chrome or Firefox with separate profile folders, proxies and fingerprint settings.</p>
 ${dlCard}
+<div class="dl-notice ref-note" id="refNote" hidden><strong>Referral code <span data-ref-code></span> is saved on this device.</strong> To make sure your referral is recorded, <a href="/signup">create your VertexStealth account here on the website first</a> (the same account works in the desktop app), then sign in to the app.</div>
 <h2 class="dl-h2">How do I install VertexStealth on Windows?</h2>
 <p class="dl-intro">Windows will probably show a blue "Windows protected your PC" window the first time. Here is exactly what to do.</p>
 <ol class="sm-steps">
@@ -722,6 +723,7 @@ authPage('login', 'Sign in', `<h1>Sign in</h1><p class="auth-sub">${authNote}</p
 <p class="auth-links"><a href="/forgot">Forgot password?</a><a href="/signup">Create an account</a></p>`);
 authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth-sub">${authNote} New accounts start with a ${P.trialDays}-day free trial.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><label class="field"><span>Password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm password</span><input type="password" id="password2" autocomplete="new-password" required></label>
+<label class="field"><span>Referral code (optional)</span><input type="text" id="refcode" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. AB12CD34"></label>
 <label class="check-row"><input type="checkbox" id="terms" required><span>I am at least 18 and agree to the <a href="/terms">Terms of Service</a>, <a href="/eula">EULA</a> and <a href="/privacy">Privacy Policy</a>.</span></label><button class="btn primary auth-btn" type="submit">Create account</button></form>
 <p class="auth-links"><a href="/login">Already have an account? Sign in</a></p>`);
 authPage('forgot', 'Reset password', `<h1>Reset your password</h1><p class="auth-sub">Enter your email and we will send you a link to choose a new password.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
@@ -736,7 +738,7 @@ page({ file: 'admin.html', title: 'Admin — ' + cfg.name, desc: 'Administration
 
 // ---------- robots + sitemap ----------
 fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
-  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\nDisallow: /partner\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\nDisallow: /partner$\nDisallow: /partner/\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
 const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/partners-program', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];

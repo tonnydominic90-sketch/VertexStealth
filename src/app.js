@@ -33,3 +33,10 @@ document.querySelectorAll('.demo-tab').forEach(tab=>tab.addEventListener('click'
   var v=document.querySelector('[data-dl-version]'); if(v&&d.version){v.textContent='Version '+d.version;v.hidden=false;}
  }).catch(function(){});
 })();
+
+(function(){
+ var n=document.getElementById('refNote'); if(!n)return;
+ try{var v=JSON.parse(localStorage.getItem('vs_ref')||'null');
+  if(v&&/^[A-Z0-9]{8}$/.test(String(v.code||''))&&Date.now()-(v.ts||0)<14*864e5){var c=n.querySelector('[data-ref-code]');if(c)c.textContent=v.code;n.hidden=false;}
+ }catch(e){}
+})();
