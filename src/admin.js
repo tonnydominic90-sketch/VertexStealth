@@ -79,6 +79,7 @@
     clear(root);
     var side = h('aside', { class: 'adm-side' }, h('div', { class: 'adm-brand' }, 'Vertex', h('span', { text: 'Stealth' }), ' Admin'));
     TABS.forEach(function (t) { side.appendChild(h('button', { class: 'adm-nav' + (state.tab === t[0] ? ' on' : ''), text: t[1], onclick: function () { state.tab = t[0]; shell(me); render(); } })); });
+    side.appendChild(h('a', { class: 'adm-nav', href: '/partner-admin', text: 'Partner program ↗' }));
     side.appendChild(h('div', { class: 'adm-me', text: me.email })); side.appendChild(h('a', { href: '/', text: '← Back to website' }));
     side.appendChild(h('button', { class: 'adm-nav', text: 'Sign out', onclick: async function () { await VS.signOut(); location.replace('/login'); } }));
     main = h('main', { class: 'adm-main' });

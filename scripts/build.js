@@ -42,12 +42,16 @@ function emitAsset(file) {
 }
 const cssUrl = emitAsset('styles.css');
 const jsUrl = emitAsset('app.js');
+const refJs = emitAsset('ref.js');
+const portalJs = emitAsset('partner.js');
+const partnerAdminJs = emitAsset('partner-admin.js');
 for (const f of fs.readdirSync(path.join(src, 'static'))) {
   fs.copyFileSync(path.join(src, 'static', f), path.join(dist, f));
 }
 
 // ---------- content ----------
 const P = cfg.pricing;
+const PP = cfg.partners || {};
 const live = !!cfg.paymentsLive;
 const mail = (subject) => `mailto:${cfg.email}?subject=${encodeURIComponent(subject)}`;
 const saving = P.monthly * 12 - P.yearly;
@@ -114,7 +118,7 @@ const header = `<a class="skip" href="#top">Skip to content</a>
  </div>
 </header>`;
 
-const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
+const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
 
 
 // ---------- structured data ----------
@@ -402,18 +406,122 @@ ${faqBlock(dlFaq)}</div>
 });
 
 // ---------- pillar pages (src/pages/<slug>.html + .json) ----------
-const pillars = ['antidetect-browser', 'multi-profile-management'];
-for (const slug of pillars) {
+const basePillars = ['antidetect-browser', 'multi-profile-management'];
+for (const slug of basePillars) {
   const meta = JSON.parse(read(`src/pages/${slug}.json`));
   const main = read(`src/pages/${slug}.html`)
     .replace('{{FAQ}}', faqBlock(meta.faq))
     .replace(/\{\{FREE\}\}/g, P.trialProfiles).replace(/\{\{TRIAL\}\}/g, P.trialDays)
     .replace(/\{\{MONTHLY\}\}/g, money(P.monthly)).replace(/\{\{YEARLY\}\}/g, money(P.yearly))
     .replace('{{PAID_NOTE}}', live ? '' : ' Paid checkout is not open yet.');
+  page({ file: slug + '.html', title: meta.title, desc: meta.desc, canonicalPath: '/' + slug, crumb: meta.crumb, main,
+    nodes: [software(), howtoNode(meta.howto), faqNode(meta.faq)] });
+}
+
+const pct = PP.commissionPercent ?? 20;
+const usd = (n) => '$' + n.toFixed(2);
+const countries = JSON.parse(read('src/countries.json'));
+const backendLive = !!PP.backendLive || process.env.PARTNER_BACKEND_LIVE === '1';
+const fnUrl = (process.env.PARTNER_FUNCTIONS_URL || PP.functionsUrl || '').replace(/\/+$/, '');
+if (backendLive && !/^(https:\/\/|http:\/\/localhost)/.test(fnUrl)) throw new Error('partners.functionsUrl must start with https:// when backendLive is true');
+const applyUrl = (process.env.PARTNER_APPLY_URL || PP.applyEndpoint || (backendLive ? fnUrl + '/partner-apply' : '')).trim();
+if (applyUrl && !/^(https:\/\/|http:\/\/localhost)/.test(applyUrl)) throw new Error('partners.applyEndpoint must start with https://');
+const reviewTime = PP.reviewTime || '3 business days';
+
+function partnerForm() {
+  if (!applyUrl) {
+    const body = ['Full name:', 'Email:', 'Country:', 'Website or main channel (optional):', '', 'How I plan to share and promote my link:', ''].join('\n');
+    return `<div class="pp-card pp-mail"><h3>Apply by email</h3><p>Send us your name, email, country and a short note on how you plan to share your link. We reply within ${esc(reviewTime)}.</p><a class="btn primary" href="mailto:${esc(cfg.email)}?subject=${encodeURIComponent('Partner program application')}&body=${encodeURIComponent(body)}">Email your application</a></div>`;
+  }
+  return `<form class="pp-form" id="partner-form" data-endpoint="${esc(applyUrl)}" data-review="${esc(reviewTime)}" novalidate>
+<div class="pp-grid2">
+<label>Full name<input name="name" required maxlength="120" autocomplete="name"></label>
+<label>Email<input type="email" name="email" required maxlength="160" autocomplete="email"></label>
+<label>Country<input name="country" list="pp-countries" required maxlength="80" autocomplete="country-name"><datalist id="pp-countries">${countries.map((c) => `<option value="${esc(c)}">`).join('')}</datalist></label>
+<label>Website or main channel (optional)<input type="url" name="channel_url" maxlength="300" placeholder="https://"></label>
+</div>
+<label>How do you plan to share and promote your link?<textarea name="promotion_plan" required minlength="40" maxlength="1500" rows="6" placeholder="Tell us where you will share it, who your audience is and what you will create."></textarea></label>
+<label class="pp-check"><input type="checkbox" name="agree" required> <span>I have read and agree to the Partner Program Terms.</span></label>
+<input class="pp-hp" name="company_website" tabindex="-1" autocomplete="off" aria-hidden="true">
+<div><button class="btn primary" type="submit">Submit application</button></div>
+<p class="pp-status" role="status" aria-live="polite"></p>
+</form>`;
+}
+
+const tokens = {
+  PCT: pct, COOKIE_DAYS: PP.attributionDays ?? 30, HOLD_DAYS: PP.holdDays ?? 14, MIN_PAYOUT: PP.minPayout ?? 50,
+  REVIEW_TIME: reviewTime, EMAIL: cfg.email, COMPANY: cfg.company, TERMS_DATE: PP.termsUpdated || buildDate,
+  EX_MONTHLY: usd(P.monthly * pct / 100), EX_YEARLY: usd(P.yearly * pct / 100), EX_YEARLY10: usd(P.yearly * pct / 100 * 10),
+  MONTHLY: money(P.monthly), YEARLY: money(P.yearly), FREE: P.freeProfiles, TRIAL: P.trialDays,
+  PAID_NOTE: live ? '' : ' Paid checkout is not open yet.',
+  LAUNCH_NOTE: live ? '' : '<div class="pp-note">Paid checkout is opening soon. You can apply now, and commissions start once referred customers can upgrade to a paid plan.</div>',
+  PARTNER_FORM: partnerForm(),
+};
+const fill = (str) => str.replace(/\{\{([A-Z0-9_]+)\}\}/g, (m, k) => (k in tokens ? String(tokens[k]) : m));
+
+const pillars = ['antidetect-browser', 'multi-profile-management', 'partners-program'];
+for (const slug of pillars) {
+  const meta = JSON.parse(fill(read(`src/pages/${slug}.json`)));
+  const main = fill(read(`src/pages/${slug}.html`)).replace('{{FAQ}}', faqBlock(meta.faq));
   page({
     file: slug + '.html', title: meta.title, desc: meta.desc, canonicalPath: '/' + slug, crumb: meta.crumb, main,
-    nodes: [software(), howtoNode(meta.howto), faqNode(meta.faq)],
+    nodes: [...(meta.noSoftware ? [] : [software()]), ...(meta.howto ? [howtoNode(meta.howto)] : []), faqNode(meta.faq)],
   });
+}
+
+
+// ---------- referral landing, partner portal, partner admin ----------
+const liveFn = backendLive ? fnUrl : '';
+page({
+  file: 'r.html', title: 'Redirecting to VertexStealth', desc: 'Redirecting to VertexStealth.', canonicalPath: '/r', index: false, scripts: [refJs],
+  main: `<section class="notfound"><div class="wrap" id="ref" data-fn="${esc(liveFn)}"><p class="lead">Taking you to VertexStealth…</p><p><a class="btn primary" href="/download">Continue</a></p></div></section>`,
+});
+
+const tbl = (id, head) => `<div class="pp-scroll"><table class="pp-table"><thead><tr>${head.map((h) => `<th>${h}</th>`).join('')}</tr></thead><tbody id="${id}"></tbody></table></div>`;
+const portalBody = !backendLive
+  ? `<div class="pp-note">The partner portal opens when the program launches. <a class="ul" href="/partners-program">Learn about the partner program</a>.</div>`
+  : `<div data-view="loading"><p class="lead">Loading…</p></div>
+<div data-view="login" hidden>
+<p class="lead">Enter the email address you applied with and we will send you a one-time sign-in link.</p>
+<form class="pp-form" id="login-form"><label>Email<input id="f-email" type="email" required maxlength="160" autocomplete="email"></label><div><button class="btn primary" type="submit">Email me a sign-in link</button></div><p class="pp-status" id="login-status" role="status"></p></form>
+<p class="pp-fine">Not a partner yet? <a class="ul" href="/partners-program#apply">Apply here</a>.</p></div>
+<div data-view="sent" hidden><div class="pp-note">If that email belongs to an approved partner, a sign-in link is on its way. It works once and expires in 20 minutes.</div></div>
+<div data-view="badlink" hidden><div class="pp-note">That sign-in link is invalid or has expired. <a class="ul" href="/partner">Request a new one</a>.</div></div>
+<div data-view="error" hidden><div class="pp-note">Something went wrong loading your portal. Please refresh, or email <a class="ul" href="mailto:${esc(cfg.email)}">${esc(cfg.email)}</a>.</div></div>
+<div data-view="dash" hidden>
+<h2 class="pp-h3">Welcome, <span id="p-name"></span></h2>
+<p>Your referral link (${'`'}<span id="p-pct"></span>${'`'} commission on each customer's first payment). Referral code: <b id="p-code"></b></p>
+<div class="pp-linkrow"><input id="p-link" readonly aria-label="Your referral link"><button class="btn primary" type="button" id="copy">Copy link</button></div>
+<div class="pp-dash-grid"><div class="pp-stat sm"><b id="s-clicks">0</b><span>link visits, last 30 days</span></div><div class="pp-stat sm"><b id="s-signups">0</b><span>sign-ups</span></div><div class="pp-stat sm"><b id="s-upgrades">0</b><span>upgrades</span></div></div>
+<div class="pp-dash-grid"><div class="pp-stat sm"><b id="b-pending">$0.00</b><span>pending</span></div><div class="pp-stat sm"><b id="b-approved">$0.00</b><span>approved, payable</span></div><div class="pp-stat sm"><b id="b-paid">$0.00</b><span>paid</span></div></div>
+<div class="pp-note" id="b-owed" hidden></div>
+<p class="pp-fine">Commissions stay pending for <span id="hold"></span> days, then become approved. Payouts are monthly once your approved balance reaches $<span id="minp"></span>.</p>
+<h3 class="pp-h3">Referrals</h3>${tbl('t-referrals', ['Date', 'Referral', 'Via', 'Status'])}
+<h3 class="pp-h3">Commissions</h3>${tbl('t-commissions', ['Date', 'Payment', 'Commission', 'Status', 'Note'])}
+<h3 class="pp-h3">Payouts</h3>${tbl('t-payouts', ['Date', 'Amount', 'Method', 'Reference'])}
+<h3 class="pp-h3">Payout details</h3>
+<form class="pp-form" id="payout-form"><div class="pp-grid2"><label>Method<select id="f-method" required><option value="paypal">PayPal</option><option value="usdt">USDT (crypto)</option><option value="bank">Bank transfer</option><option value="other">Other</option></select></label><label>Account / address / email<input id="f-details" required minlength="3" maxlength="500"></label></div><div><button class="btn primary" type="submit">Save payout details</button></div><p class="pp-status" id="payout-status" role="status"></p></form>
+<p class="pp-fine"><button class="btn outline" type="button" id="logout">Sign out</button> &nbsp; <a class="ul" href="/partners-program#terms">Partner Program Terms</a></p>
+</div>`;
+page({
+  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: [portalJs],
+  main: `<section class="page"><div class="wrap pp-narrow" id="portal" data-fn="${esc(liveFn)}"><div class="kicker">Partner portal</div><h1>Your partner portal</h1>${portalBody}</div></section>`,
+});
+
+const adminKey = (process.env.PARTNER_ADMIN_ANON_KEY || PP.supabaseAnonKey || '').trim();
+const partnerSbUrl = (process.env.PARTNER_SUPABASE_URL || PP.supabaseUrl || '').replace(/\/+$/, '');
+let adminBuilt = false;
+if (adminKey && partnerSbUrl && backendLive) {
+  adminBuilt = true;
+  page({
+    file: 'partner-admin.html', title: 'Partner admin — VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, scripts: [partnerAdminJs],
+    main: `<section class="page"><div class="wrap pp-wide" id="padmin" data-sb="${esc(partnerSbUrl)}" data-anon="${esc(adminKey)}" data-fn="${esc(fnUrl)}"><div class="kicker">Partner admin</div><h1>Partner program admin</h1>
+<div id="login"><form class="pp-form" id="login-form"><div class="pp-grid2"><label>Admin email<input id="a-email" type="email" required autocomplete="username"></label><label>Password<input id="a-pass" type="password" required autocomplete="current-password"></label></div><div><button class="btn primary" type="submit">Sign in</button></div><p class="pp-status" id="login-status" role="status"></p></form></div>
+<div id="app" hidden><div class="pa-tabs"><button class="btn primary" data-tab="applications" type="button">Applications</button><button class="btn outline" data-tab="partners" type="button">Partners</button><button class="btn outline" data-tab="commissions" type="button">Commissions</button><button class="btn outline" data-tab="payouts" type="button">Payouts</button><select id="filter" aria-label="Filter"></select><button class="btn outline" id="signout" type="button">Sign out</button></div><p class="pp-status" id="msg" role="status"></p><div id="content"></div></div>
+</div></section>`,
+  });
+} else {
+  console.warn('NOTE: partner-admin page not built (needs partners.backendLive=true, partners.supabaseUrl and partners.supabaseAnonKey).');
 }
 
 // ---------- legal pages from legal/*.md ----------
@@ -626,10 +734,10 @@ page({ file: 'admin.html', title: 'Admin — ' + cfg.name, desc: 'Administration
 
 // ---------- robots + sitemap ----------
 fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
-  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\nDisallow: /partner\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
-const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
+const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/partners-program', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
 fs.writeFileSync(path.join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((u) => `  <url><loc>${siteUrl}${u === '/' ? '/' : u}</loc><lastmod>${today}</lastmod></url>`).join('\n') + '\n</urlset>\n');

@@ -17,5 +17,18 @@
     "anonKey": ""
   },
   "releasesRepo": "tonnydominic90-sketch/VertexStealth-Release",
-  "downloadDirectUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.1/VertexStealth-Setup-0.2.1.exe"
+  "downloadDirectUrl": "https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.1/VertexStealth-Setup-0.2.1.exe",
+  "partners": {
+    "commissionPercent": 20,
+    "attributionDays": 30,
+    "holdDays": 14,
+    "minPayout": 50,
+    "reviewTime": "3 business days",
+    "termsUpdated": "3 November 2026",
+    "applyEndpoint": "",
+    "backendLive": true,
+    "functionsUrl": "https://jtvjvogreelngfdseqee.supabase.co/functions/v1",
+    "supabaseUrl": "https://jtvjvogreelngfdseqee.supabase.co",
+    "supabaseAnonKey": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp0dmp2b2dyZWVsbmdmZHNlcWVlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODk0NzAwMTksImV4cCI6MjEwNTA0NjAxOX0.J7pRq_bkO-_8CTxx7BaP19Q4PDjDPCBYo0UI2oHna34"
+  }
 }
