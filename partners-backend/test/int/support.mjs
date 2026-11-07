@@ -1,4 +1,4 @@
-// proxy: /rest/v1/* -> PostgREST ; mock Resend on :3999 ; JWT minting
+// proxy: /rest/v1/* -> PostgREST ; mock Brevo on :3999 ; JWT minting
 import http from 'node:http'; import crypto from 'node:crypto';
 export const SECRET = 'super-secret-jwt-token-with-at-least-32-characters-long';
 const b64 = (o) => Buffer.from(typeof o === 'string' ? o : JSON.stringify(o)).toString('base64url');
@@ -9,7 +9,7 @@ const sent = [];
 http.createServer((req, res) => { let d = ''; req.on('data', (c) => d += c); req.on('end', () => {
   if (req.method === 'GET') { res.setHeader('content-type', 'application/json'); return res.end(JSON.stringify(sent)); }
   if (req.method === 'DELETE') { sent.length = 0; return res.end('ok'); }
-  try { sent.push({ auth: req.headers.authorization, ...JSON.parse(d) }); } catch {} res.setHeader('content-type', 'application/json'); res.end('{"id":"mock"}'); }); }).listen(3999);
+  try { const b = JSON.parse(d); sent.push({ auth: req.headers['api-key'], to: (b.to || []).map((x) => x.email), subject: b.subject, html: b.htmlContent, text: b.textContent }); } catch {} res.setHeader('content-type', 'application/json'); res.end('{"id":"mock"}'); }); }).listen(3999);
 http.createServer((req, res) => {
   const cors = { 'access-control-allow-origin': req.headers.origin || '*', 'access-control-allow-headers': '*', 'access-control-allow-methods': 'POST, GET, OPTIONS' };
   if (req.method === 'OPTIONS') { res.writeHead(204, cors); return res.end(); }

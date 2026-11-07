@@ -1,6 +1,6 @@
 # Deploying the partner program backend (about 45 minutes)
 
-You need: your Supabase project, the Supabase CLI logged in (`supabase login`, `supabase link`), a Resend account, and the website repo on Vercel.
+You need: your Supabase project, the Supabase CLI logged in (`supabase login`, `supabase link`), a Brevo account (see `SETUP-EMAIL-GOOGLE.md` in the website repo), and the website repo on Vercel.
 
 ## 1. Database
 1. Supabase dashboard -> **SQL Editor** -> paste all of `supabase/partner-program.sql` -> **Run**. It is safe to run twice.
@@ -10,18 +10,17 @@ You need: your Supabase project, the Supabase CLI logged in (`supabase login`, `
    If you change `hold_days`/`min_payout`/`attribution_days`, also change the matching `partners.*` values in the website's `site.config.json`
    so the page text agrees.
 
-## 2. E-mail (Resend)
+## 2. E-mail (Brevo)
 Approval, decline, confirmation and portal sign-in links are e-mails, so this is required.
-1. Create a free account at resend.com and an API key.
-2. Add and verify your domain (DNS records). Until a domain is verified Resend only delivers to your own address.
-3. Choose the sender, e.g. `VertexStealth Partners <partners@yourdomain.com>`.
+1. In Brevo create an API key (SMTP & API -> API Keys) and make sure your sender address is verified (Senders, domains, IPs).
+2. Choose the sender, e.g. `VertexStealth Partners <your-verified-address>`; it must be a verified Brevo sender.
 
 ## 3. Functions
 1. Copy `supabase/functions/*` (including `_shared`) into your project's `supabase/functions/`.
 2. Add the contents of `supabase/config.toml.snippet` to your `supabase/config.toml`.
 3. Secrets (the Supabase URL and keys are provided to functions automatically):
    ```
-   supabase secrets set RESEND_API_KEY=re_xxx EMAIL_FROM="VertexStealth Partners <partners@yourdomain.com>" \
+   supabase secrets set BREVO_API_KEY=xkeysib-xxx EMAIL_FROM="VertexStealth Partners <partners@yourdomain.com>" \
      ADMIN_NOTIFY_EMAIL=techinfo.vertex@gmail.com SITE_URL=https://yourdomain.com ALLOWED_ORIGINS=https://yourdomain.com \
      PARTNER_IP_SALT=$(openssl rand -hex 16) REVIEW_TIME="3 business days"
    ```
@@ -33,6 +32,9 @@ Approval, decline, confirmation and portal sign-in links are e-mails, so this is
    supabase functions deploy partner-portal --no-verify-jwt
    supabase functions deploy partner-admin-review
    ```
+
+## 3b. Account sign-in for partners (optional but recommended)
+Run `supabase/account-dashboard.sql` (website repo) in the SQL Editor, then redeploy the functions. Approved partners can then open the partner dashboard from their normal account.
 
 ## 4. Website
 1. In the website repo edit `site.config.json` -> `partners`: set `"backendLive": true`, check `functionsUrl` / `supabaseUrl`, and paste your
@@ -51,7 +53,7 @@ Approval, decline, confirmation and portal sign-in links are e-mails, so this is
 
 ## 7. Before you announce
 - Have a lawyer read the Partner Program Terms on the page; the numbers there come from `site.config.json`.
-- Add to your Privacy Policy: partner applications (name, email, country, plan), link-click counts, and Resend as an e-mail processor.
+- Add to your Privacy Policy: partner applications (name, email, country, plan), link-click counts, and Brevo as an e-mail processor.
 - Do one real $10 test purchase with a test partner and walk it through pending -> approved -> payout.
 - Payouts are manual by design: the admin page shows who is owed what; you send the money (PayPal/USDT/bank), then press **Record payout** and enter your payment reference.
 

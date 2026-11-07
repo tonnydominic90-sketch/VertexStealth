@@ -48,11 +48,28 @@
     view('dash');
   }
 
+  // A signed-in VertexStealth account (password or Google) whose confirmed email matches an approved partner skips the emailed link.
+  async function accountLogin() {
+    try {
+      if (!window.VS || !window.VS.configured()) return 'none';
+      const a = await window.VS.session(); if (!a) return 'none';
+      const r = await api('account_login', { access_token: a.access_token });
+      if (r.ok && r.data && r.data.session) { setSession(r.data.session); return 'ok'; }
+      return { signedIn: (a.user && a.user.email) || 'your account' };
+    } catch (e) { return 'none'; }
+  }
+  function loginView(info) {
+    const note = $('acct-note'), btn = $('acct-btn');
+    if (info && info.signedIn) { note.className = 'pp-status err'; note.textContent = 'You are signed in as ' + info.signedIn + ', but that email is not linked to an approved partner account. Partners sign in with the email address they applied with.'; btn.textContent = 'Use a different account'; }
+    else { note.className = 'pp-status'; note.textContent = ''; }
+    view('login');
+  }
+
   async function load() {
-    const s = getSession(); if (!s) return view('login');
-    view('loading');
-    const r = await api('summary', null, s);
-    if (r.status === 401) { setSession(''); return view('login'); }
+    let s = getSession(); view('loading');
+    if (!s) { const a = await accountLogin(); if (a === 'ok') s = getSession(); else return loginView(a); }
+    let r = await api('summary', null, s);
+    if (r.status === 401) { setSession(''); const a = await accountLogin(); if (a !== 'ok') return loginView(a); r = await api('summary', null, getSession()); }
     if (!r.ok) { view('error'); return; }
     render(r.data);
   }

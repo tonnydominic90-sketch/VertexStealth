@@ -58,6 +58,20 @@
     },
     recover: function (email) { return gotrue('/recover?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/account'), { body: { email: email } }); },
     updatePassword: async function (password) { var s = await session(); if (!s) throw { message: 'Please sign in again.' }; return gotrue('/user', { method: 'PUT', token: s.access_token, body: { password: password } }); },
+    google: function (next) {
+      try { if (next) sessionStorage.setItem('vs_next', next); } catch (e) {}
+      location.href = cfg.supabaseUrl + '/auth/v1/authorize?provider=google&redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/login');
+    },
+    googleEnabled: async function () {
+      try { var r = await fetch(cfg.supabaseUrl + '/auth/v1/settings', { headers: { apikey: cfg.anonKey } }); var d = await r.json(); return !!(d && d.external && d.external.google); } catch (e) { return false; }
+    },
+    rpc: async function (name, args) {
+      var s = await session(); if (!s) throw { message: 'Please sign in.' };
+      var r = await fetch(cfg.supabaseUrl + '/rest/v1/rpc/' + name, { method: 'POST', headers: { apikey: cfg.anonKey, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) });
+      if (!r.ok) throw { message: 'Request failed (' + r.status + ').', status: r.status };
+      return r.json();
+    },
+    signOutEverywhere: async function () { var s = read(); write(null); if (s) { try { await gotrue('/logout?scope=global', { token: s.access_token }); } catch (e) {} } },
     getUser: async function () { var s = await session(); if (!s) return null; return gotrue('/user', { method: 'GET', token: s.access_token }); },
     signOut: async function () { var s = read(); write(null); if (s) { try { await gotrue('/logout', { token: s.access_token }); } catch (e) {} } },
     rest: async function (path) {
@@ -100,7 +114,7 @@
 
   function msg(text, ok) { var m = $('authMsg'); if (!m) return; m.textContent = text; m.className = 'auth-msg' + (ok ? ' ok' : ''); m.hidden = !text; }
   function busy(on) { var b = document.querySelector('#authForm button[type=submit]'); if (b) { b.disabled = on; b.style.opacity = on ? '.6' : ''; } }
-  function nextUrl() { var n = new URLSearchParams(location.search).get('next') || ''; return /^\/[A-Za-z0-9\-_\/]*$/.test(n) && n.indexOf('//') !== 0 ? n : '/account'; }
+  function nextUrl() { var n = new URLSearchParams(location.search).get('next') || ''; if (!n) { try { n = sessionStorage.getItem('vs_next') || ''; sessionStorage.removeItem('vs_next'); } catch (e) {} } return /^\/[A-Za-z0-9\-_\/]*$/.test(n) && n.indexOf('//') !== 0 ? n : '/account'; }
   function form(handler) {
     var f = $('authForm'); if (!f) return;
     f.addEventListener('submit', async function (e) {
@@ -125,9 +139,27 @@
     if (hashSession) { gotrue('/user', { method: 'GET', token: hashSession.access_token }).then(function (u) { hashSession.user = u; write(hashSession); }); }
   }
 
+  // Google / email-link errors come back as #error=...&error_description=...
+  if (location.hash.indexOf('error_description=') > -1) {
+    var eh = new URLSearchParams(location.hash.slice(1));
+    history.replaceState(null, '', location.pathname + location.search);
+    setTimeout(function () { msg(nice({ message: (eh.get('error_description') || '').replace(/\+/g, ' ') }) || 'Sign-in was cancelled.'); }, 0);
+  }
+
+  // "Continue with Google": shown only when the Google provider is switched on in Supabase
+  var gb = $('googleBtn');
+  if (gb && /^(login|signup)$/.test(page || '')) {
+    api.googleEnabled().then(function (on) {
+      if (!on) return;
+      gb.hidden = false; if ($('authOr')) $('authOr').hidden = false; if ($('googleNote')) $('googleNote').hidden = false;
+      gb.addEventListener('click', function () { api.google(new URLSearchParams(location.search).get('next') || ''); });
+    });
+  }
+
   if (page === 'login') {
     if (new URLSearchParams(location.search).get('confirmed') || hashType === 'signup') msg('Email confirmed. You can sign in now.', true);
-    session().then(function (s) { if (s) location.replace(nextUrl()); });
+    if (hashSession && !hashType) msg('Signing you in…', true);
+    session().then(async function (s) { if (s) { await claimReferral(s.user); location.replace(nextUrl()); } });
     form(async function () {
       var email = val('email'), pw = $('password').value;
       if (!validEmail(email) || !pw) throw { message: 'Enter your email and password.' };
@@ -159,26 +191,154 @@
       var s = hashSession || await session();
       if (!s) { location.replace('/login?next=/account'); return; }
       var u = await api.getUser().catch(function () { return s.user; }) || s.user || {};
-      $('acctEmail').textContent = u.email || '';
-      $('acctSince').textContent = u.created_at ? new Date(u.created_at).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : '';
       $('accountBody').hidden = false;
       if (hashType === 'recovery') { msg('Choose a new password below.', true); $('pwTitle').textContent = 'Set a new password'; }
       api.track(); claimReferral(u);
-      try {
-        var rows = await api.rest('/profiles?select=*&id=eq.' + encodeURIComponent(u.id));
-        var p = rows && rows[0];
-        if (p && (p.plan || p.plan_expires_at)) {
-          var txt = String(p.plan || 'trial'); if (p.plan_expires_at) txt += ' · until ' + new Date(p.plan_expires_at).toLocaleDateString();
-          $('acctPlan').textContent = txt; $('acctPlanRow').hidden = false;
-        }
-      } catch (e) {}
       $('signOut').addEventListener('click', async function () { await api.signOut(); location.replace('/'); });
+      $('signOutAll').addEventListener('click', async function () { await api.signOutEverywhere(); location.replace('/login'); });
+      renderIdentity(u);
+      // load the rest in parallel; any piece may fail without breaking the page
+      var res = await Promise.all([
+        api.rpc('my_entitlement').catch(function () { return null; }),
+        api.rest('/profiles?select=*&id=eq.' + encodeURIComponent(u.id)).then(function (r) { return r && r[0]; }).catch(function () { return null; }),
+        api.rpc('my_partner').catch(function () { return null; }),
+        api.rpc('my_devices').catch(function () { return null; })
+      ]);
+      var ent = res[0], prof = res[1], partner = res[2], devices = res[3];
+      renderPlan(u, ent, prof); renderUsage(ent); renderSteps(ent, devices); renderPartner(partner); renderBilling(u, ent, prof);
+      var dv = $('acctDevices'); dv.textContent = devices ? (devices.length ? devices.length + (devices.length === 1 ? ' device' : ' devices') : 'None yet. Sign in to the desktop app to register one.') : 'Not available';
     })();
     form(async function () {
       var pw = $('password').value;
       if (pw.length < 8) throw { message: 'Use a password with at least 8 characters.' };
       if (pw !== $('password2').value) throw { message: 'The passwords do not match.' };
-      await api.updatePassword(pw); $('password').value = ''; $('password2').value = ''; msg('Password updated. Use it on the website and in the desktop app.', true);
+      await api.updatePassword(pw); $('password').value = ''; $('password2').value = ''; msg('Password saved. Use it on the website and in the desktop app.', true);
     });
+  }
+
+  // ===== account dashboard rendering (plain DOM, no innerHTML: every value is written as text) =====
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined && text !== null) e.textContent = text; return e; }
+  function link(href, text, cls) { var a = el('a', cls, text); a.href = href; return a; }
+  function fmtDate(d) { return d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : ''; }
+  function money(n) { return '$' + Number(n || 0).toFixed(Number(n) % 1 ? 2 : 0); }
+  function leftText(end) {
+    if (!end) return null; var ms = new Date(end).getTime() - Date.now(); if (ms <= 0) return 'Ended';
+    var d = Math.floor(ms / 864e5), h = Math.floor((ms % 864e5) / 36e5);
+    return d >= 1 ? d + (d === 1 ? ' day' : ' days') + (d < 3 ? ' ' + h + ' h' : '') : h + (h === 1 ? ' hour' : ' hours');
+  }
+  function clear(id) { var n = $(id); n.textContent = ''; return n; }
+  function mailto(subject, body) { var m = (cfg.email || 'support@vertexstealth.top'); return 'mailto:' + m + '?subject=' + encodeURIComponent(subject) + '&body=' + encodeURIComponent(body || ''); }
+  function methods(u) {
+    var list = (u.app_metadata && u.app_metadata.providers) || (u.app_metadata && u.app_metadata.provider ? [u.app_metadata.provider] : []);
+    return list.length ? list : ['email'];
+  }
+
+  function renderIdentity(u) {
+    var m = u.user_metadata || {}, name = m.full_name || m.name || '';
+    var first = (name || (u.email || '').split('@')[0] || '').split(/\s+/)[0];
+    $('adHello').textContent = first ? 'Hi, ' + first.charAt(0).toUpperCase() + first.slice(1) : 'Your account';
+    $('adSub').textContent = 'Manage your plan, profiles and account.';
+    $('adAvatar').textContent = (name || u.email || '?').trim().charAt(0).toUpperCase();
+    $('acctEmail').textContent = u.email || '';
+    $('acctSince').textContent = fmtDate(u.created_at);
+    var ms = methods(u).map(function (x) { return x === 'google' ? 'Google' : x === 'email' ? 'Email and password' : x; });
+    $('acctMethod').textContent = ms.join(' and ');
+    $('helpMail').href = mailto('VertexStealth support', 'Account: ' + (u.email || ''));
+    $('delMail').href = mailto('Delete my VertexStealth account', 'Please delete the account ' + (u.email || '') + ' and its data.');
+    if (methods(u).indexOf('email') < 0) { $('pwTitle').textContent = 'Security'; $('pwLabel').textContent = 'Set a password (at least 8 characters). The desktop app signs in with email and password.'; }
+  }
+
+  function renderPlan(u, ent, prof) {
+    var plans = cfg.plans || {};
+    var eff = (ent && ent.effective) || (prof && prof.plan) || 'free';
+    var kind = eff === 'trial' ? 'trial' : (eff === 'free' ? 'free' : 'paid');
+    var planName = String((ent && ent.plan) || (prof && prof.plan) || '');
+    var nice = kind === 'trial' ? 'Free trial' : kind === 'free' ? 'No active plan' : (/year/i.test(planName + eff) ? 'Yearly' : /month/i.test(planName + eff) ? 'Monthly' : (planName || eff).replace(/^./, function (c) { return c.toUpperCase(); }));
+    var end = kind === 'trial' ? (ent && ent.trial_ends_at) : (ent && ent.plan_expires_at) || (prof && prof.plan_expires_at);
+    var left = leftText(end), started = ent && ent.trial_started_at;
+    var badge = $('planBadge'); badge.textContent = kind === 'trial' ? 'Trial' : kind === 'free' ? 'Free' : 'Active'; badge.className = 'ad-badge ' + kind;
+    if (prof && prof.is_admin) badge.textContent += ' · Admin';
+    $('planTitle').textContent = nice;
+    var sub = '';
+    if (kind === 'trial') sub = 'Your free trial ends on ' + fmtDate(end) + (left ? ' (' + left + ' left).' : '.');
+    else if (kind === 'free') sub = started ? 'Your free trial has ended. Choose a plan to keep creating and launching profiles.' : 'Your ' + (plans.trialDays || 3) + '-day free trial starts when you first sign in to the desktop app.';
+    else sub = end ? 'Your plan is active until ' + fmtDate(end) + (left ? ' (' + left + ' left).' : '.') : 'Your plan is active with no end date.';
+    $('planSub').textContent = sub;
+    $('fPlan').textContent = nice;
+    $('fStatus').textContent = kind === 'free' ? (started ? 'Trial ended' : 'Trial not started') : kind === 'trial' ? 'Trial running' : 'Active';
+    $('fDateLabel').textContent = kind === 'trial' ? 'Trial ends' : kind === 'paid' ? 'Renews / ends' : 'Ended';
+    $('fDate').textContent = end ? fmtDate(end) : (kind === 'paid' ? 'No end date' : '-');
+    $('fLeft').textContent = left || '-';
+    // bar: share of the period still left
+    var bw = $('planBarWrap'), bar = $('planBar'), frac = null;
+    if (end) {
+      var total = kind === 'trial' && started ? new Date(end) - new Date(started) : (/year/i.test(nice) ? 365 : 30) * 864e5;
+      if (kind !== 'free' && total > 0) frac = Math.max(0, Math.min(1, (new Date(end) - Date.now()) / total));
+    }
+    if (frac !== null) { bw.hidden = false; bar.style.width = Math.round(frac * 100) + '%'; bar.className = 'ad-bar-fill' + (frac < 0.2 ? ' low' : ''); }
+    var cta = clear('planCta');
+    cta.appendChild(link('/pricing', kind === 'paid' ? 'Renew or change plan' : kind === 'trial' ? 'Upgrade now' : 'Choose a plan', 'btn primary'));
+    cta.appendChild(link('/pricing', 'Compare plans', 'btn outline'));
+    var pn = $('payNote');
+    if (!plans.paymentsLive) {
+      pn.hidden = false; pn.textContent = 'Online checkout is opening soon. To upgrade or renew now, ';
+      pn.appendChild(link(mailto('Upgrade my VertexStealth plan', 'Account: ' + (u.email || '') + '\nPlan wanted: Monthly / Yearly'), 'email us'));
+      pn.appendChild(document.createTextNode(' and we will activate it for you.'));
+    }
+  }
+
+  function renderUsage(ent) {
+    if (!ent) { $('useBig').textContent = '-'; $('useNote').textContent = 'Usage is not available right now.'; $('useBarWrap').hidden = true; return; }
+    var count = ent.count || 0, limit = ent.limit;
+    $('useBig').textContent = limit === null || limit === undefined ? count + (count === 1 ? ' profile' : ' profiles') : count + ' of ' + limit;
+    var bar = $('useBar'), pct = limit === null || limit === undefined ? 0 : limit === 0 ? (count ? 100 : 0) : Math.min(100, Math.round(count / limit * 100));
+    $('useBarWrap').hidden = limit === null || limit === undefined; bar.style.width = pct + '%'; bar.className = 'ad-bar-fill' + (pct >= 100 ? ' low' : '');
+    var note = limit === null || limit === undefined ? 'Your plan allows unlimited browser profiles.' : limit === 0 ? 'Your current plan does not include profiles. Choose a plan to create them.' : 'Your plan includes up to ' + limit + ' profiles.';
+    if (limit !== null && limit !== undefined && count > limit) note += ' ' + (count - limit) + ' profile(s) are locked, never deleted. Upgrade to unlock them.';
+    $('useNote').textContent = note;
+  }
+
+  function renderSteps(ent, devices) {
+    var count = ent ? ent.count || 0 : 0, paid = ent && ent.effective !== 'free' && ent.effective !== 'trial';
+    var hasDevice = devices && devices.length > 0;
+    var items = [[true, 'Create your account', null], [hasDevice || count > 0, 'Download and install the desktop app', '/download'], [count > 0, 'Sign in to the app and create your first profile', '/docs'], [!!paid, 'Choose a plan to keep your profiles', '/pricing']];
+    var ol = clear('adSteps');
+    items.forEach(function (it) { var li = el('li', it[0] ? 'done' : ''); li.appendChild(el('span', 'ad-tick', it[0] ? '\u2713' : '')); li.appendChild(it[2] && !it[0] ? link(it[2], it[1]) : el('span', null, it[1])); ol.appendChild(li); });
+  }
+
+  function renderPartner(p) {
+    var body = clear('partnerBody'), pc = cfg.partners || {};
+    var st = p && p.status || 'none';
+    if (st === 'active') {
+      body.appendChild(el('p', 'ad-muted', 'You are an approved VertexStealth partner. Your referral code:'));
+      body.appendChild(el('div', 'ad-code', p.code || ''));
+      var row = el('div', 'ad-row');
+      row.appendChild(link('/partner', 'Open partner dashboard', 'btn primary'));
+      var cp = el('button', 'btn outline', 'Copy referral link'); cp.type = 'button';
+      cp.addEventListener('click', async function () { try { await navigator.clipboard.writeText(location.origin + '/r/' + p.code); cp.textContent = 'Copied'; setTimeout(function () { cp.textContent = 'Copy referral link'; }, 1500); } catch (e) {} });
+      row.appendChild(cp); body.appendChild(row);
+    } else if (st === 'suspended') {
+      body.appendChild(el('p', 'ad-muted', 'Your partner account is suspended. Please contact support if you think this is a mistake.'));
+      body.appendChild(link(mailto('Partner account suspended', 'Account: ' + ($('acctEmail').textContent || '')), 'Contact support', 'btn outline'));
+    } else if (st === 'pending') {
+      body.appendChild(el('p', 'ad-muted', 'Your partner application is being reviewed. We reply within ' + (pc.reviewTime || '3 business days') + ' and will email you. Your dashboard appears here once you are approved.'));
+    } else if (st === 'declined') {
+      body.appendChild(el('p', 'ad-muted', 'Your last partner application was not approved. You are welcome to apply again with a clearer plan.'));
+      body.appendChild(link('/partners-program#apply', 'Apply again', 'btn outline'));
+    } else {
+      body.appendChild(el('p', 'ad-muted', 'Earn ' + (pc.percent || 20) + '% of the first payment of every customer you refer. Free to join.'));
+      body.appendChild(link('/partners-program#apply', 'Become a partner', 'btn outline'));
+    }
+  }
+
+  function renderBilling(u, ent, prof) {
+    var plans = cfg.plans || {}, b = clear('billBody');
+    var list = el('ul', 'ad-prices');
+    var yearSave = plans.monthly && plans.yearly ? Math.max(0, plans.monthly * 12 - plans.yearly) : 0;
+    [['Monthly', money(plans.monthly) + ' / month'], ['Yearly', money(plans.yearly) + ' / year' + (yearSave ? ' (save ' + money(yearSave) + ')' : '')]].forEach(function (r) { var li = el('li'); li.appendChild(el('span', null, r[0])); li.appendChild(el('b', null, r[1])); list.appendChild(li); });
+    b.appendChild(list);
+    var end = ent && ent.effective !== 'trial' && ent.effective !== 'free' ? (ent.plan_expires_at || (prof && prof.plan_expires_at)) : null;
+    b.appendChild(el('p', 'ad-muted', end ? 'Your current plan runs until ' + fmtDate(end) + '. Renew before then to keep every profile unlocked.' : 'Payment history: no payments recorded on this account yet.'));
+    b.appendChild(link(mailto('Invoice or refund request', 'Account: ' + (u.email || '')), 'Need an invoice or a refund? Contact us', 'ad-link'));
   }
 })();

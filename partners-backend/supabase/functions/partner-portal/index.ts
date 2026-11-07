@@ -1,5 +1,5 @@
 // Partner portal API (public, no JWT; partners sign in with an emailed one-time link).
-// POST { action: "request_login", email } | { action: "exchange", token } | { action: "summary" }
+// POST { action: "request_login", email } | { action: "exchange", token } | { action: "account_login", access_token } | { action: "summary" }
 //      | { action: "save_payout", method, details } | { action: "logout" }
 import { originAllowed, randomToken, readJson, reply, serviceClient, sha256Hex, str } from "../_shared/util.ts";
 import { loginEmail, portalUrl, sendEmail } from "../_shared/email.ts";
@@ -29,6 +29,19 @@ export async function handle(req: Request): Promise<Response> {
     const session = randomToken();
     const { data } = await sb.rpc("partner_login_exchange", { p_token_hash: await sha256Hex(token), p_session_hash: await sha256Hex(session) });
     return data === true ? reply(req, 200, { ok: true, session }) : reply(req, 401, { error: "invalid_link" });
+  }
+
+  // An approved partner who is signed in to their normal VertexStealth account (password or Google) skips the emailed link:
+  // we verify the account's login token with Supabase and require a CONFIRMED email that matches an active partner.
+  if (action === "account_login") {
+    const token = str(b.access_token, 4000);
+    if (token.length < 20) return reply(req, 401, { error: "unauthorized" });
+    const { data: u, error: uerr } = await sb.auth.getUser(token);
+    const user = u?.user;
+    if (uerr || !user?.email || !(user.email_confirmed_at || user.confirmed_at)) return reply(req, 401, { error: "unauthorized" });
+    const session = randomToken();
+    const { data } = await sb.rpc("partner_session_for_user", { p_email: user.email, p_session_hash: await sha256Hex(session) });
+    return data === true ? reply(req, 200, { ok: true, session }) : reply(req, 403, { error: "not_a_partner" });
   }
 
   // everything below needs a valid session

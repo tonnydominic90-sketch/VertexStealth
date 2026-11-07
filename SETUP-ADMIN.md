@@ -23,7 +23,7 @@ Only accounts with `profiles.is_admin = true` can open it (your admin account al
 
 1. Supabase > SQL Editor: run `supabase/site-admin.sql` (new tables only; no existing table is changed).
 2. Vercel > Settings > Environment Variables: add everything in `.env.example`. Redeploy.
-3. Email (Resend): create an account at resend.com, add the domain `vertexstealth.top`, then add the DNS records Resend shows (SPF, DKIM) in **Vercel > Domains > DNS Records**. Create an API key and set `RESEND_API_KEY`.
+3. Email (Brevo): see `SETUP-EMAIL-GOOGLE.md` (verify your sender, create an API key, set `BREVO_API_KEY` and `EMAIL_FROM`).
 4. Open `/admin` > **Setup check** and fix anything marked with a cross. If a profile column name differs from your schema, edit `api/_lib/schema-map.json`.
 
 ### What the panel does
@@ -40,5 +40,5 @@ The website records a location when someone signs in on the site. To also learn 
 ## 4. Before you go live
 - The Privacy Policy does not yet mention website analytics (country-level page views), the admin email centre or unsubscribe records. Add a short paragraph and bump `LEGAL_VERSION`.
 - Send "product news" only to people who would expect it; service notices (price changes need 30 days' notice, terms changes 14 days under your Terms) are fine for everyone.
-- Keep `SUPABASE_SERVICE_ROLE_KEY` and `RESEND_API_KEY` only in Vercel. If either leaks, rotate it immediately.
+- Keep `SUPABASE_SERVICE_ROLE_KEY` and `BREVO_API_KEY` only in Vercel. If either leaks, rotate it immediately.
 - Run `node scripts/test-api.js` after changing anything in `/api`.

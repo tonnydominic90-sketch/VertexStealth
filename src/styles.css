@@ -131,3 +131,9 @@
 .pp-dash-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:18px 0}.pp-h3{margin:28px 0 10px;font-size:18px;letter-spacing:-.02em}
 .pp-narrow{max-width:760px;margin:0 auto}.pp-narrow .pp-table td,.pp-wide .pp-table td{font-size:13px}
 @media(max-width:700px){.pp-dash-grid{grid-template-columns:1fr}}
+/* Google sign-in button + dividers on auth pages */
+.google-btn{width:100%;justify-content:center;gap:10px;margin:0 0 4px;padding:13px 16px;font-weight:800}
+.google-btn[hidden],.auth-or[hidden],.auth-fine[hidden]{display:none}
+.auth-or{display:flex;align-items:center;gap:12px;margin:16px 0;color:#8a97a8;font-size:12.5px;font-weight:700}
+.auth-or:before,.auth-or:after{content:"";flex:1;height:1px;background:#e1eaf2}
+.auth-fine{margin:8px 0 0;font-size:12px;line-height:1.6;color:#6b798b}.auth-fine a{text-decoration:underline}

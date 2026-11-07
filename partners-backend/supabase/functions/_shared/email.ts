@@ -2,15 +2,27 @@ import { env, esc, siteUrl } from "./util.ts";
 
 export interface Mail { to: string; subject: string; html: string; text: string }
 
-/** Sends through Resend. Returns false (and logs) instead of throwing, so a mail problem never breaks a request. */
+/** "Name <a@b.c>" or "a@b.c" -> { name?, email } */
+function parseAddress(v: string): { name?: string; email: string } {
+  const m = v.match(/^\s*"?([^"<]*?)"?\s*<([^>]+)>\s*$/);
+  return m ? { name: m[1].trim() || undefined, email: m[2].trim() } : { email: v.trim() };
+}
+
+/** Sends through Brevo (transactional API). BREVO_API_KEY = v3 API key; EMAIL_FROM must be a verified Brevo sender.
+ *  Returns false (and logs) instead of throwing, so a mail problem never breaks a request. */
 export async function sendEmail(m: Mail): Promise<boolean> {
-  const key = env("RESEND_API_KEY");
-  if (!key) { console.warn("RESEND_API_KEY not set - email not sent:", m.subject); return false; }
+  const key = env("BREVO_API_KEY");
+  if (!key) { console.warn("BREVO_API_KEY not set - email not sent:", m.subject); return false; }
   try {
-    const r = await fetch(env("RESEND_API_URL", "https://api.resend.com/emails"), {
+    const body: Record<string, unknown> = {
+      sender: parseAddress(env("EMAIL_FROM", "VertexStealth <support@vertexstealth.top>")),
+      to: [{ email: m.to }], subject: m.subject, htmlContent: m.html, textContent: m.text,
+    };
+    const rt = env("EMAIL_REPLY_TO"); if (rt) body.replyTo = parseAddress(rt);
+    const r = await fetch(env("BREVO_API_URL", "https://api.brevo.com/v3/smtp/email"), {
       method: "POST",
-      headers: { Authorization: `Bearer ${key}`, "Content-Type": "application/json" },
-      body: JSON.stringify({ from: env("EMAIL_FROM", "VertexStealth Partners <onboarding@resend.dev>"), to: [m.to], subject: m.subject, html: m.html, text: m.text }),
+      headers: { "api-key": key, "Content-Type": "application/json", accept: "application/json" },
+      body: JSON.stringify(body),
     });
     if (!r.ok) console.error("email failed", r.status, (await r.text()).slice(0, 200));
     return r.ok;
@@ -49,8 +61,8 @@ export function approvedEmail(name: string, code: string): Mail & { to?: string 
   const link = referralLink(code);
   return {
     to: "", subject: "You are in: your VertexStealth partner link",
-    html: shell("Welcome to the Partner Program", `<p>Hi ${esc(name)}, your application was approved.</p><p><b>Your referral link</b><br><a href="${esc(link)}">${esc(link)}</a></p><p><b>Your referral code</b><br><span style="font-size:20px;letter-spacing:2px">${esc(code)}</span></p><p>People who follow your link are told to enter your code when they create their VertexStealth account.</p>${btn(portalUrl(), "Open your partner portal")}<p>Sign in with this email address. We will send you a one-time sign-in link. Please read the Partner Program Terms and always disclose that you earn commission.</p>`),
-    text: `Hi ${name}, your application was approved.\n\nReferral link: ${link}\nReferral code: ${code}\n\nPartner portal: ${portalUrl()} (sign in with this email address)\n`,
+    html: shell("Welcome to the Partner Program", `<p>Hi ${esc(name)}, your application was approved.</p><p><b>Your referral link</b><br><a href="${esc(link)}">${esc(link)}</a></p><p><b>Your referral code</b><br><span style="font-size:20px;letter-spacing:2px">${esc(code)}</span></p><p>People who follow your link are told to enter your code when they create their VertexStealth account.</p>${btn(portalUrl(), "Open your partner portal")}<p>If you have a VertexStealth account with this email address (including Google sign-in), simply sign in on the website and open <b>Partner dashboard</b> from your account page. Otherwise the portal can email you a one-time sign-in link. Please read the Partner Program Terms and always disclose that you earn commission.</p>`),
+    text: `Hi ${name}, your application was approved.\n\nReferral link: ${link}\nReferral code: ${code}\n\nPartner portal: ${portalUrl()}\nSign in to your VertexStealth account with this email address and open Partner dashboard, or request a one-time sign-in link on that page.\n`,
   };
 }
 

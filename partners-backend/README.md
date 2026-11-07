@@ -2,7 +2,7 @@
 
 ```
 supabase/partner-program.sql          database migration (tables, RLS lock-down, all functions)
-supabase/functions/_shared/           CORS, input checks, e-mail (Resend)
+supabase/functions/_shared/           CORS, input checks, e-mail (Brevo)
 supabase/functions/partner-apply/     public application form endpoint
 supabase/functions/partner-click/     counts visits on a partner link
 supabase/functions/partner-admin-review/  approve / decline (admin only) + e-mails the applicant

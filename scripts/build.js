@@ -47,6 +47,7 @@ const portalJs = emitAsset('partner.js');
 const partnerAdminJs = emitAsset('partner-admin.js');
 const partnerApplyJs = emitAsset('partner-apply.js');
 const partnersCss = emitAsset('partners.css');
+const authJs = emitAsset('auth.js');
 for (const f of fs.readdirSync(path.join(src, 'static'))) {
   fs.copyFileSync(path.join(src, 'static', f), path.join(dist, f));
 }
@@ -487,7 +488,9 @@ const portalBody = !backendLive
   ? `<div class="pp-note">The partner portal opens when the program launches. <a class="ul" href="/partners-program">Learn about the partner program</a>.</div>`
   : `<div data-view="loading"><p class="lead">Loading…</p></div>
 <div data-view="login" hidden>
-<p class="lead">Enter the email address you applied with and we will send you a one-time sign-in link.</p>
+<p class="lead">Approved partners can sign in with their VertexStealth account, or with a one-time email link.</p>
+<div class="pp-formcard pp-acct"><h3 class="pp-formtitle">Sign in with your VertexStealth account</h3><p class="pp-formsub">Use the same account as the app and website (email and password, or Google). It must use the email address you applied with.</p><p class="pp-status" id="acct-note" role="status"></p><a class="btn primary" id="acct-btn" href="/login?next=/partner">Sign in with your account <span>→</span></a></div>
+<p class="pp-or"><span>or get an email link</span></p>
 <div class="pp-formcard"><form class="pp-form" id="login-form"><label><span>Email</span><input id="f-email" type="email" required maxlength="160" autocomplete="email" placeholder="Your email address"></label><div><button class="btn primary" type="submit">Email me a sign-in link</button></div><p class="pp-status" id="login-status" role="status"></p></form></div>
 <p class="pp-fine">Not a partner yet? <a class="ul" href="/partners-program#apply">Apply here</a>.</p></div>
 <div data-view="sent" hidden><div class="pp-note">If that email belongs to an approved partner, a sign-in link is on its way. It works once and expires in 20 minutes.</div></div>
@@ -509,7 +512,7 @@ const portalBody = !backendLive
 <p class="pp-fine"><button class="btn outline" type="button" id="logout">Sign out</button> &nbsp; <a class="ul" href="/partners-program#terms">Partner Program Terms</a></p>
 </div>`;
 page({
-  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: [portalJs], styles: [partnersCss],
+  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: ['/vs-config.js', authJs, portalJs], styles: [partnersCss],
   main: `<section class="page"><div class="wrap pp-narrow" id="portal" data-fn="${esc(liveFn)}"><div class="kicker">Partner portal</div><h1>Your partner portal</h1>${portalBody}</div></section>`,
 });
 
@@ -732,17 +735,19 @@ ${ul(['Windows 10 and 11 only; macOS, Linux and mobile are not available yet', '
 const sbUrl = (process.env.SUPABASE_URL || (cfg.supabase && cfg.supabase.url) || '').trim();
 const sbAnon = (process.env.SUPABASE_ANON_KEY || (cfg.supabase && cfg.supabase.anonKey) || '').trim();
 if (!sbAnon) console.warn('WARNING: Supabase anon key is empty (site.config.json supabase.anonKey or SUPABASE_ANON_KEY). Sign-in pages will show "not configured".');
-fs.writeFileSync(path.join(dist, 'vs-config.js'), `window.VS_CONFIG=${JSON.stringify({ supabaseUrl: sbUrl, anonKey: sbAnon, siteUrl })};\n`);
-const authJs = emitAsset('auth.js');
+fs.writeFileSync(path.join(dist, 'vs-config.js'), `window.VS_CONFIG=${JSON.stringify({ supabaseUrl: sbUrl, anonKey: sbAnon, siteUrl, email: cfg.email, plans: { monthly: P.monthly, yearly: P.yearly, trialDays: P.trialDays, trialProfiles: P.trialProfiles, paymentsLive: !!live }, partners: { percent: (cfg.partners || {}).commissionPercent, reviewTime: (cfg.partners || {}).reviewTime } })};\n`);
 const adminJs = emitAsset('admin.js');
 const adminCss = emitAsset('admin.css');
+const accountCss = emitAsset('account.css');
 const authScripts = ['/vs-config.js', authJs];
 const authPage = (slug, title, body) => page({ file: slug + '.html', title: `${title} — ${cfg.name}`, desc: `${title} for your ${cfg.name} account.`, canonicalPath: '/' + slug, index: false, scripts: authScripts, pageId: slug, main: `<section class="auth-wrap"><div class="auth-card">${body}</div></section>` });
 const authNote = 'Your VertexStealth account works on this website and in the desktop app, with the same email and password.';
 authPage('login', 'Sign in', `<h1>Sign in</h1><p class="auth-sub">${authNote}</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<button class="btn outline google-btn" type="button" id="googleBtn" hidden><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Continue with Google</span></button><p class="auth-or" id="authOr" hidden><span>or use your email</span></p>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><label class="field"><span>Password</span><input type="password" id="password" autocomplete="current-password" required></label><button class="btn primary auth-btn" type="submit">Sign in</button></form>
 <p class="auth-links"><a href="/forgot">Forgot password?</a><a href="/signup">Create an account</a></p>`);
 authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth-sub">${authNote} New accounts start with a ${P.trialDays}-day free trial.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<button class="btn outline google-btn" type="button" id="googleBtn" hidden><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Continue with Google</span></button><p class="auth-or" id="authOr" hidden><span>or use your email</span></p><p class="auth-fine" id="googleNote" hidden>By continuing with Google you confirm you are at least 18 and agree to the <a href="/terms">Terms</a>, <a href="/eula">EULA</a> and <a href="/privacy">Privacy Policy</a>.</p>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><label class="field"><span>Password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm password</span><input type="password" id="password2" autocomplete="new-password" required></label>
 <label class="field"><span>Referral code (optional)</span><input type="text" id="refcode" maxlength="12" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="e.g. AB12CD34"></label>
 <label class="check-row"><input type="checkbox" id="terms" required><span>I am at least 18 and agree to the <a href="/terms">Terms of Service</a>, <a href="/eula">EULA</a> and <a href="/privacy">Privacy Policy</a>.</span></label><button class="btn primary auth-btn" type="submit">Create account</button></form>
@@ -750,11 +755,25 @@ authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth
 authPage('forgot', 'Reset password', `<h1>Reset your password</h1><p class="auth-sub">Enter your email and we will send you a link to choose a new password.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><button class="btn primary auth-btn" type="submit">Send reset link</button></form>
 <p class="auth-links"><a href="/login">Back to sign in</a></p>`);
-authPage('account', 'Your account', `<h1>Your account</h1><div class="auth-msg" id="authMsg" role="alert" hidden></div>
-<div id="accountBody" hidden><dl class="acct"><div><dt>Email</dt><dd id="acctEmail"></dd></div><div><dt>Member since</dt><dd id="acctSince"></dd></div><div id="acctPlanRow" hidden><dt>Plan</dt><dd id="acctPlan"></dd></div></dl>
-<div class="acct-actions"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><button class="btn outline" type="button" id="signOut">Sign out</button></div>
-<h2 id="pwTitle">Change password</h2><form id="authForm" novalidate><label class="field"><span>New password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm new password</span><input type="password" id="password2" autocomplete="new-password" required></label><button class="btn outline auth-btn" type="submit">Update password</button></form>
-<p class="auth-links"><a href="${esc(mail('Account help'))}">Need help? ${esc(cfg.email)}</a></p></div>`);
+page({ file: 'account.html', title: 'Your account — ' + cfg.name, desc: 'Your VertexStealth account dashboard.', canonicalPath: '/account', index: false, scripts: authScripts, styles: [accountCss], pageId: 'account', main: `<section class="ad-wrap"><div class="wrap">
+<div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<div id="accountBody" hidden>
+<header class="ad-head"><div class="ad-avatar" id="adAvatar" aria-hidden="true"></div><div class="ad-title"><h1 id="adHello">Your account</h1><p id="adSub"></p></div>
+<div class="ad-head-actions"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><button class="btn outline" type="button" id="signOut">Sign out</button></div></header>
+<div class="ad-grid">
+<section class="ad-card ad-plan" id="adPlan"><div class="ad-plan-top"><div><span class="ad-badge" id="planBadge">Plan</span><h2 id="planTitle">Loading…</h2><p id="planSub"></p></div><div class="ad-plan-cta" id="planCta"></div></div>
+<div class="ad-bar" id="planBarWrap" hidden><div class="ad-bar-fill" id="planBar"></div></div>
+<dl class="ad-facts"><div><dt>Current plan</dt><dd id="fPlan">-</dd></div><div><dt>Status</dt><dd id="fStatus">-</dd></div><div><dt id="fDateLabel">Renews / ends</dt><dd id="fDate">-</dd></div><div><dt>Time left</dt><dd id="fLeft">-</dd></div></dl>
+<p class="ad-note" id="payNote" hidden></p></section>
+<section class="ad-card"><h2>Browser profiles</h2><div class="ad-big" id="useBig">-</div><div class="ad-bar" id="useBarWrap"><div class="ad-bar-fill" id="useBar"></div></div><p class="ad-muted" id="useNote"></p></section>
+<section class="ad-card"><h2>Get started</h2><ol class="ad-steps" id="adSteps"></ol></section>
+<section class="ad-card" id="adPartner"><h2>Partner program</h2><div id="partnerBody"><p class="ad-muted">Loading…</p></div></section>
+<section class="ad-card"><h2>Billing</h2><div id="billBody"></div></section>
+<section class="ad-card"><h2>Account details</h2><dl class="ad-list"><div><dt>Email</dt><dd id="acctEmail"></dd></div><div><dt>Sign-in method</dt><dd id="acctMethod"></dd></div><div><dt>Member since</dt><dd id="acctSince"></dd></div><div><dt>Registered devices</dt><dd id="acctDevices">-</dd></div></dl></section>
+<section class="ad-card ad-wide"><h2 id="pwTitle">Security</h2><div class="ad-sec"><form id="authForm" novalidate><label class="field"><span id="pwLabel">New password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm new password</span><input type="password" id="password2" autocomplete="new-password" required></label><button class="btn outline auth-btn" type="submit">Update password</button></form>
+<div class="ad-sec-side"><h3>Sessions</h3><p class="ad-muted">Signed in somewhere you no longer use? End every session on every device.</p><button class="btn outline" type="button" id="signOutAll">Sign out everywhere</button></div></div></section>
+<section class="ad-card"><h2>Help</h2><ul class="ad-links"><li><a href="/docs">Documentation and guides</a></li><li><a href="/faq">Frequently asked questions</a></li><li><a href="/system-requirements">System requirements</a></li><li><a id="helpMail" href="mailto:${esc(cfg.email)}">Contact support</a></li><li><a id="delMail" href="mailto:${esc(cfg.email)}">Request account deletion</a></li></ul></section>
+</div></div></div></section>` });
 page({ file: 'admin.html', title: 'Admin — ' + cfg.name, desc: 'Administration.', canonicalPath: '/admin', index: false, bare: true, scripts: [...authScripts, adminJs], styles: [adminCss], pageId: 'admin', main: '<div id="adminRoot" class="adm-root"><p class="adm-boot">Loading…</p></div>' });
 
 // ---------- robots + sitemap ----------

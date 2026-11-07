@@ -10,7 +10,7 @@ psql -h localhost -U postgres -d vs_test -q -c "insert into auth.users(id,email)
 nohup /tmp/postgrest postgrest.conf >/tmp/pgrst.log 2>&1 &
 nohup node support.mjs >/tmp/support.log 2>&1 &
 export SUPABASE_URL=http://localhost:54321 SUPABASE_SERVICE_ROLE_KEY=$(node support.mjs jwt service_role) SUPABASE_ANON_KEY=$(node support.mjs jwt anon)
-export SITE_URL=https://vertexstealth.vercel.app ALLOWED_ORIGINS=https://vertexstealth.vercel.app,http://localhost:3111 PORTAL_URL=http://localhost:3111/partner RESEND_API_KEY=test-key RESEND_API_URL=http://localhost:3999/emails ADMIN_NOTIFY_EMAIL=admin@vertexstealth.test PARTNER_IP_SALT=salt FN_PORT=8001
+export SITE_URL=https://vertexstealth.vercel.app ALLOWED_ORIGINS=https://vertexstealth.vercel.app,http://localhost:3111 PORTAL_URL=http://localhost:3111/partner BREVO_API_KEY=test-key BREVO_API_URL=http://localhost:3999/emails ADMIN_NOTIFY_EMAIL=admin@vertexstealth.test PARTNER_IP_SALT=salt FN_PORT=8001
 (cd $ROOT && nohup /tmp/denoinst/node_modules/.bin/deno run --allow-net --allow-env --allow-read test/int/serve_functions.ts >/tmp/fn.log 2>&1 &)
 for i in $(seq 1 40); do curl -s -o /dev/null localhost:3000/ && curl -s -o /dev/null -X OPTIONS localhost:8001/functions/v1/partner-apply && break; sleep 1; done
 echo "stack up"

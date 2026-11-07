@@ -220,22 +220,31 @@ const ACTIONS = {
   async setupCheck() {
     const checks = [];
     const add = (group, name, ok, detail) => checks.push({ group, name, ok, detail: detail || '' });
-    for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'RESEND_API_KEY', 'EMAIL_FROM']) add('Environment variables', k, !!env(k), env(k) ? 'set' : 'missing in Vercel > Settings > Environment Variables');
+    for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'BREVO_API_KEY', 'EMAIL_FROM']) add('Environment variables', k, !!env(k), env(k) ? 'set' : 'missing in Vercel > Settings > Environment Variables');
     add('Environment variables', 'SITE_URL', !!env('SITE_URL'), env('SITE_URL') ? 'set' : 'not set, defaulting to https://www.vertexstealth.top');
     const probe = async (table, c) => { try { await sb(`/${table}?select=${c}&limit=1`); return true; } catch (e) { return String(e.message); } };
     for (const t of ['site_events', 'user_locations', 'admin_audit_log', 'email_campaigns', 'email_optouts', 'site_settings']) { const r = await probe(t, '*'); add('Tables from supabase/site-admin.sql', t, r === true, r === true ? 'found' : 'missing: run supabase/site-admin.sql in the Supabase SQL Editor'); }
     for (const [k, c] of Object.entries(col)) { const r = await probe(MAP.profilesTable, c); add(`Existing table "${MAP.profilesTable}" columns`, `${k} -> ${c}`, r === true, r === true ? 'found' : 'not found: edit api/_lib/schema-map.json to match your schema'); }
     if (MAP.devices) { const r = await probe(MAP.devices.table, `${MAP.devices.userColumn},${MAP.devices.bannedColumn}`); add('Existing devices table', `${MAP.devices.table}.${MAP.devices.userColumn}/${MAP.devices.bannedColumn}`, r === true, r === true ? 'found' : 'not found: banning will skip devices until this matches your schema'); }
-    if (env('RESEND_API_KEY')) {
+    if (env('BREVO_API_KEY')) {
+      const H = { 'api-key': env('BREVO_API_KEY'), accept: 'application/json' };
       try {
-        const r = await fetch('https://api.resend.com/domains', { headers: { Authorization: 'Bearer ' + env('RESEND_API_KEY') } });
+        const r = await fetch('https://api.brevo.com/v3/account', { headers: H });
         const d = await r.json().catch(() => ({}));
-        if (r.ok) {
-          const dom = (env('EMAIL_FROM').match(/@([^>\s]+)/) || [])[1] || 'vertexstealth.top';
-          const hit = (d.data || []).find((x) => x.name === dom);
-          add('Email sending (Resend)', `domain ${dom}`, !!hit && hit.status === 'verified', hit ? 'status: ' + hit.status : 'domain not added in Resend yet');
-        } else add('Email sending (Resend)', 'API key', true, 'key present (restricted keys cannot list domains, that is fine)');
-      } catch (e) { add('Email sending (Resend)', 'API reachable', false, String(e.message)); }
+        if (!r.ok) add('Email sending (Brevo)', 'API key', false, 'Brevo rejected the key: ' + (d.message || r.status) + '. Create a new v3 API key in Brevo > SMTP & API.');
+        else {
+          add('Email sending (Brevo)', 'API key', true, 'valid' + (d.companyName ? ' (' + d.companyName + ')' : ''));
+          const plan = (d.plan || []).find((p) => /free|standard|business|enterprise|premium/i.test(p.type || '')) || (d.plan || [])[0];
+          if (plan) add('Email sending (Brevo)', 'plan and credits', true, `${plan.type || 'plan'}: ${plan.credits ?? '?'} credits left` + (/free/i.test(plan.type || '') ? ' (the free plan allows about 300 emails per day)' : ''));
+          const fromAddr = (require('./_lib/mailer').parseAddress(env('EMAIL_FROM')).email || '').toLowerCase();
+          const sr = await fetch('https://api.brevo.com/v3/senders', { headers: H });
+          const sd = await sr.json().catch(() => ({}));
+          if (sr.ok) {
+            const hit = (sd.senders || []).find((x) => String(x.email).toLowerCase() === fromAddr);
+            add('Email sending (Brevo)', `sender ${fromAddr || '(EMAIL_FROM not set)'}`, !!hit && hit.active !== false, hit ? (hit.active === false ? 'found but not active: finish its verification in Brevo' : 'verified sender') : 'not in Brevo > Senders, domains & dedicated IPs. Add and verify it, or change EMAIL_FROM.');
+          } else add('Email sending (Brevo)', 'senders list', true, 'could not list senders with this key (that is fine)');
+        }
+      } catch (e) { add('Email sending (Brevo)', 'API reachable', false, String(e.message)); }
     }
     return { checks };
   },

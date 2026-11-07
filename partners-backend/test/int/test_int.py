@@ -45,7 +45,7 @@ s, j, _ = post('partner-apply', GOOD, headers={'X-Forwarded-For': '1.1.1.1'}); c
 m = mails(); check('two emails sent (applicant + admin)', len(m) == 2, m)
 check('applicant email goes to applicant', any(x['to'] == ['pat@creator.com'] for x in m))
 check('admin email goes to admin', any(x['to'] == ['admin@vertexstealth.test'] for x in m))
-check('resend auth header used', all(x['auth'] == 'Bearer test-key' for x in m))
+check('brevo api-key header used', all(x['auth'] == 'test-key' for x in m))
 s, j, _ = post('partner-apply', GOOD, headers={'X-Forwarded-For': '1.1.1.2'}); check('duplicate 409', s == 409 and j['error'] == 'duplicate', (s, j))
 s, j, _ = post('partner-apply', {**GOOD, 'email': 'bad'}); check('bad email 422', s == 422)
 s, j, _ = post('partner-apply', {**GOOD, 'email': 'x1@x.com', 'promotion_plan': 'short'}); check('short plan 422', s == 422)

@@ -1,7 +1,7 @@
 'use strict';
-// Offline test of the serverless API against an in-memory fake Supabase + Resend. Run: node scripts/test-api.js
+// Offline test of the serverless API against an in-memory fake Supabase + Brevo. Run: node scripts/test-api.js
 process.env.SUPABASE_URL = 'https://fake.supabase.co'; process.env.SUPABASE_SERVICE_ROLE_KEY = 'service-key';
-process.env.RESEND_API_KEY = 're_test'; process.env.SITE_URL = 'https://www.vertexstealth.top';
+process.env.BREVO_API_KEY = 'xkeysib-test'; process.env.EMAIL_FROM = 'VertexStealth <support@vertexstealth.top>'; process.env.SITE_URL = 'https://www.vertexstealth.top';
 const assert = require('assert');
 const now = Date.now(), iso = (d) => new Date(d).toISOString();
 const db = {
@@ -28,9 +28,10 @@ global.fetch = async (url, opt = {}) => {
   const u = new URL(url); const m = opt.method || 'GET'; const auth = (opt.headers || {}).Authorization || '';
   if (u.host === 'github.com') return (opt.method === 'HEAD' && /\/0\.2\.[12]\//.test(u.pathname)) ? { ok: true, status: 200 } : { ok: false, status: 404 };
   if (u.host === 'api.github.com') return json({ tag_name: 'v0.2.2', published_at: iso(now), assets: [{ name: 'VertexStealth-Setup-0.2.2.exe.blockmap', browser_download_url: 'x', size: 1 }, { name: 'VertexStealth-Setup-0.2.2.exe', browser_download_url: 'https://github.com/tonnydominic90-sketch/VertexStealth-Release/releases/download/0.2.2/VertexStealth-Setup-0.2.2.exe', size: 90000000 }] });
-  if (u.host === 'api.resend.com') {
-    if (u.pathname === '/emails/batch') { const arr = JSON.parse(opt.body); sent.push(...arr); return json({ data: arr.map((_, i) => ({ id: 'e' + i })) }); }
-    return json({ data: [{ name: 'vertexstealth.top', status: 'verified' }] });
+  if (u.host === 'api.brevo.com') {
+    if (u.pathname === '/v3/smtp/email') { const b = JSON.parse(opt.body); if (opt.headers['api-key'] !== 'xkeysib-test') return json({ message: 'Key not found' }, 401); sent.push({ to: [b.to[0].email], subject: b.subject, html: b.htmlContent, text: b.textContent, headers: b.headers, from: b.sender.email }); return json({ messageId: '<x@brevo>' }, 201); }
+    if (u.pathname === '/v3/account') return json({ companyName: 'Test', plan: [{ type: 'free', credits: 300 }] });
+    if (u.pathname === '/v3/senders') return json({ senders: [{ email: 'support@vertexstealth.top', active: true }] });
   }
   if (u.pathname === '/auth/v1/user') { const tok = auth.replace('Bearer ', ''); const usr = db.users.find((x) => 'tok-' + x.id === tok); return usr ? json(usr) : json({ msg: 'bad' }, 401); }
   if (u.pathname === '/auth/v1/admin/users') return json({ users: db.users });
