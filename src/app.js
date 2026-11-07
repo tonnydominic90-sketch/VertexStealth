@@ -16,7 +16,12 @@ document.querySelectorAll('.demo-tab').forEach(tab=>tab.addEventListener('click'
 }));
 
 (function(){
- try{if(localStorage.getItem('vs.session')){document.querySelectorAll('[data-auth-link]').forEach(function(l){l.textContent='Account';l.setAttribute('href','/account');});}}catch(e){}
+ try{if(localStorage.getItem('vs.session')){document.querySelectorAll('[data-auth-link]').forEach(function(l){l.textContent='Account';l.setAttribute('href','/account');
+ var o=document.createElement('a');o.className=l.className;o.href='/';o.textContent='Sign out';o.setAttribute('data-signout','');l.parentNode.insertBefore(o,l.nextSibling);
+ o.addEventListener('click',async function(e){e.preventDefault();var raw=null;try{raw=JSON.parse(localStorage.getItem('vs.session')||'null');}catch(x){}
+  try{localStorage.removeItem('vs.session');}catch(x){}
+  try{var c=window.VS_CONFIG;if(raw&&c&&c.supabaseUrl&&c.anonKey){await fetch(c.supabaseUrl+'/auth/v1/logout',{method:'POST',headers:{apikey:c.anonKey,Authorization:'Bearer '+raw.access_token}});}}catch(x){}
+  location.href='/';});});}}catch(e){}
  var dl=document.querySelector('[data-dl]');
  if(dl){dl.addEventListener('click',function(){var n=document.getElementById('dlStarted');if(n)n.hidden=false;var s=dl.querySelector('span');dl.firstChild.textContent='Starting download… ';if(s)s.textContent='✓';});}
  var p=location.pathname;

@@ -755,24 +755,24 @@ authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth
 authPage('forgot', 'Reset password', `<h1>Reset your password</h1><p class="auth-sub">Enter your email and we will send you a link to choose a new password.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><button class="btn primary auth-btn" type="submit">Send reset link</button></form>
 <p class="auth-links"><a href="/login">Back to sign in</a></p>`);
-page({ file: 'account.html', title: 'Your account — ' + cfg.name, desc: 'Your VertexStealth account dashboard.', canonicalPath: '/account', index: false, scripts: authScripts, styles: [accountCss], pageId: 'account', main: `<section class="ad-wrap"><div class="wrap">
+page({ file: 'account.html', title: 'Your account — ' + cfg.name, desc: 'Your VertexStealth account dashboard.', canonicalPath: '/account', index: false, scripts: authScripts, styles: [accountCss], pageId: 'account', main: `<section class="acct-wrap"><div class="wrap">
 <div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <div id="accountBody" hidden>
-<header class="ad-head"><div class="ad-avatar" id="adAvatar" aria-hidden="true"></div><div class="ad-title"><h1 id="adHello">Your account</h1><p id="adSub"></p></div>
-<div class="ad-head-actions"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><button class="btn outline" type="button" id="signOut">Sign out</button></div></header>
-<div class="ad-grid">
-<section class="ad-card ad-plan" id="adPlan"><div class="ad-plan-top"><div><span class="ad-badge" id="planBadge">Plan</span><h2 id="planTitle">Loading…</h2><p id="planSub"></p></div><div class="ad-plan-cta" id="planCta"></div></div>
-<div class="ad-bar" id="planBarWrap" hidden><div class="ad-bar-fill" id="planBar"></div></div>
-<dl class="ad-facts"><div><dt>Current plan</dt><dd id="fPlan">-</dd></div><div><dt>Status</dt><dd id="fStatus">-</dd></div><div><dt id="fDateLabel">Renews / ends</dt><dd id="fDate">-</dd></div><div><dt>Time left</dt><dd id="fLeft">-</dd></div></dl>
-<p class="ad-note" id="payNote" hidden></p></section>
-<section class="ad-card"><h2>Browser profiles</h2><div class="ad-big" id="useBig">-</div><div class="ad-bar" id="useBarWrap"><div class="ad-bar-fill" id="useBar"></div></div><p class="ad-muted" id="useNote"></p></section>
-<section class="ad-card"><h2>Get started</h2><ol class="ad-steps" id="adSteps"></ol></section>
-<section class="ad-card" id="adPartner"><h2>Partner program</h2><div id="partnerBody"><p class="ad-muted">Loading…</p></div></section>
-<section class="ad-card"><h2>Billing</h2><div id="billBody"></div></section>
-<section class="ad-card"><h2>Account details</h2><dl class="ad-list"><div><dt>Email</dt><dd id="acctEmail"></dd></div><div><dt>Sign-in method</dt><dd id="acctMethod"></dd></div><div><dt>Member since</dt><dd id="acctSince"></dd></div><div><dt>Registered devices</dt><dd id="acctDevices">-</dd></div></dl></section>
-<section class="ad-card ad-wide"><h2 id="pwTitle">Security</h2><div class="ad-sec"><form id="authForm" novalidate><label class="field"><span id="pwLabel">New password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm new password</span><input type="password" id="password2" autocomplete="new-password" required></label><button class="btn outline auth-btn" type="submit">Update password</button></form>
-<div class="ad-sec-side"><h3>Sessions</h3><p class="ad-muted">Signed in somewhere you no longer use? End every session on every device.</p><button class="btn outline" type="button" id="signOutAll">Sign out everywhere</button></div></div></section>
-<section class="ad-card"><h2>Help</h2><ul class="ad-links"><li><a href="/docs">Documentation and guides</a></li><li><a href="/faq">Frequently asked questions</a></li><li><a href="/system-requirements">System requirements</a></li><li><a id="helpMail" href="mailto:${esc(cfg.email)}">Contact support</a></li><li><a id="delMail" href="mailto:${esc(cfg.email)}">Request account deletion</a></li></ul></section>
+<header class="acct-head"><div class="acct-avatar" id="acctAvatar" aria-hidden="true"></div><div class="acct-title"><h1 id="acctHello">Your account</h1><p id="acctSub"></p></div>
+<div class="acct-head-actions"><a class="btn primary" href="/download">Download for Windows <span>↓</span></a><button class="btn outline" type="button" id="signOut">Sign out</button></div></header>
+<div class="acct-grid">
+<section class="acct-card acct-plan" id="acctPlan"><div class="acct-plan-top"><div><span class="acct-badge" id="planBadge">Plan</span><h2 id="planTitle">Loading…</h2><p id="planSub"></p></div><div class="acct-plan-cta" id="planCta"></div></div>
+<div class="acct-bar" id="planBarWrap" hidden><div class="acct-bar-fill" id="planBar"></div></div>
+<dl class="acct-facts"><div><dt>Current plan</dt><dd id="fPlan">-</dd></div><div><dt>Status</dt><dd id="fStatus">-</dd></div><div><dt id="fDateLabel">Renews / ends</dt><dd id="fDate">-</dd></div><div><dt>Time left</dt><dd id="fLeft">-</dd></div></dl>
+<p class="acct-note" id="payNote" hidden></p></section>
+<section class="acct-card"><h2>Browser profiles</h2><div class="acct-big" id="useBig">-</div><div class="acct-bar" id="useBarWrap"><div class="acct-bar-fill" id="useBar"></div></div><p class="acct-muted" id="useNote"></p></section>
+<section class="acct-card"><h2>Get started</h2><ol class="acct-steps" id="acctSteps"></ol></section>
+<section class="acct-card" id="acctPartner"><h2>Partner program</h2><div id="partnerBody"><p class="acct-muted">Loading…</p></div></section>
+<section class="acct-card"><h2>Billing</h2><div id="billBody"></div></section>
+<section class="acct-card"><h2>Account details</h2><dl class="acct-list"><div><dt>Email</dt><dd id="acctEmail"></dd></div><div><dt>Sign-in method</dt><dd id="acctMethod"></dd></div><div><dt>Member since</dt><dd id="acctSince"></dd></div><div><dt>Registered devices</dt><dd id="acctDevices">-</dd></div></dl></section>
+<section class="acct-card acct-wide"><h2 id="pwTitle">Security</h2><div class="acct-sec"><form id="authForm" novalidate><label class="field"><span id="pwLabel">New password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm new password</span><input type="password" id="password2" autocomplete="new-password" required></label><button class="btn outline auth-btn" type="submit">Update password</button></form>
+<div class="acct-sec-side"><h3>Sessions</h3><p class="acct-muted">Signed in somewhere you no longer use? End every session on every device.</p><button class="btn outline" type="button" id="signOutAll">Sign out everywhere</button></div></div></section>
+<section class="acct-card"><h2>Help</h2><ul class="acct-links"><li><a href="/docs">Documentation and guides</a></li><li><a href="/faq">Frequently asked questions</a></li><li><a href="/system-requirements">System requirements</a></li><li><a id="helpMail" href="mailto:${esc(cfg.email)}">Contact support</a></li><li><a id="delMail" href="mailto:${esc(cfg.email)}">Request account deletion</a></li></ul></section>
 </div></div></div></section>` });
 page({ file: 'admin.html', title: 'Admin — ' + cfg.name, desc: 'Administration.', canonicalPath: '/admin', index: false, bare: true, scripts: [...authScripts, adminJs], styles: [adminCss], pageId: 'admin', main: '<div id="adminRoot" class="adm-root"><p class="adm-boot">Loading…</p></div>' });
 

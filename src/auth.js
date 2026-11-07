@@ -236,9 +236,9 @@
   function renderIdentity(u) {
     var m = u.user_metadata || {}, name = m.full_name || m.name || '';
     var first = (name || (u.email || '').split('@')[0] || '').split(/\s+/)[0];
-    $('adHello').textContent = first ? 'Hi, ' + first.charAt(0).toUpperCase() + first.slice(1) : 'Your account';
-    $('adSub').textContent = 'Manage your plan, profiles and account.';
-    $('adAvatar').textContent = (name || u.email || '?').trim().charAt(0).toUpperCase();
+    $('acctHello').textContent = first ? 'Hi, ' + first.charAt(0).toUpperCase() + first.slice(1) : 'Your account';
+    $('acctSub').textContent = 'Manage your plan, profiles and account.';
+    $('acctAvatar').textContent = (name || u.email || '?').trim().charAt(0).toUpperCase();
     $('acctEmail').textContent = u.email || '';
     $('acctSince').textContent = fmtDate(u.created_at);
     var ms = methods(u).map(function (x) { return x === 'google' ? 'Google' : x === 'email' ? 'Email and password' : x; });
@@ -256,7 +256,7 @@
     var nice = kind === 'trial' ? 'Free trial' : kind === 'free' ? 'No active plan' : (/year/i.test(planName + eff) ? 'Yearly' : /month/i.test(planName + eff) ? 'Monthly' : (planName || eff).replace(/^./, function (c) { return c.toUpperCase(); }));
     var end = kind === 'trial' ? (ent && ent.trial_ends_at) : (ent && ent.plan_expires_at) || (prof && prof.plan_expires_at);
     var left = leftText(end), started = ent && ent.trial_started_at;
-    var badge = $('planBadge'); badge.textContent = kind === 'trial' ? 'Trial' : kind === 'free' ? 'Free' : 'Active'; badge.className = 'ad-badge ' + kind;
+    var badge = $('planBadge'); badge.textContent = kind === 'trial' ? 'Trial' : kind === 'free' ? 'Free' : 'Active'; badge.className = 'acct-badge ' + kind;
     if (prof && prof.is_admin) badge.textContent += ' · Admin';
     $('planTitle').textContent = nice;
     var sub = '';
@@ -275,7 +275,7 @@
       var total = kind === 'trial' && started ? new Date(end) - new Date(started) : (/year/i.test(nice) ? 365 : 30) * 864e5;
       if (kind !== 'free' && total > 0) frac = Math.max(0, Math.min(1, (new Date(end) - Date.now()) / total));
     }
-    if (frac !== null) { bw.hidden = false; bar.style.width = Math.round(frac * 100) + '%'; bar.className = 'ad-bar-fill' + (frac < 0.2 ? ' low' : ''); }
+    if (frac !== null) { bw.hidden = false; bar.style.width = Math.round(frac * 100) + '%'; bar.className = 'acct-bar-fill' + (frac < 0.2 ? ' low' : ''); }
     var cta = clear('planCta');
     cta.appendChild(link('/pricing', kind === 'paid' ? 'Renew or change plan' : kind === 'trial' ? 'Upgrade now' : 'Choose a plan', 'btn primary'));
     cta.appendChild(link('/pricing', 'Compare plans', 'btn outline'));
@@ -292,7 +292,7 @@
     var count = ent.count || 0, limit = ent.limit;
     $('useBig').textContent = limit === null || limit === undefined ? count + (count === 1 ? ' profile' : ' profiles') : count + ' of ' + limit;
     var bar = $('useBar'), pct = limit === null || limit === undefined ? 0 : limit === 0 ? (count ? 100 : 0) : Math.min(100, Math.round(count / limit * 100));
-    $('useBarWrap').hidden = limit === null || limit === undefined; bar.style.width = pct + '%'; bar.className = 'ad-bar-fill' + (pct >= 100 ? ' low' : '');
+    $('useBarWrap').hidden = limit === null || limit === undefined; bar.style.width = pct + '%'; bar.className = 'acct-bar-fill' + (pct >= 100 ? ' low' : '');
     var note = limit === null || limit === undefined ? 'Your plan allows unlimited browser profiles.' : limit === 0 ? 'Your current plan does not include profiles. Choose a plan to create them.' : 'Your plan includes up to ' + limit + ' profiles.';
     if (limit !== null && limit !== undefined && count > limit) note += ' ' + (count - limit) + ' profile(s) are locked, never deleted. Upgrade to unlock them.';
     $('useNote').textContent = note;
@@ -302,43 +302,43 @@
     var count = ent ? ent.count || 0 : 0, paid = ent && ent.effective !== 'free' && ent.effective !== 'trial';
     var hasDevice = devices && devices.length > 0;
     var items = [[true, 'Create your account', null], [hasDevice || count > 0, 'Download and install the desktop app', '/download'], [count > 0, 'Sign in to the app and create your first profile', '/docs'], [!!paid, 'Choose a plan to keep your profiles', '/pricing']];
-    var ol = clear('adSteps');
-    items.forEach(function (it) { var li = el('li', it[0] ? 'done' : ''); li.appendChild(el('span', 'ad-tick', it[0] ? '\u2713' : '')); li.appendChild(it[2] && !it[0] ? link(it[2], it[1]) : el('span', null, it[1])); ol.appendChild(li); });
+    var ol = clear('acctSteps');
+    items.forEach(function (it) { var li = el('li', it[0] ? 'done' : ''); li.appendChild(el('span', 'acct-tick', it[0] ? '\u2713' : '')); li.appendChild(it[2] && !it[0] ? link(it[2], it[1]) : el('span', null, it[1])); ol.appendChild(li); });
   }
 
   function renderPartner(p) {
     var body = clear('partnerBody'), pc = cfg.partners || {};
     var st = p && p.status || 'none';
     if (st === 'active') {
-      body.appendChild(el('p', 'ad-muted', 'You are an approved VertexStealth partner. Your referral code:'));
-      body.appendChild(el('div', 'ad-code', p.code || ''));
-      var row = el('div', 'ad-row');
+      body.appendChild(el('p', 'acct-muted', 'You are an approved VertexStealth partner. Your referral code:'));
+      body.appendChild(el('div', 'acct-code', p.code || ''));
+      var row = el('div', 'acct-row');
       row.appendChild(link('/partner', 'Open partner dashboard', 'btn primary'));
       var cp = el('button', 'btn outline', 'Copy referral link'); cp.type = 'button';
       cp.addEventListener('click', async function () { try { await navigator.clipboard.writeText(location.origin + '/r/' + p.code); cp.textContent = 'Copied'; setTimeout(function () { cp.textContent = 'Copy referral link'; }, 1500); } catch (e) {} });
       row.appendChild(cp); body.appendChild(row);
     } else if (st === 'suspended') {
-      body.appendChild(el('p', 'ad-muted', 'Your partner account is suspended. Please contact support if you think this is a mistake.'));
+      body.appendChild(el('p', 'acct-muted', 'Your partner account is suspended. Please contact support if you think this is a mistake.'));
       body.appendChild(link(mailto('Partner account suspended', 'Account: ' + ($('acctEmail').textContent || '')), 'Contact support', 'btn outline'));
     } else if (st === 'pending') {
-      body.appendChild(el('p', 'ad-muted', 'Your partner application is being reviewed. We reply within ' + (pc.reviewTime || '3 business days') + ' and will email you. Your dashboard appears here once you are approved.'));
+      body.appendChild(el('p', 'acct-muted', 'Your partner application is being reviewed. We reply within ' + (pc.reviewTime || '3 business days') + ' and will email you. Your dashboard appears here once you are approved.'));
     } else if (st === 'declined') {
-      body.appendChild(el('p', 'ad-muted', 'Your last partner application was not approved. You are welcome to apply again with a clearer plan.'));
+      body.appendChild(el('p', 'acct-muted', 'Your last partner application was not approved. You are welcome to apply again with a clearer plan.'));
       body.appendChild(link('/partners-program#apply', 'Apply again', 'btn outline'));
     } else {
-      body.appendChild(el('p', 'ad-muted', 'Earn ' + (pc.percent || 20) + '% of the first payment of every customer you refer. Free to join.'));
+      body.appendChild(el('p', 'acct-muted', 'Earn ' + (pc.percent || 20) + '% of the first payment of every customer you refer. Free to join.'));
       body.appendChild(link('/partners-program#apply', 'Become a partner', 'btn outline'));
     }
   }
 
   function renderBilling(u, ent, prof) {
     var plans = cfg.plans || {}, b = clear('billBody');
-    var list = el('ul', 'ad-prices');
+    var list = el('ul', 'acct-prices');
     var yearSave = plans.monthly && plans.yearly ? Math.max(0, plans.monthly * 12 - plans.yearly) : 0;
     [['Monthly', money(plans.monthly) + ' / month'], ['Yearly', money(plans.yearly) + ' / year' + (yearSave ? ' (save ' + money(yearSave) + ')' : '')]].forEach(function (r) { var li = el('li'); li.appendChild(el('span', null, r[0])); li.appendChild(el('b', null, r[1])); list.appendChild(li); });
     b.appendChild(list);
     var end = ent && ent.effective !== 'trial' && ent.effective !== 'free' ? (ent.plan_expires_at || (prof && prof.plan_expires_at)) : null;
-    b.appendChild(el('p', 'ad-muted', end ? 'Your current plan runs until ' + fmtDate(end) + '. Renew before then to keep every profile unlocked.' : 'Payment history: no payments recorded on this account yet.'));
-    b.appendChild(link(mailto('Invoice or refund request', 'Account: ' + (u.email || '')), 'Need an invoice or a refund? Contact us', 'ad-link'));
+    b.appendChild(el('p', 'acct-muted', end ? 'Your current plan runs until ' + fmtDate(end) + '. Renew before then to keep every profile unlocked.' : 'Payment history: no payments recorded on this account yet.'));
+    b.appendChild(link(mailto('Invoice or refund request', 'Account: ' + (u.email || '')), 'Need an invoice or a refund? Contact us', 'acct-link'));
   }
 })();
