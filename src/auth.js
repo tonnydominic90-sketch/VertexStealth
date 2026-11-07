@@ -68,7 +68,7 @@
     rpc: async function (name, args) {
       var s = await session(); if (!s) throw { message: 'Please sign in.' };
       var r = await fetch(cfg.supabaseUrl + '/rest/v1/rpc/' + name, { method: 'POST', headers: { apikey: cfg.anonKey, Authorization: 'Bearer ' + s.access_token, 'Content-Type': 'application/json' }, body: JSON.stringify(args || {}) });
-      if (!r.ok) throw { message: 'Request failed (' + r.status + ').', status: r.status };
+      if (!r.ok) { var ej = await r.json().catch(function () { return null; }); throw { message: (ej && ej.message) || ('Request failed (' + r.status + ').'), status: r.status }; }
       return r.json();
     },
     signOutEverywhere: async function () { var s = read(); write(null); if (s) { try { await gotrue('/logout?scope=global', { token: s.access_token }); } catch (e) {} } },
@@ -202,10 +202,12 @@
         api.rpc('my_entitlement').catch(function () { return null; }),
         api.rest('/profiles?select=*&id=eq.' + encodeURIComponent(u.id)).then(function (r) { return r && r[0]; }).catch(function () { return null; }),
         api.rpc('my_partner').catch(function () { return null; }),
-        api.rpc('my_devices').catch(function () { return null; })
+        api.rpc('my_devices').catch(function () { return null; }),
+        api.rpc('my_billing').catch(function () { return null; })
       ]);
-      var ent = res[0], prof = res[1], partner = res[2], devices = res[3];
-      renderPlan(u, ent, prof); renderUsage(ent); renderSteps(ent, devices); renderPartner(partner); renderBilling(u, ent, prof);
+      var ent = res[0], prof = res[1], partner = res[2], devices = res[3], bill = res[4];
+      dash.email = u.email || ''; dash.partner = partner; dash.ent = ent; dash.prof = prof; dash.u = u;
+      renderPlan(u, ent, prof, bill); renderUsage(ent); renderSteps(ent, devices); renderPartner(partner); renderBilling(u, ent, prof, bill); wireDataButtons();
       var dv = $('acctDevices'); dv.textContent = devices ? (devices.length ? devices.length + (devices.length === 1 ? ' device' : ' devices') : 'None yet. Sign in to the desktop app to register one.') : 'Not available';
     })();
     form(async function () {
@@ -216,6 +218,7 @@
     });
   }
 
+  var dash = { email: '', partner: null, ent: null, prof: null, u: null };
   // ===== account dashboard rendering (plain DOM, no innerHTML: every value is written as text) =====
   function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined && text !== null) e.textContent = text; return e; }
   function link(href, text, cls) { var a = el('a', cls, text); a.href = href; return a; }
@@ -244,11 +247,10 @@
     var ms = methods(u).map(function (x) { return x === 'google' ? 'Google' : x === 'email' ? 'Email and password' : x; });
     $('acctMethod').textContent = ms.join(' and ');
     $('helpMail').href = mailto('VertexStealth support', 'Account: ' + (u.email || ''));
-    $('delMail').href = mailto('Delete my VertexStealth account', 'Please delete the account ' + (u.email || '') + ' and its data.');
     if (methods(u).indexOf('email') < 0) { $('pwTitle').textContent = 'Security'; $('pwLabel').textContent = 'Set a password (at least 8 characters). The desktop app signs in with email and password.'; }
   }
 
-  function renderPlan(u, ent, prof) {
+  function renderPlan(u, ent, prof, bill) {
     var plans = cfg.plans || {};
     var eff = (ent && ent.effective) || (prof && prof.plan) || 'free';
     var kind = eff === 'trial' ? 'trial' : (eff === 'free' ? 'free' : 'paid');
@@ -263,10 +265,13 @@
     if (kind === 'trial') sub = 'Your free trial ends on ' + fmtDate(end) + (left ? ' (' + left + ' left).' : '.');
     else if (kind === 'free') sub = started ? 'Your free trial has ended. Choose a plan to keep creating and launching profiles.' : 'Your ' + (plans.trialDays || 3) + '-day free trial starts when you first sign in to the desktop app.';
     else sub = end ? 'Your plan is active until ' + fmtDate(end) + (left ? ' (' + left + ' left).' : '.') : 'Your plan is active with no end date.';
+    var cancelling = kind === 'paid' && bill && bill.cancel_scheduled;
+    if (cancelling) sub = 'Your subscription is cancelled and ends on ' + fmtDate(bill.ends_at || end) + (left ? ' (' + left + ' left)' : '') + '. You keep full access until then.';
     $('planSub').textContent = sub;
     $('fPlan').textContent = nice;
     $('fStatus').textContent = kind === 'free' ? (started ? 'Trial ended' : 'Trial not started') : kind === 'trial' ? 'Trial running' : 'Active';
-    $('fDateLabel').textContent = kind === 'trial' ? 'Trial ends' : kind === 'paid' ? 'Renews / ends' : 'Ended';
+    $('fDateLabel').textContent = kind === 'trial' ? 'Trial ends' : kind === 'paid' ? (cancelling ? 'Ends on' : 'Renews / ends') : 'Ended';
+    if (cancelling) { $('fStatus').textContent = 'Cancelled, ends soon'; badge.textContent = 'Ending'; badge.className = 'acct-badge free'; }
     $('fDate').textContent = end ? fmtDate(end) : (kind === 'paid' ? 'No end date' : '-');
     $('fLeft').textContent = left || '-';
     // bar: share of the period still left
@@ -331,14 +336,117 @@
     }
   }
 
-  function renderBilling(u, ent, prof) {
+  function renderBilling(u, ent, prof, bill) {
     var plans = cfg.plans || {}, b = clear('billBody');
     var list = el('ul', 'acct-prices');
     var yearSave = plans.monthly && plans.yearly ? Math.max(0, plans.monthly * 12 - plans.yearly) : 0;
     [['Monthly', money(plans.monthly) + ' / month'], ['Yearly', money(plans.yearly) + ' / year' + (yearSave ? ' (save ' + money(yearSave) + ')' : '')]].forEach(function (r) { var li = el('li'); li.appendChild(el('span', null, r[0])); li.appendChild(el('b', null, r[1])); list.appendChild(li); });
     b.appendChild(list);
-    var end = ent && ent.effective !== 'trial' && ent.effective !== 'free' ? (ent.plan_expires_at || (prof && prof.plan_expires_at)) : null;
-    b.appendChild(el('p', 'acct-muted', end ? 'Your current plan runs until ' + fmtDate(end) + '. Renew before then to keep every profile unlocked.' : 'Payment history: no payments recorded on this account yet.'));
+    var paid = ent && ent.effective !== 'trial' && ent.effective !== 'free';
+    var end = paid ? (ent.plan_expires_at || (prof && prof.plan_expires_at)) : null;
+    var cancelling = paid && bill && bill.cancel_scheduled;
+    if (cancelling) {
+      b.appendChild(el('p', 'acct-muted', 'Cancellation scheduled. You keep full access until ' + fmtDate(bill.ends_at || end) + ' and will not be charged again.'));
+      var keep = el('button', 'btn outline', 'Keep my subscription'); keep.type = 'button'; keep.addEventListener('click', resumeSubscription); b.appendChild(keep);
+    } else if (paid) {
+      b.appendChild(el('p', 'acct-muted', end ? 'Your current plan runs until ' + fmtDate(end) + '.' : 'Your plan has no end date.'));
+      var cb = el('button', 'btn danger', 'Cancel subscription'); cb.type = 'button'; cb.addEventListener('click', cancelSubscription); b.appendChild(cb);
+      b.appendChild(el('p', 'acct-muted', 'You can cancel at any time. You keep your plan until the end of the period you already paid for.'));
+    } else {
+      b.appendChild(el('p', 'acct-muted', 'Payment history: no payments recorded on this account. Your free trial does not renew, so there is nothing to cancel.'));
+    }
     b.appendChild(link(mailto('Invoice or refund request', 'Account: ' + (u.email || '')), 'Need an invoice or a refund? Contact us', 'acct-link'));
+  }
+
+  // ===== cancel subscription, export / delete data, delete account =====
+  function toast(text, bad) { var m = $('authMsg'); if (!m) return; m.textContent = text; m.className = 'auth-msg' + (bad ? '' : ' ok'); m.hidden = false; window.scrollTo({ top: 0, behavior: 'smooth' }); }
+  var DB_ERRORS = { no_active_subscription: 'There is no paid subscription to cancel.', confirm_mismatch: 'The email you typed does not match this account.', admin_account: 'Administrator accounts cannot be deleted here. Ask another administrator.', partner_balance: 'You are a partner and still have commissions that are pending, approved or owed. Please contact support so we can settle them first, then delete your account.', not_authenticated: 'Please sign in again.' };
+  function dbError(e) { var m = String((e && e.message) || ''); for (var k in DB_ERRORS) if (m.indexOf(k) > -1) return DB_ERRORS[k]; return m || 'Something went wrong. Please try again.'; }
+
+  /** ask({title, text, confirm, danger, fields:[{id,label,type,placeholder,required}]}) -> null or {values} */
+  function ask(o) {
+    return new Promise(function (resolve) {
+      var inputs = {};
+      function done(v) { bg.remove(); document.removeEventListener('keydown', onKey); resolve(v); }
+      var box = el('div', 'acct-modal'); box.setAttribute('role', 'dialog'); box.setAttribute('aria-modal', 'true');
+      box.appendChild(el('h3', null, o.title));
+      (o.text || []).forEach(function (t) { box.appendChild(el('p', null, t)); });
+      (o.fields || []).forEach(function (f) {
+        var lab = el('label', null, f.label); lab.setAttribute('for', 'ask_' + f.id); box.appendChild(lab);
+        var inp = el('input'); inp.id = 'ask_' + f.id; inp.type = f.type || 'text'; inp.placeholder = f.placeholder || ''; inp.autocomplete = 'off'; inputs[f.id] = inp; box.appendChild(inp);
+      });
+      var row = el('div', 'acct-modal-btns');
+      var no = el('button', 'btn outline', o.cancel || 'Keep it'); no.type = 'button'; no.addEventListener('click', function () { done(null); });
+      var ok = el('button', 'btn ' + (o.danger ? 'danger-solid' : 'primary'), o.confirm || 'Confirm'); ok.type = 'button';
+      function values() { var v = {}; for (var k in inputs) v[k] = inputs[k].value.trim(); return v; }
+      function valid() { return (o.fields || []).every(function (f) { return !f.mustEqual || inputs[f.id].value.trim().toLowerCase() === String(f.mustEqual).toLowerCase(); }); }
+      function refresh() { ok.disabled = !valid(); }
+      ok.addEventListener('click', function () { if (valid()) done({ values: values() }); });
+      Object.keys(inputs).forEach(function (k) { inputs[k].addEventListener('input', refresh); });
+      row.appendChild(no); row.appendChild(ok); box.appendChild(row); refresh();
+      var bg = el('div', 'acct-modal-bg'); bg.appendChild(box);
+      bg.addEventListener('mousedown', function (e) { if (e.target === bg) done(null); });
+      function onKey(e) { if (e.key === 'Escape') done(null); }
+      document.addEventListener('keydown', onKey); document.body.appendChild(bg);
+      (Object.keys(inputs).length ? inputs[Object.keys(inputs)[0]] : no).focus();
+    });
+  }
+
+  async function reloadAccount() { location.reload(); }
+
+  async function cancelSubscription() {
+    var end = dash.ent && dash.ent.plan_expires_at;
+    var r = await ask({ title: 'Cancel your subscription?', danger: true, confirm: 'Cancel subscription', cancel: 'Keep subscription',
+      text: ['Your plan will not renew' + (end ? ' and ends on ' + fmtDate(end) : '') + '. You keep full access until then, and you will not be charged again.', 'You can change your mind any time before it ends. Your browser profiles are never deleted; they lock when the plan ends and unlock when you subscribe again.'],
+      fields: [{ id: 'reason', label: 'Why are you leaving? (optional)', placeholder: 'Too expensive, missing a feature, no longer needed…' }] });
+    if (!r) return;
+    try { await api.rpc('cancel_my_subscription', { p_reason: r.values.reason || null }); toast('Your subscription is cancelled. You keep access until ' + (end ? fmtDate(end) : 'the end of your period') + '.'); setTimeout(reloadAccount, 1800); }
+    catch (e) { toast(dbError(e), true); }
+  }
+  async function resumeSubscription() {
+    try { await api.rpc('resume_my_subscription'); toast('Welcome back. Your subscription will continue.'); setTimeout(reloadAccount, 1500); } catch (e) { toast(dbError(e), true); }
+  }
+
+  async function exportData() {
+    var b = $('exportBtn'); b.disabled = true;
+    try {
+      var data = await api.rpc('export_my_data');
+      var blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+      var a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'vertexstealth-my-data-' + new Date().toISOString().slice(0, 10) + '.json';
+      document.body.appendChild(a); a.click(); a.remove(); setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+      toast('Your data file is downloading.');
+    } catch (e) { toast(dbError(e), true); }
+    b.disabled = false;
+  }
+
+  async function deleteData() {
+    var r = await ask({ title: 'Delete your data?', danger: true, confirm: 'Delete my data', cancel: 'Cancel',
+      text: ['This erases: your browser profile registry in our cloud (the list of profile IDs), your website activity and location records, your crash reports, and your onboarding answers.', 'It keeps: your account, email, plan and terms acceptance, and the device identifiers we use to prevent trial abuse. Your browser profiles, cookies and settings on your own computer are not touched.', 'This cannot be undone.'] });
+    if (!r) return;
+    try { var d = await api.rpc('delete_my_data'); toast('Done. We removed ' + (d.browser_profiles || 0) + ' registry entries, ' + (d.website_events || 0) + ' activity records and ' + (d.crash_reports || 0) + ' crash reports.'); setTimeout(reloadAccount, 2200); }
+    catch (e) { toast(dbError(e), true); }
+  }
+
+  async function deleteAccount() {
+    var warn = ['This permanently deletes your VertexStealth account and your data. It cannot be undone.'];
+    var paid = dash.ent && dash.ent.effective !== 'free' && dash.ent.effective !== 'trial';
+    if (paid) warn.push('You have an active paid plan' + (dash.ent.plan_expires_at ? ' until ' + fmtDate(dash.ent.plan_expires_at) : '') + '. It ends immediately when you delete the account, and remaining time is not refunded unless the law requires it.');
+    if (dash.partner && (dash.partner.status === 'active' || dash.partner.status === 'suspended')) warn.push('You are also a partner. Your partner access ends too. If commissions are still unpaid we will ask you to contact support first.');
+    warn.push('Your files and browser profiles on your own computer stay there; only the cloud account is removed.');
+    var r = await ask({ title: 'Delete your account?', danger: true, confirm: 'Permanently delete account', cancel: 'Keep my account', text: warn,
+      fields: [{ id: 'email', label: 'Type your email address to confirm: ' + dash.email, placeholder: dash.email, mustEqual: dash.email }, { id: 'reason', label: 'Why are you leaving? (optional)', placeholder: '' }] });
+    if (!r) return;
+    try {
+      await api.rpc('delete_my_account', { p_confirm: r.values.email, p_reason: r.values.reason || null });
+      try { Object.keys(localStorage).forEach(function (k) { if (k === 'vs.session' || k.indexOf('vs_ref') === 0) localStorage.removeItem(k); }); } catch (e) {}
+      $('accountBody').hidden = true;
+      toast('Your account has been deleted. Thank you for trying VertexStealth. Taking you to the home page…');
+      setTimeout(function () { location.replace('/'); }, 3500);
+    } catch (e) { toast(dbError(e), true); }
+  }
+
+  function wireDataButtons() {
+    var map = { exportBtn: exportData, delDataBtn: deleteData, delAcctBtn: deleteAccount };
+    Object.keys(map).forEach(function (id) { var b = $(id); if (b && !b.dataset.bound) { b.dataset.bound = '1'; b.addEventListener('click', map[id]); } });
   }
 })();

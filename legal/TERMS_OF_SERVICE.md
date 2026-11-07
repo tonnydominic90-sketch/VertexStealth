@@ -36,7 +36,7 @@ Prices are in US dollars and exclude any applicable taxes (such as VAT or sales 
 
 **Renewal.** Card and PayPal subscriptions renew automatically at the end of each billing period at the then-current price until you cancel. Cryptocurrency payments are one-off payments for a single billing period and do not renew automatically; we will remind you before your access expires so you can pay again. Cryptocurrency payments are priced in US dollars and converted at the rate shown at checkout; network and exchange fees are your responsibility, and you must send the exact amount requested.
 
-**Cancellation.** You may cancel a subscription at any time from your payment provider's subscription settings or by emailing support@vertexstealth.top. Cancellation takes effect at the end of the current billing period; you keep paid access until then and are not charged again.
+**Cancellation.** You may cancel a subscription at any time from the Billing section of your account page, from your payment provider's subscription settings, or by emailing support@vertexstealth.top. Cancellation takes effect at the end of the current billing period; you keep paid access until then and are not charged again.
 
 **Price changes.** We may change prices for future billing periods by giving at least 30 days' notice. The new price applies from your next renewal, and you may cancel before then.
 
@@ -67,7 +67,7 @@ You are responsible for any proxy or third-party service you connect to the Serv
 ## 8. Suspension and termination
 We may warn, restrict, suspend or terminate an account, and may block the device bound to it, if we reasonably believe that you have breached these Terms or the law, abused the free trial, put the Service or other people at risk, or if we are required to by law. Where reasonable and lawful we will give you notice and an opportunity to respond, but we may act immediately in serious cases.
 
-You may stop using the Service and request deletion of your account at any time by emailing support@vertexstealth.top. When your account ends, your right to use the Service ends. Sections that by their nature should continue (including sections 6, 10, 11, 12, 13 and 14) survive termination.
+You may stop using the Service and delete your account at any time from your account page (Your data and account), or by emailing support@vertexstealth.top. Deleting your account ends any paid plan immediately; remaining paid time is not refunded unless the law requires it. When your account ends, your right to use the Service ends. Sections that by their nature should continue (including sections 6, 10, 11, 12, 13 and 14) survive termination.
 
 ## 9. Intellectual property
 The Service, including its software, design, text and trademarks, belongs to Vertex Tech Solutions and its licensors and is licensed to you, not sold, under the [EULA](EULA.md). You may not use our name or logo without written permission. If you send us feedback or suggestions we may use them without restriction or payment.

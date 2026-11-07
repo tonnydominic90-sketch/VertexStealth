@@ -78,7 +78,7 @@ If the same email already has a password account, Supabase links both sign-in me
 
 ## Part 6. Account dashboard and partner dashboard access
 
-1. Supabase -> **SQL Editor** -> paste all of `supabase/account-dashboard.sql` -> **Run**. (Safe to run twice. It adds three functions: `my_partner`, `my_devices`, `partner_session_for_user`.)
+1. Supabase -> **SQL Editor** -> paste all of `supabase/account-dashboard.sql` -> **Run**. Then do the same with `supabase/account-privacy.sql` (cancel subscription, download / delete my data, delete account). (Safe to run twice. It adds three functions: `my_partner`, `my_devices`, `partner_session_for_user`.)
 2. Redeploy the functions (they share the changed email code):
    ```
    supabase functions deploy partner-apply --no-verify-jwt
@@ -91,3 +91,14 @@ If the same email already has a password account, Supabase links both sign-in me
 How it works for a partner: when you **Approve** an application, the partner gets the email. If they have (or create) a VertexStealth account
 with the **same, confirmed email** (password or Google), `/account` shows **Open partner dashboard** and `/partner` signs them in automatically.
 Without an account they can still use the one-time email link on `/partner`.
+
+## Part 7. Cancel subscription, delete data, delete account
+
+Run `supabase/account-privacy.sql` once (Part 6). It adds the tables `subscription_cancellations` and `account_deletions` and the functions behind the buttons on `/account`.
+
+* **Cancel subscription** records the request and keeps access until the plan's end date. Nothing renews automatically today because checkout is not live.
+  **When you switch on payments**, your payment webhook must skip renewal for any user with a row in `subscription_cancellations` where `status = 'scheduled'`, and cancel the provider subscription. You can see all cancellations in Supabase -> Table Editor -> `subscription_cancellations`.
+* **Download my data** gives the person a JSON file of their data.
+* **Delete my data** erases the cloud profile registry, activity, location and crash records and onboarding answers. Account, plan and device identifiers stay.
+* **Delete account** needs the person to type their email. It removes the account and data, ends any paid plan, and keeps device identifiers (no longer linked to them) so a trial cannot be restarted on the same computer, plus anonymised partner and payment records. It refuses (with a clear message) for administrators and for partners with unpaid commissions: settle those first, then they can delete.
+* I updated the Terms and Privacy Policy text in `legal/` to describe this. Please read the wording and have it checked before you rely on it.

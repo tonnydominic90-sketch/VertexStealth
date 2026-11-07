@@ -55,3 +55,24 @@
 .acct-sec .auth-btn{width:auto;display:inline-flex;margin-top:4px;padding:12px 20px;border:1px solid #cfe0ee;background:#fff;color:#101722;font-weight:800;box-shadow:none}
 .acct-sec .auth-btn:hover{background:#f1f7fc}
 .acct-sec .field input{width:100%;padding:12px 14px;border:1px solid #ccd9e5;border-radius:12px}
+
+/* cancel / data / delete */
+.acct-wrap .btn.danger{background:#fff;color:#b0291f;border:1px solid #efc0ba;box-shadow:none}
+.acct-wrap .btn.danger:hover{background:#fff1f0;border-color:#e59a93}
+.acct-wrap .btn.danger-solid,.acct-modal .btn.danger-solid{background:#c6372c;color:#fff;border:1px solid #c6372c;box-shadow:none}
+.acct-modal .btn.danger-solid:hover{background:#a82e24}
+.acct-modal .btn[disabled]{opacity:.45;cursor:not-allowed}
+.acct-item{display:flex;justify-content:space-between;align-items:center;gap:24px;padding:18px 0;border-top:1px solid #edf2f7}
+.acct-item:first-of-type{border-top:0;padding-top:4px}
+.acct-item h3{font-size:15px;margin:0 0 4px}.acct-item p{margin:0;max-width:560px}
+.acct-item .btn{white-space:nowrap;flex:0 0 auto}
+.acct-danger h3{color:#b0291f}
+.acct-modal-bg{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:18px;background:rgba(9,18,30,.55);backdrop-filter:blur(3px)}
+.acct-modal{width:min(520px,100%);max-height:92vh;overflow:auto;background:#fff;border-radius:20px;padding:28px;box-shadow:0 30px 90px rgba(0,0,0,.35)}
+.acct-modal h3{margin:0 0 12px;font-size:20px;letter-spacing:-.03em}
+.acct-modal p{margin:0 0 12px;font-size:14.5px;line-height:1.65;color:#4a5a6e}
+.acct-modal label{display:block;margin:16px 0 6px;font-size:12.5px;font-weight:800;color:#22344a;overflow-wrap:anywhere}
+.acct-modal input{width:100%;padding:12px 14px;border:1px solid #ccd9e5;border-radius:12px;font:inherit;font-size:15px}
+.acct-modal input:focus{outline:0;border-color:#169ee8;box-shadow:0 0 0 4px rgba(22,158,232,.16)}
+.acct-modal-btns{display:flex;justify-content:flex-end;gap:10px;margin-top:22px;flex-wrap:wrap}
+@media(max-width:700px){.acct-item{flex-direction:column;align-items:flex-start}.acct-item .btn{width:100%;justify-content:center}}
