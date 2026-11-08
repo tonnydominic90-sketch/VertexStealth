@@ -82,6 +82,7 @@ Two separate things are often called a "WebRTC leak":
 - Choose a WebRTC mode in your profile settings that matches your goal. VertexStealth offers WebRTC options per profile so you can review and adjust the behavior.
 - Re-test after every change of browser version or proxy.
 - If a page reports an address that does not match your proxy, adjust the WebRTC mode and test again before using the profile for real work.
+- For a full repeatable routine, follow [WebRTC privacy leak protection: a profile check workflow](/blog/webrtc-privacy-leak-protection-checklist).
 
 ## Troubleshooting common proxy problems
 

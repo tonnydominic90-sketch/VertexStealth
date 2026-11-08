@@ -293,7 +293,17 @@ const posts = (fs.existsSync(blogDir) ? fs.readdirSync(blogDir).filter((f) => f.
   if (!m) throw new Error(`blog/${f}: missing front matter`);
   const fm = Object.fromEntries(m[1].split('\n').map((l) => { const i = l.indexOf(':'); return [l.slice(0, i).trim(), l.slice(i + 1).trim().replace(/^"(.*)"$/, '$1')]; }));
   for (const k of ['title', 'description', 'date']) if (!fm[k]) throw new Error(`blog/${f}: front matter "${k}" is required`);
-  const words = m[2].split(/\s+/).length;
+  // real reader-visible words: drop markdown link targets, code and table syntax before counting
+  const words = (m[2].replace(/\]\([^)]*\)/g, ']').replace(/https?:\/\/\S+/g, '').replace(/[#*`|>]|^-{3,}$/gm, ' ').match(/[A-Za-z0-9][A-Za-z0-9'’\/.\-]*/g) || []).length;
+  // blog standard (see SETUP notes): meta description 120-160 characters; 900-1,200 words; homepage + internal links
+  const dlen = fm.description.length;
+  if (dlen < 120 || dlen > 160) throw new Error(`blog/${f}: meta description is ${dlen} characters; it must be 120-160`);
+  if (fm.date >= '2026-11-08') {
+    if (words < 900 || words > 1200) console.warn(`WARNING blog/${f}: ${words} words (standard is 900-1,200)`);
+    if (!/\]\(\/\)/.test(m[2])) throw new Error(`blog/${f}: must link back to the homepage with [text](/)`);
+    if ((m[2].match(/\]\(\/[^)]*\)/g) || []).length < 4) throw new Error(`blog/${f}: needs at least 4 internal links`);
+    if (!fm.author) throw new Error(`blog/${f}: front matter "author" is required`);
+  }
   return { slug: f.replace(/\.md$/, ''), ...fm, md: m[2], words, mins: Math.max(1, Math.round(words / 200)) };
 }).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
 
@@ -321,10 +331,10 @@ for (const p of posts) {
   page({
     file: 'blog/' + p.slug + '.html', title: p.seoTitle || `${p.title} — ${cfg.name}`, desc: p.description, canonicalPath: '/blog/' + p.slug,
     crumb: [['Blog', '/blog'], [p.title, '/blog/' + p.slug]],
-    nodes: [{ '@type': 'BlogPosting', '@id': url + '#post', headline: p.title, description: p.description, datePublished: p.date, dateModified: p.updated || p.date, wordCount: p.words, inLanguage: 'en', mainEntityOfPage: url, author: { '@id': siteUrl + '/#org' }, publisher: { '@id': siteUrl + '/#org' } }],
+    nodes: [{ '@type': 'BlogPosting', '@id': url + '#post', headline: p.title, description: p.description, datePublished: p.date, dateModified: p.updated || p.date, wordCount: p.words, inLanguage: 'en', mainEntityOfPage: url, author: p.author ? { '@type': 'Person', name: p.author } : { '@id': siteUrl + '/#org' }, publisher: { '@id': siteUrl + '/#org' } }],
     main: `<section class="page"><div class="wrap legal"><a class="back" href="/blog">← All articles</a>
 <h1>${esc(p.title)}</h1>
-<div class="post-meta">By the ${esc(cfg.name)} team · ${p.updated ? 'Updated ' + fmt(p.updated) : 'Published ' + fmt(p.date)} · ${p.mins} min read</div>
+<div class="post-meta">By ${p.author ? esc(p.author) : 'the ' + esc(cfg.name) + ' team'} · ${p.updated ? 'Updated ' + fmt(p.updated) : 'Published ' + fmt(p.date)} · ${p.mins} min read</div>
 ${toc}
 ${bodyHtml}
 <div class="post-cta"><strong>Try it yourself.</strong> <a href="/download">Download ${esc(cfg.name)} for Windows</a> and try it free for ${P.trialDays} days, or see <a href="/features">all features</a> and <a href="/pricing">pricing</a>.</div>
@@ -725,7 +735,7 @@ infoPage({ slug: 'docs', h1: 'VertexStealth documentation',
   body: `<h2>How do I get started?</h2>
 ${ul(['<a href="/system-requirements">System requirements</a>: Windows 10 and 11, Chrome or Firefox installed', '<a href="/download">Download and install</a>, and <a href="/blog/windows-protected-your-pc-smartscreen-install">what to do about the SmartScreen warning</a>', '<a href="/signup">Create an account</a> (works on the website and in the app)', '<a href="/how-it-works">How VertexStealth works</a>: create, configure, launch and inspect'])}
 <h2>How do I use profiles, proxies and fingerprint settings?</h2>
-${ul(['<a href="/multi-profile-management">Multi-profile management</a> for Chrome and Firefox', '<a href="/features">Features</a> and the <a href="/product-preview">product preview</a>', '<a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies and WebRTC leaks</a>', '<a href="/blog/what-is-browser-fingerprinting">What is browser fingerprinting and how to check yours</a>', '<a href="/blog/antidetect-browser-vs-vpn-vs-incognito-mode">Antidetect browser vs VPN vs incognito mode</a>'])}
+${ul(['<a href="/multi-profile-management">Multi-profile management</a> for Chrome and Firefox', '<a href="/features">Features</a> and the <a href="/product-preview">product preview</a>', '<a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies and WebRTC leaks</a>', '<a href="/blog/webrtc-privacy-leak-protection-checklist">WebRTC privacy leak protection: a profile check workflow</a>', '<a href="/blog/anti-detect-browser-comparison-checklist">Anti detect browser comparison checklist</a>', '<a href="/blog/what-is-browser-fingerprinting">What is browser fingerprinting and how to check yours</a>', '<a href="/blog/antidetect-browser-vs-vpn-vs-incognito-mode">Antidetect browser vs VPN vs incognito mode</a>'])}
 <h2>Where are plans, policies and answers?</h2>
 ${ul(['<a href="/pricing">Pricing and plan comparison</a>', '<a href="/faq">Frequently asked questions</a>', '<a href="/security">Security and privacy overview</a> and <a href="/acceptable-use">acceptable use</a>', '<a href="/terms">Terms of Service</a>, <a href="/privacy">Privacy Policy</a> and <a href="/eula">EULA</a>'])}
 <h2>What are the known limits?</h2>

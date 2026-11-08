@@ -61,7 +61,7 @@ VertexStealth works this way on Windows: it launches the Chrome or Firefox you a
 
 - **You just want no history on a shared computer:** incognito mode is enough.
 - **You are on public Wi-Fi or need a different country's IP:** use a VPN.
-- **You run several accounts or test environments and need them kept apart:** use an antidetect browser with a [multi-profile workflow](/multi-profile-management).
+- **You run several accounts or test environments and need them kept apart:** use an antidetect browser with a [multi-profile workflow](/multi-profile-management). If you are choosing between products, our [anti detect browser comparison checklist](/blog/anti-detect-browser-comparison-checklist) lists what to check.
 - **You need separate identities and a different IP for each:** use an antidetect browser with a proxy configured per profile. Our guide to [HTTP, HTTPS and SOCKS5 proxies](/blog/http-vs-socks5-proxy-browser-profiles) explains how to choose.
 
 You can also combine tools. A common setup is profiles with a proxy each, which makes a VPN unnecessary for that traffic. Avoid stacking tools you do not understand, since conflicting layers cause connection problems.
