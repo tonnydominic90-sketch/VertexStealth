@@ -123,7 +123,7 @@ body[data-page=partner-admin]{background:#f2f6fa;margin:0;color:#14202e}
 .pa-login-card h1{font-size:26px;letter-spacing:-.04em;margin:0 0 6px}
 .pa-login-card>p{margin:0 0 24px;font-size:14px;color:var(--pp-muted)}
 .pa-brand{display:flex;align-items:center;gap:10px;font-weight:850;font-size:18px;letter-spacing:-.04em}
-.pa-brand i{display:grid;place-items:center;width:34px;height:34px;border-radius:10px;font-style:normal;font-size:16px;color:#fff;background:linear-gradient(135deg,#27b3f5,#0864b0)}
+.pa-brand img{display:block;width:34px;height:34px;border-radius:10px}
 .pa-brand span span{color:var(--pp-blue)}
 .pa{display:grid;grid-template-columns:248px minmax(0,1fr);min-height:100vh}
 .pa[hidden],.pa-login[hidden]{display:none}

@@ -31,6 +31,7 @@ export async function sendEmail(m: Mail): Promise<boolean> {
 
 const shell = (title: string, body: string) =>
   `<div style="font-family:Arial,Helvetica,sans-serif;max-width:560px;margin:0 auto;color:#1a2433;line-height:1.6">
+<p style="margin:0 0 16px"><img src="${siteUrl()}/icon-192.png" width="34" height="34" alt="VertexStealth" style="vertical-align:middle;border-radius:9px"> <b style="font-size:17px;vertical-align:middle">VertexStealth</b></p>
 <h2 style="margin:0 0 14px">${esc(title)}</h2>${body}
 <p style="color:#7a8898;font-size:12px;margin-top:28px">VertexStealth Partner Program</p></div>`;
 

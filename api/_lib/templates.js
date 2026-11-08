@@ -63,7 +63,7 @@ function layout({ subject, bodyHtml, category, unsubscribeUrl, supportEmail, sit
     : 'You are receiving this service message because you have a VertexStealth account.';
   return `<!doctype html><html><body style="margin:0;background:#f4f7fb;font-family:Segoe UI,Arial,sans-serif;color:#1b2a3a">
 <div style="max-width:600px;margin:0 auto;padding:28px 16px">
-<div style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin:0 0 18px"><span style="display:inline-block;background:#169ee8;color:#fff;border-radius:8px;padding:2px 9px;margin-right:8px">V</span>Vertex<span style="color:#169ee8">Stealth</span></div>
+<div style="font-size:20px;font-weight:800;letter-spacing:-.03em;margin:0 0 18px"><img src="${esc(siteUrl)}/icon-192.png" width="30" height="30" alt="" style="vertical-align:middle;border-radius:8px;margin-right:8px">Vertex<span style="color:#169ee8">Stealth</span></div>
 <div style="background:#fff;border:1px solid #dfe8f0;border-radius:14px;padding:28px;font-size:15px;line-height:1.6">${bodyHtml}</div>
 <p style="font-size:12px;color:#6b798b;margin:18px 4px 0;line-height:1.6">${foot}<br>Vertex Tech Solutions · <a href="mailto:${esc(supportEmail)}" style="color:#6b798b">${esc(supportEmail)}</a> · <a href="${esc(siteUrl)}" style="color:#6b798b">${esc(siteUrl.replace(/^https?:\/\//, ''))}</a></p>
 </div></body></html>`;

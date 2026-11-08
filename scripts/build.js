@@ -112,7 +112,7 @@ const header = `<a class="skip" href="#top">Skip to content</a>
 <div class="announcement">A focused workspace for browser profile management. <strong>Meet VertexStealth.</strong> <a href="/features">Explore the platform →</a></div>
 <header class="header">
  <div class="wrap nav">
-  <a class="brand" href="/" aria-label="VertexStealth home"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a>
+  <a class="brand" href="/" aria-label="VertexStealth home"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a>
   <button class="menu" id="menu" aria-expanded="false" aria-controls="links">Menu</button>
   <nav class="links" id="links" aria-label="Main navigation">
    <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a><a class="m-only" href="/login" data-auth-link>Sign in</a>
@@ -121,7 +121,7 @@ const header = `<a class="skip" href="#top">Skip to content</a>
  </div>
 </header>`;
 
-const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark">V</span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
+const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
 
 
 // ---------- structured data ----------
@@ -147,7 +147,7 @@ function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null
   const robots = index && isProd ? 'index,follow,max-image-preview:large' : 'noindex,nofollow';
   const og = `${siteUrl}/og-image.png`;
   const graph = [
-    { '@type': 'Organization', '@id': siteUrl + '/#org', name: cfg.company, url: siteUrl + '/', email: cfg.email, logo: siteUrl + '/favicon.svg' },
+    { '@type': 'Organization', '@id': siteUrl + '/#org', name: cfg.company, url: siteUrl + '/', email: cfg.email, logo: siteUrl + '/icon-512.png' },
     { '@type': 'WebSite', '@id': siteUrl + '/#website', url: siteUrl + '/', name: cfg.name, inLanguage: 'en', publisher: { '@id': siteUrl + '/#org' } },
     { '@type': 'WebPage', '@id': url + '#webpage', url, name: title, description: desc, inLanguage: 'en', dateModified: buildDate, isPartOf: { '@id': siteUrl + '/#website' } },
     ...nodes,
@@ -165,6 +165,9 @@ function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null
 <meta name="theme-color" content="#f7fbff">
 <link rel="canonical" href="${esc(url)}">
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+<link rel="icon" href="/favicon.ico" sizes="48x48">
+<link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="${esc(cfg.name)}">
 <meta property="og:title" content="${esc(title)}">
@@ -535,13 +538,13 @@ if (adminKey && partnerSbUrl && backendLive) {
     file: 'partner-admin.html', title: 'Partner admin — VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, bare: true, scripts: [partnerAdminJs], styles: [partnersCss], pageId: 'partner-admin',
     main: `<div id="padmin" data-sb="${esc(partnerSbUrl)}" data-anon="${esc(adminKey)}" data-fn="${esc(fnUrl)}">
 <div class="pa-login" id="login"><div class="pa-login-card">
-<div class="pa-brand"><i>V</i><span>Vertex<span>Stealth</span></span></div>
+<div class="pa-brand"><img src="/logo.svg" alt="" width="34" height="34"><span>Vertex<span>Stealth</span></span></div>
 <h1>Partner admin</h1><p>Sign in with your admin account to review applications and manage partners.</p>
 <form class="pp-form" id="login-form"><label><span>Admin email</span><input id="a-email" type="email" required autocomplete="username" placeholder="Your admin email"></label><label><span>Password</span><input id="a-pass" type="password" required autocomplete="current-password"></label><button class="btn primary" type="submit">Sign in</button><p class="pp-status" id="login-status" role="status"></p></form>
 </div></div>
 <div class="pa" id="app" hidden>
 <aside class="pa-side">
-<div class="pa-brand"><i>V</i><span>Vertex<span>Stealth</span></span></div>
+<div class="pa-brand"><img src="/logo.svg" alt="" width="34" height="34"><span>Vertex<span>Stealth</span></span></div>
 <div class="pa-eyebrow">Partner program</div>
 <button class="pa-nav on" data-tab="applications" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v13H8l-4 4z"/><path d="M8 9h8M8 13h5"/></svg>Applications<span class="pa-count" id="pending-count" hidden></span></button>
 <button class="pa-nav" data-tab="partners" type="button"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20a6.5 6.5 0 0113 0"/><circle cx="17.5" cy="9" r="2.5"/><path d="M17 14.5a5 5 0 014.5 5"/></svg>Partners</button>
