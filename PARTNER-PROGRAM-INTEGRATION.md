@@ -2,10 +2,10 @@
 
 The website build now publishes these partner routes:
 
-- `/partners-program` — public program page and application form
-- `/r/:code` — referral tracking/redirect to `/download`
-- `/partner` — partner magic-link login and partner dashboard
-- `/partner-admin` — partner-program review and payout administration
+- `/partners-program`: public program page and application form
+- `/r/:code`: referral tracking/redirect to `/download`
+- `/partner`: partner magic-link login and partner dashboard
+- `/partner-admin`: partner-program review and payout administration
 
 The existing `/admin` remains the VertexStealth account/site admin. Its sidebar now links to **Partner program** (`/partner-admin`); partner-program administration is intentionally kept in its own protected screen and uses the partner Supabase RPCs/functions.
 

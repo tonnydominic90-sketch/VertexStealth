@@ -121,7 +121,7 @@ const header = `<a class="skip" href="#top">Skip to content</a>
  </div>
 </header>`;
 
-const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span><span>Product mockups are illustrative.</span></div></div></footer>`;
+const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span></div></div></footer>`;
 
 
 // ---------- structured data ----------
@@ -195,7 +195,7 @@ ${bare ? '' : footer}
 }
 
 // ---------- home ----------
-const defaultTitle = 'VertexStealth — Antidetect Browser & Multi-Profile Manager';
+const defaultTitle = 'VertexStealth: Antidetect Browser & Multi-Profile Manager';
 const homeDesc = 'VertexStealth is an antidetect browser and multi-profile manager for Windows: isolated Chrome and Firefox profiles with per-profile proxies, fingerprint controls and live checks.';
 
 const homeMain = read('src/index.main.html')
@@ -208,7 +208,7 @@ page({ file: 'index.html', title: defaultTitle, desc: homeDesc, canonicalPath: '
 const secs = {};
 for (const m of homeMain.matchAll(/<section class="[^"]*" id="([^"]+)">[\s\S]*?<\/section>/g)) secs[m[1]] = m[0];
 const sectionPages = [
-  { slug: 'features', ids: ['features', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features — Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'Everything in VertexStealth: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings, WebRTC options and fingerprint checks.',
+  { slug: 'features', ids: ['features', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features: Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'Everything in VertexStealth: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings, WebRTC options and fingerprint checks.',
     answer: 'VertexStealth is a Windows antidetect browser and multi-profile manager that launches your installed Chrome or Firefox with isolated profile folders, per-profile proxies and configurable fingerprint settings.',
     faqs: [
       ['How does VertexStealth keep browser profiles separate?', 'Each managed profile launches Chrome or Firefox with its own browser data folder, so cookies and browser storage stay separate from other VertexStealth profiles and from your regular browser profile.'],
@@ -216,28 +216,28 @@ const sectionPages = [
       ['Which fingerprint signals can I configure?', 'Supported signals include user agent, platform, language, timezone, geolocation, screen resolution, fonts, hardware-related values, WebRTC behavior and selected Canvas, WebGL and audio overrides. Always verify what the browser actually reports with the built-in Fingerprint Check.'],
       ['Does VertexStealth work on macOS or Linux?', 'Not yet. VertexStealth is a Windows 10 and 11 desktop app and launches Google Chrome or Mozilla Firefox, which must already be installed.'],
     ], nodes: () => [software()] },
-  { slug: 'product-preview', ids: ['product-preview'], crumb: 'Product preview', title: 'Product Preview — Proxy, Fingerprint & Checks | VertexStealth', desc: 'A closer look at VertexStealth: proxy configuration, fingerprint settings and the built-in fingerprint check.',
+  { slug: 'product-preview', ids: ['product-preview'], crumb: 'Product preview', title: 'Product Preview: Proxy, Fingerprint & Checks | VertexStealth', desc: 'A closer look at VertexStealth: proxy configuration, fingerprint settings and the built-in fingerprint check.',
     answer: 'The VertexStealth interface brings the controls for each browser profile together: proxy configuration, supported fingerprint settings and a fingerprint check, all set per profile.',
     faqs: [
       ['What profile controls can I see in the VertexStealth interface?', 'Each profile has proxy settings (type, credentials and a connection test), fingerprint settings such as navigator, display, environment and location values, WebRTC options and a Fingerprint Check.'],
       ['How does VertexStealth help keep browser profiles separate?', 'Every profile has its own settings and its own browser data folder, so one profile\'s cookies and storage are not shared with another.'],
       ['What can I inspect before I use a profile?', 'After launching a profile you can inspect selected browser properties with the Fingerprint Check, and open external diagnostic pages to compare what the browser reports.'],
     ], nodes: () => [software()] },
-  { slug: 'how-it-works', ids: ['how-it-works'], crumb: 'How it works', title: 'How VertexStealth Works — From Profile to Verified Session', desc: 'Create a browser profile, set its environment, launch it and inspect what the browser reports, in three steps.',
+  { slug: 'how-it-works', ids: ['how-it-works'], crumb: 'How it works', title: 'How VertexStealth Works: From Profile to Verified Session', desc: 'Create a browser profile, set its environment, launch it and inspect what the browser reports, in three steps.',
     answer: 'VertexStealth works in three steps: create a profile for Chrome or Firefox, set its environment (proxy, timezone, WebRTC and other settings), then launch it and inspect what the browser reports.',
     faqs: [
       ['How do I create a VertexStealth profile?', 'Open the app, add a profile, give it a name, choose Chrome or Firefox and pick a supported desktop or mobile device preset, or randomize the supported settings.'],
       ['What do I need installed before I start?', 'You need Windows 10 or 11 and Google Chrome or Mozilla Firefox already installed. You also create a VertexStealth account inside the app.'],
       ['How do I check a profile after launching it?', 'Use the built-in Fingerprint Check to inspect selected browser properties, and open external diagnostic pages to confirm what the browser reports.'],
     ], howto: { name: 'How to create and verify a VertexStealth profile', steps: [['Create a profile', 'Name the profile, select Chrome or Firefox, and choose a supported device preset or environment configuration.'], ['Set your environment', 'Configure a proxy if needed, then review timezone, geolocation, WebRTC, navigator and other available settings.'], ['Launch and inspect', 'Launch the isolated browser and use Fingerprint Check or external diagnostics to inspect selected properties.']] } },
-  { slug: 'use-cases', ids: ['use-cases'], crumb: 'Use cases', title: 'Use Cases — QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: QA and web testing, digital marketing, research and developer workflows.',
+  { slug: 'use-cases', ids: ['use-cases'], crumb: 'Use cases', title: 'Use Cases: QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: QA and web testing, digital marketing, research and developer workflows.',
     answer: 'VertexStealth is used for QA and web testing, digital marketing, research and developer workflows where separate browser sessions and controlled test environments are useful.',
     faqs: [
       ['Which workflows can VertexStealth support?', 'QA and web testing, digital marketing (keeping client or campaign sessions separate), research and analysis with dedicated sessions and proxies, and developer workflows such as inspecting browser properties and using supported local automation.'],
       ['Can I use VertexStealth for any activity?', 'No. The Terms of Service allow only lawful use and prohibit fraud, identity theft, account takeover, credential stuffing, spam and unauthorised access. Many websites also restrict multiple accounts, and following their rules is your responsibility.'],
       ['Does VertexStealth guarantee anonymity or prevent account bans?', 'No. Profile separation and fingerprint settings do not guarantee anonymity, undetectability or freedom from website restrictions.'],
     ] },
-  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing — Free Trial, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: a ' + P.trialDays + '-day free trial with up to ' + P.trialProfiles + ' profiles, then ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.',
+  { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing: Free Trial, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: a ' + P.trialDays + '-day free trial with up to ' + P.trialProfiles + ' profiles, then ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.',
     answer: `VertexStealth offers a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles, then paid plans at ${money(P.monthly)} per month or ${money(P.yearly)} per year with no profile limit.` + (live ? '' : ' Paid checkout is not open yet.'),
     extra: `<section class="section wrap legal"><h2>How do the VertexStealth plans compare?</h2>
 <table><thead><tr><th></th><th>Free trial</th><th>Monthly</th><th>Yearly</th></tr></thead><tbody>
@@ -265,7 +265,7 @@ const sectionPages = [
       ['What happens when the trial ends?', `You need a paid plan to keep using your profiles. Your profiles are not deleted: they are locked and become usable again as soon as a paid plan is active.`],
       ['Which payment methods are accepted?', 'Credit or debit card, PayPal and cryptocurrency through Binance Pay. Card and PayPal subscriptions renew automatically; crypto payments are one-off and do not renew automatically.'],
     ], nodes: () => [software()] },
-  { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ — VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.',
+  { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ: VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.',
     answer: 'These answers cover what VertexStealth is, how profiles and proxies work, which plans exist, and what the software cannot guarantee.', nodes: () => [faqNode(faq)], grouped: [
       ['What is VertexStealth and how does it work?', ['What is VertexStealth?', 'How does profile isolation work?', 'Which browsers and operating systems', 'Can I use VertexStealth on macOS', 'Do I need an account?']],
       ['How do proxies, fingerprints and anonymity work?', ['Can I use my own proxy?', 'What is a browser fingerprint?', 'Can VertexStealth guarantee anonymity', 'Does VertexStealth include cloud profiles']],
@@ -311,7 +311,7 @@ const posts = (fs.existsSync(blogDir) ? fs.readdirSync(blogDir).filter((f) => f.
 }).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
 
 page({
-  file: 'blog.html', title: 'Blog — Antidetect Browser & Multi-Profile Guides | VertexStealth', canonicalPath: '/blog', crumb: 'Blog',
+  file: 'blog.html', title: 'Blog: Antidetect Browser & Multi-Profile Guides | VertexStealth', canonicalPath: '/blog', crumb: 'Blog',
   desc: 'Guides on browser fingerprints, proxies and multi-profile browser management from the VertexStealth team.',
   nodes: [{ '@type': 'Blog', '@id': siteUrl + '/blog#blog', url: siteUrl + '/blog', name: cfg.name + ' Blog', publisher: { '@id': siteUrl + '/#org' } }],
   main: `<section class="page"><div class="wrap">
@@ -332,7 +332,7 @@ for (const p of posts) {
     });
   const toc = `<nav class="toc" aria-label="Table of contents"><strong>In this article</strong><ol>${heads.map(([id, t]) => `<li><a href="#${id}">${t}</a></li>`).join('')}</ol></nav>`;
   page({
-    file: 'blog/' + p.slug + '.html', title: p.seoTitle || `${p.title} — ${cfg.name}`, desc: p.description, canonicalPath: '/blog/' + p.slug,
+    file: 'blog/' + p.slug + '.html', title: p.seoTitle || `${p.title} | ${cfg.name}`, desc: p.description, canonicalPath: '/blog/' + p.slug,
     crumb: [['Blog', '/blog'], [p.title, '/blog/' + p.slug]],
     nodes: [{ '@type': 'BlogPosting', '@id': url + '#post', headline: p.title, description: p.description, datePublished: p.date, dateModified: p.updated || p.date, wordCount: p.words, inLanguage: 'en', mainEntityOfPage: url, author: p.author ? { '@type': 'Person', name: p.author } : { '@id': siteUrl + '/#org' }, publisher: { '@id': siteUrl + '/#org' } }],
     main: `<section class="page"><div class="wrap legal"><a class="back" href="/blog">← All articles</a>
@@ -525,7 +525,7 @@ const portalBody = !backendLive
 <p class="pp-fine"><button class="btn outline" type="button" id="logout">Sign out</button> &nbsp; <a class="ul" href="/partners-program#terms">Partner Program Terms</a></p>
 </div>`;
 page({
-  file: 'partner.html', title: 'Partner portal — VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: ['/vs-config.js', authJs, portalJs], styles: [partnersCss],
+  file: 'partner.html', title: 'Partner portal | VertexStealth', desc: 'Sign in to your VertexStealth partner portal.', canonicalPath: '/partner', index: false, scripts: ['/vs-config.js', authJs, portalJs], styles: [partnersCss],
   main: `<section class="page"><div class="wrap pp-narrow" id="portal" data-fn="${esc(liveFn)}"><div class="kicker">Partner portal</div><h1>Your partner portal</h1>${portalBody}</div></section>`,
 });
 
@@ -535,7 +535,7 @@ let adminBuilt = false;
 if (adminKey && partnerSbUrl && backendLive) {
   adminBuilt = true;
   page({
-    file: 'partner-admin.html', title: 'Partner admin — VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, bare: true, scripts: [partnerAdminJs], styles: [partnersCss], pageId: 'partner-admin',
+    file: 'partner-admin.html', title: 'Partner admin | VertexStealth', desc: 'Partner program administration.', canonicalPath: '/partner-admin', index: false, bare: true, scripts: [partnerAdminJs], styles: [partnersCss], pageId: 'partner-admin',
     main: `<div id="padmin" data-sb="${esc(partnerSbUrl)}" data-anon="${esc(adminKey)}" data-fn="${esc(fnUrl)}">
 <div class="pa-login" id="login"><div class="pa-login-card">
 <div class="pa-brand"><img src="/logo.svg" alt="" width="34" height="34"><span>Vertex<span>Stealth</span></span></div>
@@ -595,7 +595,7 @@ for (const { d, md } of legalPages) {
     return hit ? `href="/${hit.slug}${hash || ''}"` : m;
   });
   page({
-    file: d.slug + '.html', title: `${d.title} — ${cfg.name}`, canonicalPath: '/' + d.slug, crumb: d.title,
+    file: d.slug + '.html', title: `${d.title} | ${cfg.name}`, canonicalPath: '/' + d.slug, crumb: d.title,
     desc: `${d.title} for ${cfg.name}, provided by ${cfg.company}.`,
     main: `<section class="page"><div class="wrap legal"><a class="back" href="/">← Back to home</a>\n${hasH1 ? '' : `<h1>${esc(d.title)}</h1>\n`}${body}</div></section>`,
   });
@@ -603,7 +603,7 @@ for (const { d, md } of legalPages) {
 for (const d of missing) {
   console.warn(`WARNING: /${d.slug} built as a stub (legal/${d.names[0]}.md missing).`);
   page({
-    file: d.slug + '.html', title: `${d.title} — ${cfg.name}`, canonicalPath: '/' + d.slug, index: false,
+    file: d.slug + '.html', title: `${d.title} | ${cfg.name}`, canonicalPath: '/' + d.slug, index: false,
     desc: `${d.title} for ${cfg.name}.`,
     main: `<section class="page"><div class="wrap legal"><h1>${esc(d.title)}</h1><p>This document is not available yet. Contact <a href="${esc(mail(d.title))}">${esc(cfg.email)}</a>.</p></div></section>`,
   });
@@ -611,7 +611,7 @@ for (const d of missing) {
 
 // ---------- 404 ----------
 page({
-  file: '404.html', title: 'Page not found — ' + cfg.name, canonicalPath: '/404', index: false,
+  file: '404.html', title: 'Page not found | ' + cfg.name, canonicalPath: '/404', index: false,
   desc: 'The page you are looking for does not exist.',
   main: '<section class="notfound"><div class="wrap"><div class="kicker">404</div><h1>This page is not here.</h1><p class="lead">The link may be old or mistyped.</p><a class="btn primary" href="/">Back to home</a></div></section>',
 });
@@ -627,7 +627,7 @@ const infoPage = ({ slug, title, desc, h1, answer, body, faqs = [], nodes = [] }
 const ul = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
 
 infoPage({ slug: 'system-requirements', h1: 'System requirements and supported platforms',
-  title: 'System Requirements — Windows 10 & 11, Chrome and Firefox | VertexStealth',
+  title: 'System Requirements: Windows 10 & 11, Chrome and Firefox | VertexStealth',
   desc: 'VertexStealth runs on Windows 10 and 11 and launches your installed Chrome or Firefox. See supported platforms, requirements and what is not supported yet.',
   answer: 'VertexStealth is a Windows 10 and Windows 11 desktop app that launches the Google Chrome or Mozilla Firefox already installed on your PC. macOS, Linux and mobile devices are not supported yet.',
   nodes: [software()],
@@ -657,7 +657,7 @@ ${ul(['Open the <a href="/download">Download page</a> and click <b>Download inst
   ] });
 
 infoPage({ slug: 'security', h1: 'Security and privacy overview',
-  title: 'Security & Privacy Overview — How VertexStealth Handles Your Data',
+  title: 'Security & Privacy Overview: How VertexStealth Handles Your Data',
   desc: 'What VertexStealth keeps on your computer, what its servers store, how long data is kept and the controls you have. A plain-language summary of the Privacy Policy.',
   answer: 'VertexStealth keeps your browser profiles, cookies, saved logins and proxy details on your own computer. Our servers hold only a small account record, and the app has no advertising and no usage analytics.',
   nodes: [software()],
@@ -697,7 +697,7 @@ ${ul(['No advertising and no usage analytics inside the app', 'We do not sell pe
   ] });
 
 infoPage({ slug: 'acceptable-use', h1: 'Acceptable use and responsible use',
-  title: 'Acceptable Use — What You Can and Cannot Do With VertexStealth',
+  title: 'Acceptable Use: What You Can and Cannot Do With VertexStealth',
   desc: 'VertexStealth is for lawful work such as QA, marketing, research and development. See permitted workflows, prohibited activities and your responsibilities.',
   answer: 'VertexStealth may be used only for lawful purposes. Separate browser profiles are intended for work such as QA, marketing, research and development; fraud, account takeover, spam and unauthorised access are prohibited.',
   body: `<h2>What can I use VertexStealth for?</h2>
@@ -719,7 +719,7 @@ ${ul(['commit or facilitate fraud, identity theft, account takeover, credential 
   ] });
 
 infoPage({ slug: 'about', h1: 'About VertexStealth',
-  title: 'About VertexStealth — Vertex Tech Solutions',
+  title: 'About VertexStealth: Vertex Tech Solutions',
   desc: 'VertexStealth is a Windows antidetect browser and multi-profile manager built by Vertex Tech Solutions. What we build, our principles and how to reach us.',
   answer: 'VertexStealth is an antidetect browser and multi-profile manager for Windows, built and operated by Vertex Tech Solutions.',
   body: `<h2>What do we build?</h2>
@@ -732,7 +732,7 @@ ${ul(['<b>Your data stays with you.</b> Profiles, cookies and logins live on you
 <p>Email <a href="${esc(mail('VertexStealth support'))}">${esc(cfg.email)}</a> for support, billing, security or privacy requests. Our <a href="/terms">Terms</a>, <a href="/privacy">Privacy Policy</a> and <a href="/eula">EULA</a> are public.</p>` });
 
 infoPage({ slug: 'docs', h1: 'VertexStealth documentation',
-  title: 'Documentation — Guides, Setup and Limits | VertexStealth',
+  title: 'Documentation: Guides, Setup and Limits | VertexStealth',
   desc: 'All VertexStealth guides in one place: installing, creating profiles, proxies, fingerprints, plans, security and known limits.',
   answer: 'This hub collects every VertexStealth guide: installing on Windows, creating and checking profiles, proxies and WebRTC, fingerprints, plans, security and known limits.',
   body: `<h2>How do I get started?</h2>
@@ -753,7 +753,7 @@ const adminJs = emitAsset('admin.js');
 const adminCss = emitAsset('admin.css');
 const accountCss = emitAsset('account.css');
 const authScripts = ['/vs-config.js', authJs];
-const authPage = (slug, title, body) => page({ file: slug + '.html', title: `${title} — ${cfg.name}`, desc: `${title} for your ${cfg.name} account.`, canonicalPath: '/' + slug, index: false, scripts: authScripts, pageId: slug, main: `<section class="auth-wrap"><div class="auth-card">${body}</div></section>` });
+const authPage = (slug, title, body) => page({ file: slug + '.html', title: `${title} | ${cfg.name}`, desc: `${title} for your ${cfg.name} account.`, canonicalPath: '/' + slug, index: false, scripts: authScripts, pageId: slug, main: `<section class="auth-wrap"><div class="auth-card">${body}</div></section>` });
 const authNote = 'Your VertexStealth account works on this website and in the desktop app, with the same email and password.';
 authPage('login', 'Sign in', `<h1>Sign in</h1><p class="auth-sub">${authNote}</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <button class="btn outline google-btn" type="button" id="googleBtn" hidden><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Continue with Google</span></button><p class="auth-or" id="authOr" hidden><span>or use your email</span></p>
@@ -768,7 +768,7 @@ authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth
 authPage('forgot', 'Reset password', `<h1>Reset your password</h1><p class="auth-sub">Enter your email and we will send you a link to choose a new password.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><button class="btn primary auth-btn" type="submit">Send reset link</button></form>
 <p class="auth-links"><a href="/login">Back to sign in</a></p>`);
-page({ file: 'account.html', title: 'Your account — ' + cfg.name, desc: 'Your VertexStealth account dashboard.', canonicalPath: '/account', index: false, scripts: authScripts, styles: [accountCss], pageId: 'account', main: `<section class="acct-wrap"><div class="wrap">
+page({ file: 'account.html', title: 'Your account | ' + cfg.name, desc: 'Your VertexStealth account dashboard.', canonicalPath: '/account', index: false, scripts: authScripts, styles: [accountCss], pageId: 'account', main: `<section class="acct-wrap"><div class="wrap">
 <div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <div id="accountBody" hidden>
 <header class="acct-head"><div class="acct-avatar" id="acctAvatar" aria-hidden="true"></div><div class="acct-title"><h1 id="acctHello">Your account</h1><p id="acctSub"></p></div>
@@ -793,7 +793,7 @@ page({ file: 'account.html', title: 'Your account — ' + cfg.name, desc: 'Your 
 </section>
 
 </div></div></div></section>` });
-page({ file: 'admin.html', title: 'Admin — ' + cfg.name, desc: 'Administration.', canonicalPath: '/admin', index: false, bare: true, scripts: [...authScripts, adminJs], styles: [adminCss], pageId: 'admin', main: '<div id="adminRoot" class="adm-root"><p class="adm-boot">Loading…</p></div>' });
+page({ file: 'admin.html', title: 'Admin | ' + cfg.name, desc: 'Administration.', canonicalPath: '/admin', index: false, bare: true, scripts: [...authScripts, adminJs], styles: [adminCss], pageId: 'admin', main: '<div id="adminRoot" class="adm-root"><p class="adm-boot">Loading…</p></div>' });
 
 // ---------- robots + sitemap ----------
 fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
@@ -811,6 +811,7 @@ for (const f of fs.readdirSync(dist).filter((x) => x.endsWith('.html'))) {
   const t = fs.readFileSync(path.join(dist, f), 'utf8');
   if (/\{\{|\}\}/.test(t.replace(/<script type="application\/ld\+json">[\s\S]*?<\/script>/g, ''))) problems.push(f + ': unreplaced template marker');
   if (/example\.com|hello@/.test(t)) problems.push(f + ': placeholder domain/email left in page');
+  if (/—|&mdash;|&#8212;/.test(t)) problems.push(f + ': contains an em dash');
   if (/\sstyle="/.test(t)) problems.push(f + ': inline style (blocked by the CSP)');
 }
 if (problems.length) { console.error('BUILD STOPPED:\n  ' + problems.join('\n  ')); process.exit(1); }

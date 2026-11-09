@@ -20,8 +20,8 @@
   function toast(msg, err) { var t = h('div', { class: 'adm-toast' + (err ? ' err' : ''), text: msg }); document.body.appendChild(t); setTimeout(function () { t.remove(); }, err ? 6000 : 3000); }
   function flag(cc) { if (!cc || cc.length !== 2) return ''; return String.fromCodePoint.apply(null, cc.toUpperCase().split('').map(function (c) { return 127397 + c.charCodeAt(0); })); }
   var dn = null; try { dn = new Intl.DisplayNames(['en'], { type: 'region' }); } catch (e) {}
-  function country(cc) { if (!cc) return '—'; var n = ''; try { n = dn ? dn.of(cc) : ''; } catch (e) {} return flag(cc) + ' ' + (n || cc); }
-  function fdate(d) { return d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—'; }
+  function country(cc) { if (!cc) return '-'; var n = ''; try { n = dn ? dn.of(cc) : ''; } catch (e) {} return flag(cc) + ' ' + (n || cc); }
+  function fdate(d) { return d ? new Date(d).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '-'; }
 
   async function api(action, body) {
     var s = await VS.session(); if (!s) { location.replace('/login?next=/admin'); throw new Error('Signed out'); }
@@ -128,7 +128,7 @@
           u.banned ? h('button', { class: 'adm-btn sm', text: 'Unban', onclick: function () { act(u, 'unban'); } }) : h('button', { class: 'adm-btn sm dng', text: 'Ban', onclick: function () { act(u, 'ban'); } }),
           h('button', { class: 'adm-btn sm', text: 'Upgrade', onclick: function () { act(u, 'plan'); } }),
           h('button', { class: 'adm-btn sm', text: u.isAdmin ? 'Remove admin' : 'Make admin', onclick: function () { act(u, 'admin'); } }));
-        tbody.appendChild(h('tr', null, h('td', { text: u.email }), badges, h('td', { text: (u.plan || '—') + (u.planExpires ? ' · until ' + fdate(u.planExpires) : '') }), h('td', { text: country(u.country) }), h('td', { text: fdate(u.createdAt) }), h('td', { text: fdate(u.lastSignIn) }), h('td', null, acts)));
+        tbody.appendChild(h('tr', null, h('td', { text: u.email }), badges, h('td', { text: (u.plan || '-') + (u.planExpires ? ' · until ' + fdate(u.planExpires) : '') }), h('td', { text: country(u.country) }), h('td', { text: fdate(u.createdAt) }), h('td', { text: fdate(u.lastSignIn) }), h('td', null, acts)));
       });
       out.appendChild(h('div', { class: 'adm-wrap' }, h('table', { class: 'adm-table' }, h('thead', null, h('tr', null, ['Email', 'Status', 'Plan', 'Country', 'Joined', 'Last sign-in', 'Actions'].map(function (c) { return h('th', { text: c }); }))), tbody)));
       var pages = Math.max(1, Math.ceil(d.total / d.perPage));
@@ -253,7 +253,7 @@
     head('Setup check', 'Confirms the server is wired to your database and email provider. Fix anything marked ✗.');
     var d = await safe(function () { return api('setupCheck'); }); if (!d) return; var groups = {};
     d.checks.forEach(function (c) { (groups[c.group] = groups[c.group] || []).push(c); });
-    Object.keys(groups).forEach(function (g) { main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: g }), h('div', { class: 'adm-list' }, groups[g].map(function (c) { return h('div', null, h('span', { class: c.ok ? 'adm-ok' : 'adm-bad', text: c.ok ? '✓ ' : '✗ ' }), h('b', { text: c.name }), h('span', { text: ' — ' + c.detail })); })))); main.appendChild(h('div', { class: 'adm-sub', text: ' ' })); });
+    Object.keys(groups).forEach(function (g) { main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: g }), h('div', { class: 'adm-list' }, groups[g].map(function (c) { return h('div', null, h('span', { class: c.ok ? 'adm-ok' : 'adm-bad', text: c.ok ? '✓ ' : '✗ ' }), h('b', { text: c.name }), h('span', { text: ': ' + c.detail })); })))); main.appendChild(h('div', { class: 'adm-sub', text: ' ' })); });
   }
 
   // ---- boot ----

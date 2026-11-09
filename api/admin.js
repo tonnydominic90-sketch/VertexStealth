@@ -304,7 +304,7 @@ function buildEmail(r, subjectT, bodyT, category) {
   const { html, plain } = renderBody(bodyT, vars);
   const unsub = C.unsubLink(r.email);
   const doc = layout({ subject, bodyHtml: html, category, unsubscribeUrl: unsub, supportEmail: vars.support_email, siteUrl: SITE() });
-  const text = plain + '\n\n— VertexStealth' + (category === 'marketing' ? `\nUnsubscribe from product news: ${unsub}` : '');
+  const text = plain + '\n\nVertexStealth' + (category === 'marketing' ? `\nUnsubscribe from product news: ${unsub}` : '');
   const headers = category === 'marketing' ? { 'List-Unsubscribe': `<${unsub}>`, 'List-Unsubscribe-Post': 'List-Unsubscribe=One-Click' } : undefined;
   return { to: r.email, subject, html: doc, text, headers };
 }
