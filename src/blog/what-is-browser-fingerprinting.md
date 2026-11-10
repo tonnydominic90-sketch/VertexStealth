@@ -77,7 +77,7 @@ If you use VertexStealth, the built-in Fingerprint Check lets you inspect select
 
 ## How to reduce your fingerprint
 
-No setting makes a browser invisible, but several habits meaningfully reduce how distinctive yours is:
+Several habits meaningfully reduce how distinctive your browser is:
 
 - **Use a current, mainstream browser** and keep it updated, so your version blends in with most users.
 - **Prefer browsers with built-in protection.** Firefox and Brave include fingerprinting defenses, and EFF has worked with Brave to measure its approach.
@@ -91,7 +91,7 @@ If you manage several accounts, client workspaces or test environments, separate
 
 That is the problem a [multi-profile browser manager](/multi-profile-management) addresses. [VertexStealth](/antidetect-browser) launches your installed Chrome or Firefox with a dedicated profile folder and lets you configure supported signals per profile: user agent, language, timezone, screen, fonts, hardware-related values and rendering overrides, alongside a proxy and WebRTC options. Read [how it works](/how-it-works) or browse the full [feature list](/features).
 
-It is worth being direct about the limits. Configuring a profile does not guarantee anonymity, and websites use many signals plus their own rules. Verify what your browser actually reports instead of trusting a label, and follow the laws and platform terms that apply to you.
+Put it into practice: configure each profile, then verify what your browser actually reports rather than trusting a label. Combine that with a good proxy and consistent settings, and follow the laws and platform terms that apply to you.
 
 ## Frequently asked questions
 

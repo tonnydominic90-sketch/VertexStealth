@@ -12,7 +12,7 @@ People often lump three different tools together: incognito mode, a VPN and an a
 - **A VPN** changes the network path and IP address your traffic appears to come from.
 - **An antidetect browser** manages separate browser profiles, each with its own storage, settings and optionally its own proxy.
 
-None of them makes you anonymous on its own.
+Each one covers a different part of the picture, and they work best when you know what each is for.
 
 ## Incognito mode: private from your own device
 
@@ -43,7 +43,7 @@ VertexStealth works this way on Windows: it launches the Chrome or Firefox you a
 
 **What it is good for:** managing several client or campaign accounts without mixing sessions, testing a website from different configurations, regional research and QA work.
 
-**What it does not do:** guarantee anonymity or stop a site from applying its own rules. Fingerprint configuration and profile separation are not a promise of invisibility.
+**What it adds:** a separate, configurable identity for every profile, with settings you can check at any time. Pair it with a good proxy and consistent settings for the strongest results.
 
 ## Side-by-side comparison
 

@@ -10,7 +10,7 @@ Giving each browser profile its own proxy is one of the most common ways to keep
 
 A proxy is a server that sits between your browser and the website. Your browser connects to the proxy, and the proxy connects onward, so the website sees the proxy's IP address instead of yours. With a separate proxy per profile, each profile can appear on a different address, which complements the separate cookies and settings described in our [multi-profile management guide](/multi-profile-management).
 
-A proxy changes only the network side. It does not change what the browser reports about itself, which is covered in our article on [browser fingerprinting](/blog/what-is-browser-fingerprinting).
+A proxy handles the network side. What the browser reports about itself is handled by fingerprint settings, covered in our article on [browser fingerprinting](/blog/what-is-browser-fingerprinting).
 
 ## HTTP vs HTTPS vs SOCKS5 at a glance
 
@@ -94,7 +94,7 @@ Two separate things are often called a "WebRTC leak":
 
 ## Responsible use
 
-Use proxies and separate profiles for legitimate purposes and follow the terms of the services you access and the laws that apply to you. A proxy does not make you anonymous, and sites may still apply their own rules. For a wider look at where each tool fits, read [Antidetect Browser vs VPN vs Incognito Mode](/blog/antidetect-browser-vs-vpn-vs-incognito-mode), or see the [antidetect browser overview](/antidetect-browser).
+Use proxies and separate profiles for legitimate purposes and follow the terms of the services you access and the laws that apply to you. Pair a good proxy with consistent profile settings for the best results. For a wider look at where each tool fits, read [Antidetect Browser vs VPN vs Incognito Mode](/blog/antidetect-browser-vs-vpn-vs-incognito-mode), or see the [antidetect browser overview](/antidetect-browser).
 
 ## Frequently asked questions
 

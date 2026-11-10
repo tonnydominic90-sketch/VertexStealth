@@ -68,7 +68,7 @@ No. SmartScreen checks files that have been downloaded from the internet, so it 
 
 ### Why doesn't VertexStealth just buy a certificate?
 
-Code-signing certificates cost money every year, and VertexStealth is an early-stage product. We are exploring signing. A certificate alone does not guarantee that the warning disappears at once, as explained above.
+Code-signing certificates are an annual cost, and we are exploring signing the installer. A certificate alone does not guarantee that the warning disappears at once, as explained above.
 
 ### Does VertexStealth work on Windows 10 and Windows 11?
 

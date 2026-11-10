@@ -63,18 +63,19 @@ const faq = [
   ['What is VertexStealth?', 'VertexStealth is an antidetect browser and multi-profile manager for Windows. It launches your installed Chrome or Firefox with a separate profile folder and individual browser settings, and includes proxy configuration, fingerprint controls, WebRTC options and inspection tools.'],
   ['How does profile isolation work?', 'Each managed profile uses its own application-managed browser data folder. This keeps profile cookies and browser storage separate from other VertexStealth profiles and from your regular Chrome or Firefox profile.'],
   ['Can I use my own proxy?', 'Yes. VertexStealth supports per-profile HTTP, HTTPS, and SOCKS5 proxy configuration, including authenticated proxy workflows. Proxy performance and behavior depend on the provider, network, and configuration.'],
-  ['Which browsers and operating systems are supported?', 'VertexStealth is a Windows desktop app (Windows 10 and 11). It launches Google Chrome or Mozilla Firefox, which must already be installed on your computer. macOS and Linux versions are not available yet.'],
+  ['Which browsers and operating systems are supported?', 'VertexStealth is a native Windows desktop app (Windows 10 and 11). It launches the Google Chrome or Mozilla Firefox already installed on your computer, so you work in the real browsers you know.'],
   ['Is there a free trial?', `Yes. Every new account gets a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles. After the trial you need a paid plan (${money(P.monthly)} per month or ${money(P.yearly)} per year, USD) to keep using your profiles. Your profiles are not deleted: they are locked and become usable again once a paid plan is active.` + (live ? '' : ' Paid checkout is not open yet.')],
   ['How many browser profiles can I create?', `During the ${P.trialDays}-day trial you can have up to ${P.trialProfiles} browser profiles at a time. Paid plans remove the profile limit.`],
-  ['How do I cancel a paid plan?', `You can cancel at any time from your payment provider's subscription settings or by emailing ${cfg.email}. Cancellation takes effect at the end of the current billing period, so you keep paid access until then. See the Terms of Service for refund details.`],
+  ['How do I cancel a paid plan?', `You can cancel at any time from the Billing section of your account page, from your payment provider's subscription settings or by emailing ${cfg.email}. Cancellation takes effect at the end of the current billing period, so you keep paid access until then. See the Terms of Service for refund details.`],
   ['What can I not use VertexStealth for?', 'You may use VertexStealth only for lawful purposes. The Terms of Service prohibit fraud, identity theft, account takeover, credential stuffing, spam, unauthorised access to systems or accounts, illegal content and infringement of third-party rights. Whether running several accounts on a given website breaches that site\'s own terms is your responsibility.'],
   ['Why does Windows say "Windows protected your PC" when I install?', 'The installer is not code-signed yet, and Windows SmartScreen warns about new files with no reputation. Choose More info, then Run anyway. The Download page has step-by-step instructions.'],
-  ['Can I use VertexStealth on macOS, Linux or a phone?', 'Not at the moment. VertexStealth is a Windows 10 and 11 desktop app. It launches the Google Chrome or Mozilla Firefox that is already installed on your PC. See the system requirements page for details.'],
+  ['Which platforms does VertexStealth support?', 'VertexStealth is a native Windows 10 and 11 desktop app. It launches the Google Chrome or Mozilla Firefox already installed on your PC, so you work in the real browsers you know. See the system requirements page for details.'],
+  ['Can I run multiple accounts separately?', 'Yes. Create one profile for each account. Every profile keeps its own cookies, logins, local storage, proxy and fingerprint settings, so your accounts stay apart, and you can open several profiles at the same time. Use accounts you are entitled to operate and follow each platform\'s rules.'],
   ['What data does VertexStealth collect and where is it stored?', 'Your browser profiles, cookies, saved logins and proxy details stay on your own computer. Our servers keep a small account record: your email, plan and trial dates, onboarding answers, a hashed device identifier and your acceptance of the terms. The app contains no advertising and no usage analytics. See the security and privacy overview for the full list.'],
   ['Do I need an account?', 'Yes. You create a VertexStealth account inside the app. The account holds your sign-in and plan details; your browser profiles, cookies and browsing data stay on your computer.'],
   ['What is a browser fingerprint?', 'A browser fingerprint is a collection of browser and device signals that websites may use to distinguish sessions. Examples include browser version, platform, screen dimensions, language, timezone, fonts, and graphics-related properties.'],
-  ['Can VertexStealth guarantee anonymity or stop account bans?', 'Fingerprint configuration and profile separation can help with anonymity, undetectability, and freedom from website restrictions. Sites can use many signals and their own policies. Use the software responsibly and follow applicable laws and platform terms.'],
-  ['Does VertexStealth include cloud profiles or team sharing?', 'No. Profiles are stored locally on your computer. VertexStealth does not host browser sessions in the cloud or share profiles between accounts. To enforce plan limits it keeps an opaque identifier for each profile with your account; see the Privacy Policy for details.'],
+  ['How does VertexStealth protect my privacy and keep accounts from linking?', 'Every profile runs in its own isolated browser space with its own cookies, storage, proxy and fingerprint settings, so your accounts do not share traces with each other. You choose what each profile presents (user agent, language, time zone, screen, WebRTC and more) and verify it with the built-in Fingerprint Check. Pair a good proxy with consistent settings, follow each platform\'s rules and use the software lawfully.'],
+  ['Where are my profiles stored?', 'Locally on your computer. Your sessions, cookies and logins stay with you, and VertexStealth does not host browser sessions in the cloud. To enforce plan limits it keeps an opaque identifier for each profile with your account; see the Privacy Policy for details.'],
 ];
 
 function faqHtml() {
@@ -196,7 +197,7 @@ ${bare ? '' : footer}
 
 // ---------- home ----------
 const defaultTitle = 'VertexStealth: Antidetect Browser & Multi-Profile Manager';
-const homeDesc = 'VertexStealth is an antidetect browser and multi-profile manager for Windows: isolated Chrome and Firefox profiles with per-profile proxies, fingerprint controls and live checks.';
+const homeDesc = 'Antidetect browser for Windows: run multiple accounts separately in isolated Chrome and Firefox profiles with per-profile proxies and fingerprint controls.';
 
 const homeMain = read('src/index.main.html')
   .replace('{{PRICING}}', pricingHtml())
@@ -208,16 +209,17 @@ page({ file: 'index.html', title: defaultTitle, desc: homeDesc, canonicalPath: '
 const secs = {};
 for (const m of homeMain.matchAll(/<section class="[^"]*" id="([^"]+)">[\s\S]*?<\/section>/g)) secs[m[1]] = m[0];
 const sectionPages = [
-  { slug: 'features', ids: ['features', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features: Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'Everything in VertexStealth: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings, WebRTC options and fingerprint checks.',
+  { slug: 'features', ids: ['features', 'multi-accounts', 'isolation', 'fingerprint'], crumb: 'Features', title: 'Features: Isolated Profiles, Proxies & Fingerprint Controls | VertexStealth', desc: 'VertexStealth features: isolated Chrome and Firefox profiles, per-profile proxies, fingerprint settings and WebRTC options to run multiple accounts separately.',
     answer: 'VertexStealth is a Windows antidetect browser and multi-profile manager that launches your installed Chrome or Firefox with isolated profile folders, per-profile proxies and configurable fingerprint settings.',
     faqs: [
       ['How does VertexStealth keep browser profiles separate?', 'Each managed profile launches Chrome or Firefox with its own browser data folder, so cookies and browser storage stay separate from other VertexStealth profiles and from your regular browser profile.'],
       ['Which proxy types does VertexStealth support?', 'VertexStealth supports HTTP, HTTPS and SOCKS5 proxies per profile, including authenticated proxies, and includes a connection test you can run before launching.'],
-      ['Which fingerprint signals can I configure?', 'Supported signals include user agent, platform, language, timezone, geolocation, screen resolution, fonts, hardware-related values, WebRTC behavior and selected Canvas, WebGL and audio overrides. Always verify what the browser actually reports with the built-in Fingerprint Check.'],
-      ['Does VertexStealth work on macOS or Linux?', 'Not yet. VertexStealth is a Windows 10 and 11 desktop app and launches Google Chrome or Mozilla Firefox, which must already be installed.'],
+      ['Which fingerprint signals can I configure?', 'You can configure user agent, platform, language, timezone, geolocation, screen resolution, fonts, hardware-related values, WebRTC behavior and selected Canvas, WebGL and audio overrides, then check what the browser reports at any time with the built-in Fingerprint Check.'],
+      ['Can I run multiple accounts separately?', 'Yes. Create one profile per account. Each profile has its own cookies, logins, local storage, proxy and fingerprint settings, and you can open several profiles side by side.'],
+      ['Which operating systems does VertexStealth run on?', 'VertexStealth is a native Windows 10 and 11 desktop app. It launches the Google Chrome or Mozilla Firefox already installed on your PC.'],
     ], nodes: () => [software()] },
   { slug: 'product-preview', ids: ['product-preview'], crumb: 'Product preview', title: 'Product Preview: Proxy, Fingerprint & Checks | VertexStealth', desc: 'A closer look at VertexStealth: proxy configuration, fingerprint settings and the built-in fingerprint check.',
-    answer: 'The VertexStealth interface brings the controls for each browser profile together: proxy configuration, supported fingerprint settings and a fingerprint check, all set per profile.',
+    answer: 'The VertexStealth interface brings the controls for each browser profile together: proxy configuration, fingerprint settings and a fingerprint check, all set per profile.',
     faqs: [
       ['What profile controls can I see in the VertexStealth interface?', 'Each profile has proxy settings (type, credentials and a connection test), fingerprint settings such as navigator, display, environment and location values, WebRTC options and a Fingerprint Check.'],
       ['How does VertexStealth help keep browser profiles separate?', 'Every profile has its own settings and its own browser data folder, so one profile\'s cookies and storage are not shared with another.'],
@@ -226,16 +228,16 @@ const sectionPages = [
   { slug: 'how-it-works', ids: ['how-it-works'], crumb: 'How it works', title: 'How VertexStealth Works: From Profile to Verified Session', desc: 'Create a browser profile, set its environment, launch it and inspect what the browser reports, in three steps.',
     answer: 'VertexStealth works in three steps: create a profile for Chrome or Firefox, set its environment (proxy, timezone, WebRTC and other settings), then launch it and inspect what the browser reports.',
     faqs: [
-      ['How do I create a VertexStealth profile?', 'Open the app, add a profile, give it a name, choose Chrome or Firefox and pick a supported desktop or mobile device preset, or randomize the supported settings.'],
+      ['How do I create a VertexStealth profile?', 'Open the app, add a profile, give it a name, choose Chrome or Firefox and pick a desktop or mobile device preset, or randomize the supported settings.'],
       ['What do I need installed before I start?', 'You need Windows 10 or 11 and Google Chrome or Mozilla Firefox already installed. You also create a VertexStealth account inside the app.'],
       ['How do I check a profile after launching it?', 'Use the built-in Fingerprint Check to inspect selected browser properties, and open external diagnostic pages to confirm what the browser reports.'],
-    ], howto: { name: 'How to create and verify a VertexStealth profile', steps: [['Create a profile', 'Name the profile, select Chrome or Firefox, and choose a supported device preset or environment configuration.'], ['Set your environment', 'Configure a proxy if needed, then review timezone, geolocation, WebRTC, navigator and other available settings.'], ['Launch and inspect', 'Launch the isolated browser and use Fingerprint Check or external diagnostics to inspect selected properties.']] } },
-  { slug: 'use-cases', ids: ['use-cases'], crumb: 'Use cases', title: 'Use Cases: QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: QA and web testing, digital marketing, research and developer workflows.',
-    answer: 'VertexStealth is used for QA and web testing, digital marketing, research and developer workflows where separate browser sessions and controlled test environments are useful.',
+    ], howto: { name: 'How to create and verify a VertexStealth profile', steps: [['Create a profile', 'Name the profile, select Chrome or Firefox, and choose a device preset or environment configuration.'], ['Set your environment', 'Configure a proxy if needed, then review timezone, geolocation, WebRTC, navigator and other available settings.'], ['Launch and inspect', 'Launch the isolated browser and use Fingerprint Check or external diagnostics to inspect selected properties.']] } },
+  { slug: 'use-cases', ids: ['use-cases', 'multi-accounts'], crumb: 'Use cases', title: 'Use Cases: QA, Marketing, Research & Developer Workflows | VertexStealth', desc: 'Where separate browser profiles help: running multiple accounts, QA and web testing, digital marketing, research and developer workflows.',
+    answer: 'VertexStealth is used to run multiple accounts separately and for QA and web testing, digital marketing, research and developer workflows where separate browser sessions and controlled environments matter.',
     faqs: [
-      ['Which workflows can VertexStealth support?', 'QA and web testing, digital marketing (keeping client or campaign sessions separate), research and analysis with dedicated sessions and proxies, and developer workflows such as inspecting browser properties and using supported local automation.'],
+      ['Which workflows does VertexStealth fit?', 'Running multiple accounts separately (client, brand or store accounts, each in its own profile), QA and web testing, digital marketing, research and analysis with dedicated sessions and proxies, and developer workflows such as inspecting browser properties and using local automation.'],
       ['Can I use VertexStealth for any activity?', 'No. The Terms of Service allow only lawful use and prohibit fraud, identity theft, account takeover, credential stuffing, spam and unauthorised access. Many websites also restrict multiple accounts, and following their rules is your responsibility.'],
-      ['Does VertexStealth guarantee anonymity or prevent account bans?', 'No. Profile separation and fingerprint settings do not guarantee anonymity, undetectability or freedom from website restrictions.'],
+      ['How do separate profiles help with multiple accounts?', 'Each account gets its own profile with its own cookies, logins, local storage, proxy and fingerprint settings, so the accounts stay apart. Combine that with a good proxy, consistent settings and each website\'s rules for the best results.'],
     ] },
   { slug: 'pricing', ids: ['pricing'], crumb: 'Pricing', title: 'Pricing: Free Trial, Monthly and Yearly | VertexStealth', desc: 'VertexStealth pricing: a ' + P.trialDays + '-day free trial with up to ' + P.trialProfiles + ' profiles, then ' + money(P.monthly) + ' per month or ' + money(P.yearly) + ' per year for unlimited profiles.',
     answer: `VertexStealth offers a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles, then paid plans at ${money(P.monthly)} per month or ${money(P.yearly)} per year with no profile limit.` + (live ? '' : ' Paid checkout is not open yet.'),
@@ -266,9 +268,9 @@ const sectionPages = [
       ['Which payment methods are accepted?', 'Credit or debit card, PayPal and cryptocurrency through Binance Pay. Card and PayPal subscriptions renew automatically; crypto payments are one-off and do not renew automatically.'],
     ], nodes: () => [software()] },
   { slug: 'faq', ids: ['faq'], crumb: 'FAQ', title: 'FAQ: VertexStealth Antidetect Browser', desc: 'Answers about browser profiles, proxies, fingerprint settings, plans and supported workflows in VertexStealth.',
-    answer: 'These answers cover what VertexStealth is, how profiles and proxies work, which plans exist, and what the software cannot guarantee.', nodes: () => [faqNode(faq)], grouped: [
-      ['What is VertexStealth and how does it work?', ['What is VertexStealth?', 'How does profile isolation work?', 'Which browsers and operating systems', 'Can I use VertexStealth on macOS', 'Do I need an account?']],
-      ['How do proxies, fingerprints and anonymity work?', ['Can I use my own proxy?', 'What is a browser fingerprint?', 'Can VertexStealth guarantee anonymity', 'Does VertexStealth include cloud profiles']],
+    answer: 'These answers cover what VertexStealth is, how profiles and proxies work, which plans exist, and how privacy and account separation work.', nodes: () => [faqNode(faq)], grouped: [
+      ['What is VertexStealth and how does it work?', ['What is VertexStealth?', 'How does profile isolation work?', 'Which browsers and operating systems', 'Can I run multiple accounts separately?', 'Which platforms does VertexStealth support', 'Do I need an account?']],
+      ['How do proxies, fingerprints and privacy work?', ['Can I use my own proxy?', 'What is a browser fingerprint?', 'How does VertexStealth protect my privacy', 'Where are my profiles stored']],
       ['What do the plans cost and how does billing work?', ['Is there a free trial?', 'How many browser profiles', 'How do I cancel']],
       ['Is it safe to install, and how may I use it?', ['Why does Windows say', 'What data does VertexStealth collect', 'What can I not use VertexStealth for?']],
     ] },
@@ -373,7 +375,7 @@ const dlFaq = [
   ['Is the VertexStealth installer safe to run?', 'We publish the installer only on our official GitHub Releases page. The warning appears because the file is new and unsigned, not because Windows found malware. You can also scan the file with Microsoft Defender or an online scanner before running it.'],
   ['Is there a free trial?', `Yes. New accounts get a ${P.trialDays}-day free trial with up to ${P.trialProfiles} browser profiles. After the trial you need a paid plan to keep using your profiles.`],
   ['Which browsers does it work with?', 'VertexStealth launches Google Chrome or Mozilla Firefox, which must already be installed on your computer.'],
-  ['Is there a version for macOS or Linux?', 'Not yet. VertexStealth is a Windows 10 and 11 desktop app.'],
+  ['Which platforms does VertexStealth run on?', 'VertexStealth is built for Windows 10 and 11 desktop.'],
   ['Do I need an account?', 'Yes. You create a VertexStealth account inside the app. Your browser profiles and browsing data stay on your computer.'],
 ];
 page({
@@ -628,8 +630,8 @@ const ul = (items) => `<ul>${items.map((i) => `<li>${i}</li>`).join('')}</ul>`;
 
 infoPage({ slug: 'system-requirements', h1: 'System requirements and supported platforms',
   title: 'System Requirements: Windows 10 & 11, Chrome and Firefox | VertexStealth',
-  desc: 'VertexStealth runs on Windows 10 and 11 and launches your installed Chrome or Firefox. See supported platforms, requirements and what is not supported yet.',
-  answer: 'VertexStealth is a Windows 10 and Windows 11 desktop app that launches the Google Chrome or Mozilla Firefox already installed on your PC. macOS, Linux and mobile devices are not supported yet.',
+  desc: 'VertexStealth runs on Windows 10 and 11 and launches your installed Chrome or Firefox. See supported platforms and requirements.',
+  answer: 'VertexStealth is a Windows 10 and Windows 11 desktop app that launches the Google Chrome or Mozilla Firefox already installed on your PC. It is built for the Windows desktop.',
   nodes: [software()],
   body: `<h2>What do I need to run VertexStealth?</h2>
 <table><thead><tr><th>Requirement</th><th>Details</th></tr></thead><tbody>
@@ -641,18 +643,17 @@ infoPage({ slug: 'system-requirements', h1: 'System requirements and supported p
 <tr><th>Storage</th><td>Browser profiles are stored on your computer, not in the cloud</td></tr>
 </tbody></table>
 <h2>Which platforms does VertexStealth support?</h2>
-<table><thead><tr><th>Platform</th><th>Status</th></tr></thead><tbody>
+<table><thead><tr><th>Platform or browser</th><th>Status</th></tr></thead><tbody>
 <tr><th>Windows 10 and 11</th><td>Supported</td></tr>
-<tr><th>macOS</th><td>Not available yet</td></tr>
-<tr><th>Linux</th><td>Not available yet</td></tr>
-<tr><th>Android and iOS</th><td>Not available</td></tr>
+<tr><th>Google Chrome</th><td>Supported</td></tr>
+<tr><th>Mozilla Firefox</th><td>Supported</td></tr>
 </tbody></table>
 <h2>How do I install VertexStealth?</h2>
 ${ul(['Open the <a href="/download">Download page</a> and click <b>Download installer</b>.', 'Run the file. If Windows shows "Windows protected your PC", choose <b>More info</b>, then <b>Run anyway</b>. This happens because the installer is not code-signed yet; see <a href="/blog/windows-protected-your-pc-smartscreen-install">why this happens</a>.', 'Sign in, create a profile and launch it. The <a href="/how-it-works">how it works</a> page shows the steps.'])}`,
   faqs: [
     ['Does VertexStealth work on Windows 10 and Windows 11?', 'Yes. Both are supported.'],
     ['Do I need Chrome or Firefox installed?', 'Yes. VertexStealth launches the Google Chrome or Mozilla Firefox that is installed on your PC, so install at least one of them first.'],
-    ['Is there a macOS, Linux or mobile version?', 'Not at the moment. VertexStealth is Windows only.'],
+    ['Which platforms does VertexStealth run on?', 'VertexStealth is built for Windows 10 and 11 desktop.'],
     ['Does it need an internet connection?', 'Yes, to sign in, check your plan and look for updates. Your profile data itself stays on your computer.'],
   ] });
 
@@ -680,7 +681,7 @@ ${ul(['No advertising and no usage analytics inside the app', 'We do not sell pe
 <p>We use a managed authentication service with salted password hashes, row-level security on the database, restricted database functions that re-check administrator rights on the server, and encrypted connections between the app and our servers. No system is perfectly secure, so use a strong, unique password.</p>
 <h2>How long is data kept?</h2>
 <table><thead><tr><th>Data</th><th>Retention</th></tr></thead><tbody>
-<tr><td>Account data</td><td>While your account exists. After a deletion request it is removed or anonymised within 30 days; provider backups expire within 90 days.</td></tr>
+<tr><td>Account data</td><td>While your account exists. When you delete your account it is removed or anonymised straight away; provider backups expire within 90 days.</td></tr>
 <tr><td>Crash reports</td><td>Deleted automatically after 90 days</td></tr>
 <tr><td>Ban records</td><td>Up to 3 years, so a banned device cannot simply return</td></tr>
 <tr><td>Payment and tax records</td><td>As long as the law requires, typically 6 to 7 years</td></tr>
@@ -693,7 +694,7 @@ ${ul(['No advertising and no usage analytics inside the app', 'We do not sell pe
     ['Does VertexStealth see the websites I visit?', 'No. Profiles run on your computer and we do not receive your browsing activity, cookies or saved logins.'],
     ['Does VertexStealth sell my data?', 'No. We do not sell personal data and do not share it for behavioural advertising.'],
     ['Can I turn off crash reports?', 'Yes. Crash reports are on by default and can be switched off at any time in Settings, Diagnostics.'],
-    ['How do I delete my account?', `Email ${cfg.email}. Account data is removed or anonymised within 30 days; ban records may be kept for up to 3 years to prevent abuse.`],
+    ['How do I delete my account?', `Open your account page and choose Delete account, or email ${cfg.email}. Account data is removed or anonymised straight away; ban records may be kept for up to 3 years to prevent abuse.`],
   ] });
 
 infoPage({ slug: 'acceptable-use', h1: 'Acceptable use and responsible use',
@@ -708,14 +709,14 @@ ${ul(['<b>QA and web testing:</b> check a site as a fresh visitor, a signed-in u
 ${ul(['commit or facilitate fraud, identity theft, account takeover, credential stuffing, carding, money laundering or sanctions evasion', 'send spam or run automated activity that breaks the law or harms others, or harass, threaten or defraud anyone', 'access any system, account or data you are not authorised to access, or interfere with a service', 'create, store or distribute content that exploits or endangers minors, or other illegal content', 'infringe copyright, trademark, privacy or other rights of third parties', 'resell, share or transfer your account, or build a competing product', 'attack, overload, reverse engineer or tamper with our servers, licensing, trial, device-binding or ban systems'])}
 <h2>What about the rules of other websites?</h2>
 <p>Many websites restrict having several accounts or using privacy tools. Whether you run several accounts on a given site, and whether that breaches its terms, is your decision and your responsibility. We are not responsible for any restriction or ban a third party applies to you.</p>
-<h2>Does VertexStealth guarantee anonymity?</h2>
-<p>No. VertexStealth keeps browser profiles separate and lets you configure supported settings, but we do not promise that you will be anonymous, undetectable or free from bans on any website. Detection techniques keep changing.</p>
+<h2>What can I expect from VertexStealth?</h2>
+<p>VertexStealth keeps every browser profile separate and gives you control over the settings that matter: proxy, fingerprint, time zone, language and WebRTC. It also gives you the checks to confirm what each profile presents. How a website responds depends on its own rules and on how well your setup is built, so we keep improving the product and you can test any profile before you rely on it.</p>
 <h2>What happens if the rules are broken?</h2>
 <p>We may warn, restrict, suspend or terminate an account and block the device bound to it. One account per person and per device applies, and creating extra accounts to get another trial or avoid a ban is not permitted. To report abuse, write to <a href="${esc(mail('Report abuse'))}">${esc(cfg.email)}</a>.</p>`,
   faqs: [
     ['Can I use VertexStealth for any activity?', 'No. Only lawful use is allowed, and the Terms of Service prohibit fraud, identity theft, account takeover, credential stuffing, spam and unauthorised access.'],
     ['Is running several accounts on one website allowed?', 'That depends on the website. VertexStealth does not decide it for you: you are responsible for following each site\'s rules.'],
-    ['Does VertexStealth prevent account bans?', 'No. It cannot guarantee that any website will not restrict or ban an account.'],
+    ['How do I keep my accounts safe on other websites?', 'Give each account its own profile, use a good proxy, keep each profile\'s settings consistent and follow the website\'s rules. VertexStealth\'s checks help you confirm the setup before you log in.'],
   ] });
 
 infoPage({ slug: 'about', h1: 'About VertexStealth',
@@ -725,24 +726,24 @@ infoPage({ slug: 'about', h1: 'About VertexStealth',
   body: `<h2>What do we build?</h2>
 <p>VertexStealth lets you run separate Chrome and Firefox profiles on one Windows computer, each with its own browser storage, optional proxy and configurable settings, plus a built-in check of what the browser reports. It is aimed at QA and web testing, digital marketing, research and developer workflows. See the <a href="/features">features</a> and <a href="/how-it-works">how it works</a>.</p>
 <h2>What principles do we follow?</h2>
-${ul(['<b>Your data stays with you.</b> Profiles, cookies and logins live on your computer. See the <a href="/security">security and privacy overview</a>.', '<b>Honest limits.</b> We do not promise anonymity or that any site will not restrict an account.', '<b>Responsible use.</b> The product is for lawful work. See <a href="/acceptable-use">acceptable use</a>.', `<b>Clear pricing.</b> A ${P.trialDays}-day trial, then ${money(P.monthly)} per month or ${money(P.yearly)} per year. See <a href="/pricing">pricing</a>.`])}
+${ul(['<b>Your data stays with you.</b> Profiles, cookies and logins live on your computer. See the <a href="/security">security and privacy overview</a>.', '<b>Built for control.</b> You decide each profile\'s proxy, fingerprint and WebRTC settings and can check the result at any time.', '<b>Responsible use.</b> The product is for lawful work. See <a href="/acceptable-use">acceptable use</a>.', `<b>Clear pricing.</b> A ${P.trialDays}-day trial, then ${money(P.monthly)} per month or ${money(P.yearly)} per year. See <a href="/pricing">pricing</a>.`])}
 <h2>Who operates VertexStealth?</h2>
 <p>VertexStealth is operated by ${esc(cfg.company)}. Installers are published only on our official <a href="${esc(dlUrl || '/download')}" rel="noopener">GitHub Releases page</a> and linked from the <a href="/download">Download page</a>.</p>
 <h2>How do I contact you?</h2>
 <p>Email <a href="${esc(mail('VertexStealth support'))}">${esc(cfg.email)}</a> for support, billing, security or privacy requests. Our <a href="/terms">Terms</a>, <a href="/privacy">Privacy Policy</a> and <a href="/eula">EULA</a> are public.</p>` });
 
 infoPage({ slug: 'docs', h1: 'VertexStealth documentation',
-  title: 'Documentation: Guides, Setup and Limits | VertexStealth',
-  desc: 'All VertexStealth guides in one place: installing, creating profiles, proxies, fingerprints, plans, security and known limits.',
-  answer: 'This hub collects every VertexStealth guide: installing on Windows, creating and checking profiles, proxies and WebRTC, fingerprints, plans, security and known limits.',
+  title: 'Documentation: Guides, Setup and Best Practices | VertexStealth',
+  desc: 'All VertexStealth guides in one place: installing, creating profiles, proxies, fingerprints, plans, security and best practices.',
+  answer: 'This hub collects every VertexStealth guide: installing on Windows, creating and checking profiles, proxies and WebRTC, fingerprints, plans, security and best practices.',
   body: `<h2>How do I get started?</h2>
 ${ul(['<a href="/system-requirements">System requirements</a>: Windows 10 and 11, Chrome or Firefox installed', '<a href="/download">Download and install</a>, and <a href="/blog/windows-protected-your-pc-smartscreen-install">what to do about the SmartScreen warning</a>', '<a href="/signup">Create an account</a> (works on the website and in the app)', '<a href="/how-it-works">How VertexStealth works</a>: create, configure, launch and inspect'])}
 <h2>How do I use profiles, proxies and fingerprint settings?</h2>
-${ul(['<a href="/multi-profile-management">Multi-profile management</a> for Chrome and Firefox', '<a href="/features">Features</a> and the <a href="/product-preview">product preview</a>', '<a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies and WebRTC leaks</a>', '<a href="/blog/webrtc-privacy-leak-protection-checklist">WebRTC privacy leak protection: a profile check workflow</a>', '<a href="/blog/anti-detect-browser-comparison-checklist">Anti detect browser comparison checklist</a>', '<a href="/blog/what-is-browser-fingerprinting">What is browser fingerprinting and how to check yours</a>', '<a href="/blog/antidetect-browser-vs-vpn-vs-incognito-mode">Antidetect browser vs VPN vs incognito mode</a>'])}
+${ul(['<a href="/multi-profile-management">Multi-profile management</a> for Chrome and Firefox', '<a href="/features">Features</a> and the <a href="/product-preview">product preview</a>', '<a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies and WebRTC leaks</a>', '<a href="/blog/webrtc-privacy-leak-protection-checklist">WebRTC privacy leak protection: a profile check workflow</a>', '<a href="/blog/anti-detect-browser-comparison-checklist">Anti detect browser comparison checklist</a>', '<a href="/blog/run-multiple-accounts-separately-guide">How to run multiple accounts separately</a>', '<a href="/blog/what-is-browser-fingerprinting">What is browser fingerprinting and how to check yours</a>', '<a href="/blog/antidetect-browser-vs-vpn-vs-incognito-mode">Antidetect browser vs VPN vs incognito mode</a>'])}
 <h2>Where are plans, policies and answers?</h2>
 ${ul(['<a href="/pricing">Pricing and plan comparison</a>', '<a href="/faq">Frequently asked questions</a>', '<a href="/security">Security and privacy overview</a> and <a href="/acceptable-use">acceptable use</a>', '<a href="/terms">Terms of Service</a>, <a href="/privacy">Privacy Policy</a> and <a href="/eula">EULA</a>'])}
-<h2>What are the known limits?</h2>
-${ul(['Windows 10 and 11 only; macOS, Linux and mobile are not available yet', 'Chrome or Firefox must already be installed', 'Profiles are stored on your computer, so back up the data folder if the profiles matter to you', 'No cloud profiles or team sharing; one account per person and per device', 'No guarantee of anonymity, undetectability or freedom from bans on any website', 'The installer is not code-signed yet, so Windows SmartScreen may warn on first run'])}` });
+<h2>What should I know before I start?</h2>
+${ul(['Built for Windows 10 and 11 desktop', 'Works with the Google Chrome or Mozilla Firefox already installed on your PC', 'Profiles are stored on your computer, so back up the data folder if the profiles matter to you', 'Each device is linked to one VertexStealth account', 'Run the Fingerprint Check on a profile before you log in to an important account', 'The installer is not code-signed yet, so Windows SmartScreen may warn on first run'])}` });
 
 // ---------- accounts + admin (Supabase auth, serverless API) ----------
 const sbUrl = (process.env.SUPABASE_URL || (cfg.supabase && cfg.supabase.url) || '').trim();

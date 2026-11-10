@@ -33,7 +33,7 @@ Stricter is not always better. The RFC explains that HTTP and most SOCKS proxies
 | Meetings, voice or video | A looser option that still hides private addresses |
 | Testing a site that uses WebRTC itself | Start loose, verify, then tighten one step at a time |
 
-These are starting points, not guarantees: the right choice depends on your browser, proxy and what the page actually needs, which is why Step 3 exists.
+These are starting points: the right choice depends on your browser, proxy and what the page needs, which is why Step 3 exists.
 
 ## Step 2: Configure the profile
 
@@ -66,7 +66,7 @@ Keep a simple log with one line per check: date, profile name, browser version, 
 - you change the WebRTC option,
 - you connect the host computer to a new VPN or network.
 
-The W3C's fingerprinting guidance calls its measures [mitigations, not solutions](https://www.w3.org/TR/fingerprinting-guidance/). A log makes that practical: you test again instead of assuming.
+The W3C's [fingerprinting guidance](https://www.w3.org/TR/fingerprinting-guidance/) treats its measures as risk reducers, so the sensible habit is to keep testing. A log makes that practical: you check again instead of assuming.
 
 ## Troubleshooting
 
@@ -75,8 +75,8 @@ The W3C's fingerprinting guidance calls its measures [mitigations, not solutions
 - **A private address appears.** Check the browser version, then try a stricter option.
 - **Two test pages disagree.** Repeat both, then trust the stricter result until you know why.
 
-## Limits and responsible use
+## Responsible use
 
-WebRTC is one signal among many, and a proxy does not make you anonymous. Use separate profiles for legitimate work and follow the rules of the sites you use; our [acceptable use policy](/acceptable-use) explains what is not allowed.
+WebRTC is one layer of your setup, alongside proxy quality, time zone and language, and your fingerprint settings. Use separate profiles for legitimate work and follow the rules of the sites you use; our [acceptable use policy](/acceptable-use) explains what is not allowed.
 
 To build the routine into your daily workflow, see how [VertexStealth works](/how-it-works), explore the [antidetect browser overview](/antidetect-browser), or return to the [homepage](/).

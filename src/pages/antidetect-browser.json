@@ -13,10 +13,10 @@
   "faq": [
     ["What is an antidetect browser?", "An antidetect browser (also written anti-detect) lets you choose the browser details a website can read, such as user agent, language, timezone and WebRTC behavior, separately for each profile, and keeps each profile's cookies and storage apart."],
     ["Is VertexStealth a separate browser?", "No. VertexStealth launches the Chrome or Firefox you already have installed, with its own profile folder and per-profile settings, so you keep the real browser engine and its updates."],
-    ["Does VertexStealth make me undetectable?", "No. Sites use many signals and their own rules, so no tool can guarantee anonymity, undetectability or freedom from restrictions. VertexStealth helps you control and inspect your browser environment."],
+    ["How does VertexStealth help me stay private?", "Every profile has its own cookies, storage, proxy and fingerprint settings, so your accounts stay separate. You control what each profile presents and can inspect it with the built-in Fingerprint Check. Use a good proxy, keep the settings consistent and follow each website's rules."],
     ["Which signals can I configure?", "Per profile you can configure the user agent and platform, language, timezone and geolocation, proxy, WebRTC behavior, fonts, display and hardware values, and canvas, audio and WebGL details. Some settings differ between Chrome and Firefox."],
     ["How can I test a profile?", "Use the built-in Fingerprint Check to see what the running browser reports. You can also open outside testers such as BrowserLeaks and iPhey from the app."],
-    ["Does it run on macOS or Linux?", "Not yet. VertexStealth is a Windows 10 and 11 desktop app."],
+    ["Which operating systems does it run on?", "VertexStealth is a native Windows 10 and 11 desktop app."],
     ["Is it allowed to use an antidetect browser?", "Browser profile and fingerprint tools are general-purpose software. How you use them is your responsibility: follow applicable laws and the terms of the sites and platforms you use."]
   ]
 }
