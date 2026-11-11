@@ -291,7 +291,8 @@
     } });
     main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: 'Add a source' }),
       h('label', { class: 'f', text: 'Name' }), nm, h('p', { text: ' ' }),
-      h('label', { class: 'f', text: 'Link to the list (plain text or JSON, one proxy per line like 1.2.3.4:8080)' }), ur, h('p', { text: ' ' }),
+      h('label', { class: 'f', text: 'Source URL (public HTTP/HTTPS proxy list; plain text or JSON)' }), ur,
+      h('p', { class: 'adm-sub', text: 'Supports common JSON arrays and objects, including IP + port records and address values such as 1.2.3.4:8080. Example: Incogniton free proxies, GitHub raw files and jsDelivr JSON feeds. Use Test link before adding.' }), h('p', { text: ' ' }),
       h('label', { class: 'f', text: 'What does the list contain?' }), pr, h('p', { text: ' ' }),
       h('label', { class: 'f' }, cs, ' Show on the website'), h('label', { class: 'f' }, ca, ' Offer in the app'),
       h('div', { class: 'adm-bar' }, testBtn, addBtn), res));

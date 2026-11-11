@@ -72,13 +72,21 @@ function parseList(text, hint = 'http') {
     if (Array.isArray(v)) { v.forEach((x) => walk(x, depth + 1)); return; }
     if (typeof v === 'string') { line(v); return; }
     if (typeof v !== 'object') return;
-    const ip = v.ip || v.host || v.address || v.ipAddress || v.ip_address;
-    if (ip && v.port !== undefined) {
-      const raw = Array.isArray(v.protocols) ? v.protocols[0] : (v.protocols || v.protocol || v.type || v.scheme);
-      add(String(ip), v.port, normProto(raw));
+    const rawProtocol = Array.isArray(v.protocols) ? v.protocols[0] : (v.protocols || v.protocol || v.type || v.scheme || v.proxyType || v.proxy_type);
+    const ipField = v.ip || v.host || v.ipAddress || v.ip_address;
+    const addressField = v.address || v.proxy || v.endpoint || v.server;
+    // Some APIs (including Incogniton's free-proxy endpoint) return address as
+    // "IP:PORT" instead of separate ip and port properties.
+    if (ipField && v.port !== undefined) {
+      add(String(ipField), v.port, normProto(rawProtocol));
       return;
     }
-    for (const k of ['data', 'proxies', 'items', 'results', 'list']) if (v[k]) walk(v[k], depth + 1);
+    if (addressField) {
+      const address = String(addressField).trim().replace(/^(?:http|https|socks4a?|socks5h?):\/\//i, '');
+      const m = /^(\d{1,3}(?:\.\d{1,3}){3}):(\d{1,5})$/.exec(address);
+      if (m) { add(m[1], v.port !== undefined ? v.port : m[2], normProto(rawProtocol)); return; }
+    }
+    for (const k of ['data', 'proxies', 'items', 'results', 'list', 'jsonData', 'result']) if (v[k]) walk(v[k], depth + 1);
   };
   const body = String(text || '').replace(/^\uFEFF/, '').trim();
   if (body[0] === '[' || body[0] === '{') { try { walk(JSON.parse(body), 0); } catch (e) { /* not JSON, fall back to lines */ } }

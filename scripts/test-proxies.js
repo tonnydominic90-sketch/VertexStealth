@@ -104,6 +104,8 @@ let passed = 0; const ok = (name, fn) => { try { const r = fn(); if (r && r.then
     const a = P.parseList(JSON.stringify(['8.8.4.4:80', '5.6.7.8:81']), 'http').entries; assert.strictEqual(a.length, 2);
     const b = P.parseList(JSON.stringify({ data: [{ ip: '8.8.4.4', port: '3128', protocols: ['socks5'] }, { ip: '10.0.0.1', port: 1 }] }), 'mixed').entries; assert.deepStrictEqual(b, [{ ip: '8.8.4.4', port: 3128, protocol: 'socks5' }]);
     const c = P.parseList(JSON.stringify([{ host: '5.6.7.8', port: 8080, type: 'socks4' }, { host: '5.6.7.9', port: 8080 }]), 'http').entries; assert.deepStrictEqual(c.map((x) => x.protocol), ['socks4', 'http']);
+    const incogniton = P.parseList(JSON.stringify([{ address: '8.8.4.4:8080', country: 'US', protocols: ['http'], anonymityLevel: 'elite', ping: 120 }, { address: '5.6.7.8:1080', protocols: ['socks5'] }]), 'mixed').entries; assert.deepStrictEqual(incogniton, [{ ip: '8.8.4.4', port: 8080, protocol: 'http' }, { ip: '5.6.7.8', port: 1080, protocol: 'socks5' }]);
+    const wrapped = P.parseList(JSON.stringify({ jsonData: [{ ip: '9.9.9.9', port: 3128, protocol: 'http' }] }), 'http').entries; assert.deepStrictEqual(wrapped, [{ ip: '9.9.9.9', port: 3128, protocol: 'http' }]);
   });
   await ok('public ip filter', () => {
     for (const ip of ['10.1.1.1', '127.0.0.1', '172.16.0.1', '172.31.255.1', '192.168.0.1', '169.254.1.1', '100.64.0.1', '0.0.0.0', '224.0.0.1', '255.255.255.255', '198.18.0.1', '192.0.2.1']) assert.ok(!P.isPublicIPv4(ip), ip);
