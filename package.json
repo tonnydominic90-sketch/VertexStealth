@@ -6,7 +6,7 @@
   "scripts": {
     "build": "node scripts/build.js",
     "start": "node scripts/serve.js",
-    "test": "node scripts/test-api.js"
+    "test": "node scripts/test-api.js && node scripts/test-proxies.js"
   },
   "engines": {
     "node": ">=18"

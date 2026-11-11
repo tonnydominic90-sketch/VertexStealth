@@ -28,7 +28,10 @@ Preview deployments are automatically `noindex`.
 ## Local preview
 `npm install && npm run build && npm start` -> http://localhost:3000
 
+## Free proxy list
+See `FREE-PROXIES.md` for setup (one SQL file, then add sources in Admin > Free proxies).
+
 ## Pages
-`/` home, `/antidetect-browser`, `/multi-profile-management`, `/download`, `/terms`, `/privacy`, `/eula`, 404. Every page emits JSON-LD (Organization, WebSite, WebPage; plus SoftwareApplication, HowTo, FAQPage and BreadcrumbList where relevant). Links between legal files such as `EULA.md` are rewritten to `/eula` automatically.
+`/` home, `/antidetect-browser`, `/multi-profile-management`, `/free-proxy-list`, `/download`, `/terms`, `/privacy`, `/eula`, 404. Every page emits JSON-LD (Organization, WebSite, WebPage; plus SoftwareApplication, HowTo, FAQPage and BreadcrumbList where relevant). Links between legal files such as `EULA.md` are rewritten to `/eula` automatically.
 
 After deploying, validate the structured data at https://validator.schema.org and re-run your SEO crawler.

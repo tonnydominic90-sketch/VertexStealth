@@ -60,4 +60,8 @@ body{background:#f3f6fa;margin:0}
 .adm-ok{color:#13694c;font-weight:800}.adm-bad{color:#a3261d;font-weight:800}
 .adm-pick{max-height:200px;overflow:auto;border:1px solid #dfe8f0;border-radius:10px;padding:6px 10px;background:#fff;font-size:13px}
 .adm-pick label{display:flex;gap:8px;padding:3px 0}
+.adm-url{display:block;color:#5d6a7c;font-size:11px;word-break:break-all;max-width:360px;margin-top:2px}
+.adm .adm-wide{width:100%}
+.adm label.f input[type=checkbox]{margin-right:6px}
+.adm-table td .adm-sub{margin:2px 0 0;font-size:11px}
 @media(max-width:860px){.adm{grid-template-columns:1fr}.adm-side{position:static;height:auto;flex-direction:row;flex-wrap:wrap;align-items:center}.adm-two{grid-template-columns:1fr}.adm-main{padding:18px 14px 50px}}

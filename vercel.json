@@ -111,5 +111,11 @@
       "source": "/r/:code",
       "destination": "/r"
     }
+  ],
+  "crons": [
+    {
+      "path": "/api/proxy-refresh",
+      "schedule": "0 3 * * *"
+    }
   ]
 }

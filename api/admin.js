@@ -2,6 +2,7 @@
 const C = require('./_lib/common');
 const { TEMPLATES, renderBody, layout, fill } = require('./_lib/templates');
 const { sendBatch } = require('./_lib/mailer');
+const PX = require('./_lib/proxies');
 const { MAP, HttpError, sb, gotrueAdmin, listAllAuthUsers, isBannedNow, isPaid, audit, env, SITE } = C;
 const col = MAP.columns;
 const FOREVER = '876000h';
@@ -217,12 +218,97 @@ const ACTIONS = {
   async campaigns() { return { rows: await sb('/email_campaigns?select=*&order=created_at.desc&limit=50').catch(() => []) }; },
   async auditLog() { return { rows: await sb('/admin_audit_log?select=*&order=created_at.desc&limit=100').catch(() => []) }; },
 
+  // ---- free proxies (Admin > Free proxies) ----
+  async proxyOverview() {
+    const sources = await sb('/proxy_sources?select=*&order=id.asc');
+    const alive = await fetchAll('/free_proxies?select=source_ids,protocol,https&alive=eq.true', 50000);
+    const counts = {};
+    alive.forEach((r) => (r.source_ids || []).forEach((id) => { counts[id] = (counts[id] || 0) + 1; }));
+    const flagIds = (flag) => new Set(sources.filter((s) => s[flag]).map((s) => s.id));
+    const siteIds = flagIds('enabled_site'), appIds = flagIds('enabled_app');
+    const meta = await sb('/site_settings?key=in.(proxy_refresh,proxy_refresh_stats)&select=key,value').catch(() => []);
+    const stats = (meta.find((m) => m.key === 'proxy_refresh_stats') || {}).value || null;
+    const started = (meta.find((m) => m.key === 'proxy_refresh') || {}).value || null;
+    return {
+      sources: sources.map((s) => ({ id: s.id, name: s.name, url: s.url, protocol: s.protocol, enabledSite: s.enabled_site, enabledApp: s.enabled_app, lastFetchedAt: s.last_fetched_at, lastStatus: s.last_status, lastError: s.last_error, lastFound: s.last_found, alive: counts[s.id] || 0, createdAt: s.created_at })),
+      totals: { site: alive.filter((r) => (r.source_ids || []).some((id) => siteIds.has(id))).length, app: alive.filter((r) => (r.source_ids || []).some((id) => appIds.has(id))).length, stored: alive.length },
+      stats, startedAt: started && started.startedAt || null,
+    };
+  },
+
+  async proxySourceSave(b, admin) {
+    const v = PX.cleanSourceInput(b);
+    if (b.id) {
+      const id = Number(b.id);
+      if (!id) throw new HttpError(400, 'Missing source.');
+      const out = await sb(`/proxy_sources?id=eq.${id}`, { method: 'PATCH', prefer: 'return=representation', body: { ...v, updated_at: new Date().toISOString() } });
+      if (!out || !out.length) throw new HttpError(404, 'That source no longer exists.');
+      await audit(admin, 'proxy_source_edit', null, { id, name: v.name, url: v.url });
+      PX.invalidateCache();
+      return { ok: true, id };
+    }
+    let out;
+    try { out = await sb('/proxy_sources', { method: 'POST', prefer: 'return=representation', body: { ...v, created_by: admin.id } }); }
+    catch (e) { throw new HttpError(400, /duplicate|unique/i.test(e.message) ? 'That link is already in the list.' : e.message); }
+    await audit(admin, 'proxy_source_add', null, { id: out && out[0] && out[0].id, name: v.name, url: v.url });
+    PX.invalidateCache();
+    return { ok: true, id: out && out[0] && out[0].id };
+  },
+
+  async proxySourceToggle(b, admin) {
+    const id = Number(b.id); if (!id) throw new HttpError(400, 'Missing source.');
+    const patch = {};
+    if (b.where === 'site' || b.where === 'both') patch.enabled_site = !!b.value;
+    if (b.where === 'app' || b.where === 'both') patch.enabled_app = !!b.value;
+    if (!Object.keys(patch).length) throw new HttpError(400, 'Choose website, app or both.');
+    const out = await sb(`/proxy_sources?id=eq.${id}`, { method: 'PATCH', prefer: 'return=representation', body: { ...patch, updated_at: new Date().toISOString() } });
+    if (!out || !out.length) throw new HttpError(404, 'That source no longer exists.');
+    await audit(admin, 'proxy_source_toggle', null, { id, ...patch });
+    PX.invalidateCache();
+    return { ok: true };
+  },
+
+  async proxySourceDelete(b, admin) {
+    const id = Number(b.id); if (!id) throw new HttpError(400, 'Missing source.');
+    const rows = await sb(`/proxy_sources?id=eq.${id}&select=name,url`);
+    if (!rows || !rows[0]) throw new HttpError(404, 'That source no longer exists.');
+    await sb(`/proxy_sources?id=eq.${id}`, { method: 'DELETE', prefer: 'return=minimal' });
+    await audit(admin, 'proxy_source_delete', null, { id, name: rows[0].name, url: rows[0].url });
+    PX.invalidateCache();
+    return { ok: true };
+  },
+
+  // Dry run: download the list and report what we can read from it. Saves nothing.
+  async proxySourceTest(b) {
+    const v = PX.cleanSourceInput({ name: 'test', ...b });
+    let text;
+    try { text = await PX.fetchText(v.url); } catch (e) { throw new HttpError(400, 'Could not download the list: ' + e.message); }
+    const { entries, invalid } = PX.parseList(text, v.protocol);
+    const byProtocol = {}; entries.forEach((e) => { byProtocol[e.protocol] = (byProtocol[e.protocol] || 0) + 1; });
+    if (!entries.length) throw new HttpError(400, 'The list downloaded, but no valid ip:port entries were found in it. Lines should look like 1.2.3.4:8080 or socks5://1.2.3.4:1080.');
+    return { found: entries.length, invalid, byProtocol, sample: entries.slice(0, 5).map((e) => `${e.protocol}://${e.ip}:${e.port}`) };
+  },
+
+  async proxyRefresh(_b, admin) {
+    const out = await PX.refreshAll({ minGapSeconds: 30 });
+    if (!out.ran) throw new HttpError(429, 'A refresh just ran. Wait half a minute and try again.');
+    await audit(admin, 'proxy_refresh', null, { checked: out.checked, newAlive: out.newAlive });
+    return out;
+  },
+
+  async proxyGeoTest() {
+    const t0 = Date.now();
+    const r = await PX.lookupCountries(['8.8.8.8', '1.1.1.1']);
+    return { ok: r.map.size > 0, found: Object.fromEntries(r.map), errors: r.errors, ms: Date.now() - t0, provider: env('IPINFO_TOKEN') ? 'IPinfo Lite' : 'country.is' };
+  },
+
   async setupCheck() {
     const checks = [];
     const add = (group, name, ok, detail) => checks.push({ group, name, ok, detail: detail || '' });
     for (const k of ['SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'BREVO_API_KEY', 'EMAIL_FROM']) add('Environment variables', k, !!env(k), env(k) ? 'set' : 'missing in Vercel > Settings > Environment Variables');
     add('Environment variables', 'SITE_URL', !!env('SITE_URL'), env('SITE_URL') ? 'set' : 'not set, defaulting to https://www.vertexstealth.top');
     const probe = async (table, c) => { try { await sb(`/${table}?select=${c}&limit=1`); return true; } catch (e) { return String(e.message); } };
+    for (const t of ['proxy_sources', 'free_proxies']) { const r = await probe(t, '*'); add('Tables from supabase/free-proxies.sql', t, r === true, r === true ? 'found' : 'missing: run supabase/free-proxies.sql in the Supabase SQL Editor (' + r + ')'); }
     for (const t of ['site_events', 'user_locations', 'admin_audit_log', 'email_campaigns', 'email_optouts', 'site_settings']) { const r = await probe(t, '*'); add('Tables from supabase/site-admin.sql', t, r === true, r === true ? 'found' : 'missing: run supabase/site-admin.sql in the Supabase SQL Editor'); }
     for (const [k, c] of Object.entries(col)) { const r = await probe(MAP.profilesTable, c); add(`Existing table "${MAP.profilesTable}" columns`, `${k} -> ${c}`, r === true, r === true ? 'found' : 'not found: edit api/_lib/schema-map.json to match your schema'); }
     if (MAP.devices) { const r = await probe(MAP.devices.table, `${MAP.devices.userColumn},${MAP.devices.bannedColumn}`); add('Existing devices table', `${MAP.devices.table}.${MAP.devices.userColumn}/${MAP.devices.bannedColumn}`, r === true, r === true ? 'found' : 'not found: banning will skip devices until this matches your schema'); }

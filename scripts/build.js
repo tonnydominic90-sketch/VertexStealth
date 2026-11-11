@@ -48,6 +48,8 @@ const partnerAdminJs = emitAsset('partner-admin.js');
 const partnerApplyJs = emitAsset('partner-apply.js');
 const partnersCss = emitAsset('partners.css');
 const authJs = emitAsset('auth.js');
+const freeProxyJs = emitAsset('free-proxies.js');
+const freeProxyCss = emitAsset('free-proxies.css');
 for (const f of fs.readdirSync(path.join(src, 'static'))) {
   fs.copyFileSync(path.join(src, 'static', f), path.join(dist, f));
 }
@@ -116,13 +118,13 @@ const header = `<a class="skip" href="#top">Skip to content</a>
   <a class="brand" href="/" aria-label="VertexStealth home"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a>
   <button class="menu" id="menu" aria-expanded="false" aria-controls="links">Menu</button>
   <nav class="links" id="links" aria-label="Main navigation">
-   <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a><a class="m-only" href="/login" data-auth-link>Sign in</a>
+   <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/free-proxy-list">Free proxies</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a><a class="m-only" href="/login" data-auth-link>Sign in</a>
   </nav>
   <div class="navright"><a class="login" href="/download">Download</a><a class="login" href="/login" data-auth-link>Sign in</a><a class="btn primary" href="/download">Get VertexStealth <span>↗</span></a></div>
  </div>
 </header>`;
 
-const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span></div></div></footer>`;
+const footer = `<footer class="footer"><div class="wrap"><div class="footer-top"><div class="footer-brand"><a class="brand" href="/"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a><p>An antidetect browser and multi-profile manager: isolated Chrome and Firefox profiles with per-profile proxies and fingerprint settings, in one Windows desktop workspace.</p></div><div class="footer-cols"><div class="footer-col"><strong>Product</strong><a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile management</a><a href="/free-proxy-list">Free proxy list</a><a href="/pricing">Pricing</a><a href="/download">Download</a></div><div class="footer-col"><strong>Learn</strong><a href="/product-preview">Product preview</a><a href="/how-it-works">How it works</a><a href="/use-cases">Use cases</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a href="/docs">Documentation</a><a href="/system-requirements">System requirements</a></div><div class="footer-col"><strong>Company</strong><a href="/about">About</a><a href="/partners-program">Partner program</a><a href="/security">Security &amp; privacy</a><a href="/acceptable-use">Acceptable use</a><a href="${esc(mail('VertexStealth support'))}">Contact &amp; support</a><a href="/terms">Terms of Service</a><a href="/privacy">Privacy Policy</a><a href="/eula">EULA</a></div></div></div><div class="footer-bottom"><span>© <span id="year">${new Date().getFullYear()}</span> ${esc(cfg.company)}. All rights reserved.</span></div></div></footer>`;
 
 
 // ---------- structured data ----------
@@ -739,11 +741,64 @@ infoPage({ slug: 'docs', h1: 'VertexStealth documentation',
   body: `<h2>How do I get started?</h2>
 ${ul(['<a href="/system-requirements">System requirements</a>: Windows 10 and 11, Chrome or Firefox installed', '<a href="/download">Download and install</a>, and <a href="/blog/windows-protected-your-pc-smartscreen-install">what to do about the SmartScreen warning</a>', '<a href="/signup">Create an account</a> (works on the website and in the app)', '<a href="/how-it-works">How VertexStealth works</a>: create, configure, launch and inspect'])}
 <h2>How do I use profiles, proxies and fingerprint settings?</h2>
-${ul(['<a href="/multi-profile-management">Multi-profile management</a> for Chrome and Firefox', '<a href="/features">Features</a> and the <a href="/product-preview">product preview</a>', '<a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies and WebRTC leaks</a>', '<a href="/blog/webrtc-privacy-leak-protection-checklist">WebRTC privacy leak protection: a profile check workflow</a>', '<a href="/blog/anti-detect-browser-comparison-checklist">Anti detect browser comparison checklist</a>', '<a href="/blog/run-multiple-accounts-separately-guide">How to run multiple accounts separately</a>', '<a href="/blog/what-is-browser-fingerprinting">What is browser fingerprinting and how to check yours</a>', '<a href="/blog/antidetect-browser-vs-vpn-vs-incognito-mode">Antidetect browser vs VPN vs incognito mode</a>'])}
+${ul(['<a href="/multi-profile-management">Multi-profile management</a> for Chrome and Firefox', '<a href="/free-proxy-list">Free proxy list</a>: working HTTP, HTTPS, SOCKS4 and SOCKS5 proxies you can copy or export', '<a href="/features">Features</a> and the <a href="/product-preview">product preview</a>', '<a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies and WebRTC leaks</a>', '<a href="/blog/webrtc-privacy-leak-protection-checklist">WebRTC privacy leak protection: a profile check workflow</a>', '<a href="/blog/anti-detect-browser-comparison-checklist">Anti detect browser comparison checklist</a>', '<a href="/blog/run-multiple-accounts-separately-guide">How to run multiple accounts separately</a>', '<a href="/blog/what-is-browser-fingerprinting">What is browser fingerprinting and how to check yours</a>', '<a href="/blog/antidetect-browser-vs-vpn-vs-incognito-mode">Antidetect browser vs VPN vs incognito mode</a>'])}
 <h2>Where are plans, policies and answers?</h2>
 ${ul(['<a href="/pricing">Pricing and plan comparison</a>', '<a href="/faq">Frequently asked questions</a>', '<a href="/security">Security and privacy overview</a> and <a href="/acceptable-use">acceptable use</a>', '<a href="/terms">Terms of Service</a>, <a href="/privacy">Privacy Policy</a> and <a href="/eula">EULA</a>'])}
 <h2>What should I know before I start?</h2>
 ${ul(['Built for Windows 10 and 11 desktop', 'Works with the Google Chrome or Mozilla Firefox already installed on your PC', 'Profiles are stored on your computer, so back up the data folder if the profiles matter to you', 'Each device is linked to one VertexStealth account', 'Run the Fingerprint Check on a profile before you log in to an important account', 'The installer is not code-signed yet, so Windows SmartScreen may warn on first run'])}` });
+
+// ---------- free proxy list (data comes from /api/free-proxies, managed in Admin > Free proxies) ----------
+const fpFaq = [
+  ['What is a free proxy list?', 'A free proxy list is a collection of public proxy servers (IP address and port) that anyone can use. Our list is gathered from public sources, and every proxy is tested by us before it is shown, so the table only contains proxies that were working at their last check.'],
+  ['Are free proxies safe to use?', 'Free proxies are run by strangers, and the operator of a proxy can see unencrypted traffic that passes through it. Use them for low-risk tasks such as testing a location or reading public pages, never type passwords or payment details through one, and prefer HTTPS sites so your traffic stays encrypted end to end.'],
+  ['Can I use free proxies to manage accounts?', 'No. Free proxies are shared by many people, change or disappear without notice and are often already flagged by websites. For account work use a dedicated or residential proxy, and keep one proxy per profile.'],
+  ['What is the difference between HTTP, HTTPS, SOCKS4 and SOCKS5 proxies?', 'HTTP proxies handle web traffic, and an HTTPS-capable HTTP proxy can also tunnel encrypted connections. SOCKS4 and SOCKS5 proxies work at a lower level and can carry other kinds of traffic, and SOCKS5 adds more features such as authentication and UDP. Read the guide on HTTP vs SOCKS5 proxies for browser profiles for details.'],
+  ['How are the proxies tested and how often is the list updated?', 'We connect to each proxy and ask it to open a real encrypted connection to a public server. Only proxies that complete this test are listed, and the speed shown is how long the test took from our servers. The list is refreshed automatically, usually within about 20 minutes of a visit, and proxies that fail repeatedly are removed.'],
+  ['Why does a free proxy stop working so quickly?', 'Public proxies are often misconfigured servers or home devices that get switched off, blocked or overloaded. If one fails, pick another from the list, or use the speed filter to choose faster ones.'],
+  ['How do I use a free proxy in VertexStealth?', 'Copy a proxy from the table, open the proxy settings of a profile, paste the IP address and port, choose the matching protocol and run the connection test before you launch the profile. VertexStealth also has free proxies built in, where you can pick a proxy and filter by country and protocol inside the app.'],
+];
+page({
+  file: 'free-proxy-list.html', title: 'Free Proxy List: Working HTTP and SOCKS5 Proxies | VertexStealth', canonicalPath: '/free-proxy-list', crumb: 'Free proxy list',
+  desc: 'Free proxy list of working HTTP, HTTPS, SOCKS4 and SOCKS5 proxies, tested by us. Filter by country, protocol and speed, then copy or export the list.',
+  nodes: [faqNode(fpFaq)], scripts: [freeProxyJs], styles: [freeProxyCss],
+  main: `<section class="page"><div class="wrap">
+<div class="fp-hero"><div class="kicker">Free proxy list</div>
+<h1>Free proxy list: working HTTP, HTTPS, SOCKS4 and SOCKS5 proxies</h1>
+<p class="lead">Browse proxies that passed our connection test, filter them by country, protocol and speed, and copy or export them in one click. Use them in your browser profiles or with any tool that accepts a proxy.</p></div>
+<div class="fp-warn"><b>Read this first.</b> These are public proxies from free sources. We test them but give no guarantee, and they are not suitable for account management or for anything private. For that, use a dedicated proxy. See <a class="ul" href="#faq">the FAQ</a> below.</div>
+<div id="fp">
+<div class="fp-filters">
+<label>Protocol<select id="fp-proto"><option value="">All protocols</option><option value="http">HTTP</option><option value="https">HTTPS</option><option value="socks4">SOCKS4</option><option value="socks5">SOCKS5</option></select></label>
+<label>Country<select id="fp-country"><option value="">All countries</option></select></label>
+<label>Speed<select id="fp-speed"><option value="">Any speed</option><option value="500">Under 500 ms</option><option value="1000">Under 1,000 ms</option><option value="2000">Under 2,000 ms</option><option value="3000">Under 3,000 ms</option></select></label>
+<div><button class="fp-btn" type="button" id="fp-reset">Reset filters</button></div>
+</div>
+<div class="fp-tools"><button class="fp-btn pri" type="button" id="fp-copyall">Copy all matching</button><a class="fp-btn" id="fp-dl-txt" href="/api/free-proxies?format=txt&amp;download=1" rel="nofollow">Download TXT</a><a class="fp-btn" id="fp-dl-csv" href="/api/free-proxies?format=csv&amp;download=1" rel="nofollow">Download CSV</a><a class="fp-btn" id="fp-dl-json" href="/api/free-proxies?format=json&amp;download=1" rel="nofollow">Download JSON</a></div>
+<p class="fp-summary" id="fp-summary" role="status" aria-live="polite">Loading proxies…</p>
+<div class="fp-scroll"><table class="fp-table"><thead><tr><th>IP address</th><th>Port</th><th>Country</th><th>Protocol</th><th>Speed</th><th>Last checked</th><th>Copy</th></tr></thead><tbody id="fp-body"><tr><td colspan="7" class="fp-empty">Loading proxies…</td></tr></tbody></table></div>
+<div class="fp-pager" id="fp-pager"></div>
+<noscript><p class="fp-note">The live table needs JavaScript. You can still download the list as <a href="/api/free-proxies?format=txt&amp;download=1" rel="nofollow">TXT</a>, <a href="/api/free-proxies?format=csv&amp;download=1" rel="nofollow">CSV</a> or <a href="/api/free-proxies?format=json&amp;download=1" rel="nofollow">JSON</a>.</p></noscript>
+<p class="fp-note">Speed is the time our servers needed to open a test connection through the proxy, so your own speed will differ. Before you rely on a proxy, check that your browser does not leak your real address: see the <a href="/blog/webrtc-privacy-leak-protection-checklist">WebRTC leak checklist</a>.</p>
+</div>
+<div class="legal fp-legal">
+<h2>How do I use a free proxy in VertexStealth?</h2>
+<ol class="fp-steps">
+<li><span><b>Pick a proxy.</b> Filter the table by protocol, country and speed, then press Copy next to a proxy to copy its IP address and port.</span></li>
+<li><span><b>Add it to a profile.</b> In <a href="/">VertexStealth</a>, create or edit a profile, open its proxy settings, paste the address and port and choose the matching protocol.</span></li>
+<li><span><b>Test before you launch.</b> Run the connection test, then use the Fingerprint Check to confirm what the browser reports. If the proxy fails, try another one.</span></li>
+</ol>
+<p>The desktop app also has free proxies built in: you can choose one directly and filter by country and protocol. <a href="/download">Download VertexStealth for Windows</a> and try it free for ${P.trialDays} days, or read about <a href="/antidetect-browser">how an antidetect browser works</a> and <a href="/multi-profile-management">multi-profile management</a>. For the difference between proxy types, see <a href="/blog/http-vs-socks5-proxy-browser-profiles">HTTP vs SOCKS5 proxies for browser profiles</a>.</p>
+<h2>How do we find and test these proxies?</h2>
+<ul>
+<li>We collect proxy addresses from public lists and combine them.</li>
+<li>We connect to every proxy and ask it to open an encrypted connection to a public server. Proxies that fail are not shown.</li>
+<li>We record the response time, the protocol it answered with and the country of its IP address, and we test working proxies again later. Proxies that keep failing are removed.</li>
+</ul>
+</div>
+${faqBlock(fpFaq)}
+</div></section>
+${finalCta}`,
+});
 
 // ---------- accounts + admin (Supabase auth, serverless API) ----------
 const sbUrl = (process.env.SUPABASE_URL || (cfg.supabase && cfg.supabase.url) || '').trim();
@@ -801,7 +856,7 @@ fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
   ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\nDisallow: /partner$\nDisallow: /partner/\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
-const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/partners-program', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
+const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/free-proxy-list', '/partners-program', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
 fs.writeFileSync(path.join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((u) => `  <url><loc>${siteUrl}${u === '/' ? '/' : u}</loc><lastmod>${today}</lastmod></url>`).join('\n') + '\n</urlset>\n');

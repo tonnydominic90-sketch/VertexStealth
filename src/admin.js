@@ -73,7 +73,7 @@
   }
 
   // ---- layout ----
-  var TABS = [['overview', 'Overview'], ['users', 'Users'], ['locations', 'Locations'], ['email', 'Communication'], ['releases', 'Releases'], ['activity', 'Activity log'], ['setup', 'Setup check']];
+  var TABS = [['overview', 'Overview'], ['users', 'Users'], ['locations', 'Locations'], ['email', 'Communication'], ['releases', 'Releases'], ['proxies', 'Free proxies'], ['activity', 'Activity log'], ['setup', 'Setup check']];
   var main;
   function shell(me) {
     clear(root);
@@ -86,7 +86,7 @@
     root.appendChild(h('div', { class: 'adm' }, side, main));
   }
   function head(t, s) { clear(main); main.appendChild(h('h1', { text: t })); main.appendChild(h('p', { class: 'adm-sub', text: s || '' })); }
-  function render() { ({ overview: vOverview, users: vUsers, locations: vLocations, email: vEmail, releases: vReleases, activity: vActivity, setup: vSetup })[state.tab](); }
+  function render() { ({ overview: vOverview, users: vUsers, locations: vLocations, email: vEmail, releases: vReleases, proxies: vProxies, activity: vActivity, setup: vSetup })[state.tab](); }
 
   // ---- Overview ----
   async function vOverview() {
@@ -235,6 +235,104 @@
       h('label', { class: 'f', text: 'Version' }), ver, h('p', { text: ' ' }), h('label', { class: 'f', text: 'Installer link (.exe on GitHub Releases)' }), url, info,
       h('div', { class: 'adm-bar' }, det, save),
       h('p', { class: 'adm-sub', text: 'Steps for each release: 1) publish the release on GitHub with the installer attached. 2) Click Detect latest (or paste the link). 3) Save and publish. The server checks that GitHub really has the file before saving.' })));
+  }
+
+  // ---- Free proxies ----
+  function ago(d) {
+    if (!d) return 'never';
+    var s = Math.max(0, Math.round((Date.now() - new Date(d).getTime()) / 1000));
+    if (s < 90) return 'just now'; if (s < 5400) return Math.round(s / 60) + ' min ago'; if (s < 129600) return Math.round(s / 3600) + ' h ago'; return Math.round(s / 86400) + ' days ago';
+  }
+  var PROTO_LABEL = { http: 'HTTP', https: 'HTTPS', socks4: 'SOCKS4', socks5: 'SOCKS5', mixed: 'Mixed (protocol in each line)' };
+  var PROTO_OPTIONS = [['http', 'HTTP proxies'], ['https', 'HTTPS proxies'], ['socks4', 'SOCKS4 proxies'], ['socks5', 'SOCKS5 proxies'], ['mixed', 'Mixed: lines like socks5://1.2.3.4:1080']];
+  async function vProxies() {
+    head('Free proxies', 'Add links to public proxy lists. We download them, test every proxy ourselves and show the working ones on the website and in the app.');
+    main.appendChild(h('p', { class: 'adm-sub', text: 'Loading…' }));
+    var d = await safe(function () { return api('proxyOverview'); });
+    if (!d) { head('Free proxies', 'Could not load. Run supabase/free-proxies.sql in the Supabase SQL Editor first, then open Setup check.'); return; }
+    head('Free proxies', 'Add links to public proxy lists. We download them, test every proxy ourselves and show the working ones on the website and in the app.');
+    var st = d.stats;
+    main.appendChild(h('div', { class: 'adm-cards' },
+      h('div', { class: 'adm-card' }, h('b', { text: d.totals.site }), h('span', { text: 'Working proxies on the website' })),
+      h('div', { class: 'adm-card' }, h('b', { text: d.totals.app }), h('span', { text: 'Working proxies in the app' })),
+      h('div', { class: 'adm-card' }, h('b', { text: d.sources.length }), h('span', { text: 'Sources' })),
+      h('div', { class: 'adm-card' }, h('b', { text: ago(st && st.finishedAt) }), h('span', { text: 'Last refresh' }))));
+
+    // refresh + geo test
+    var info = h('p', { class: 'adm-sub', text: st ? 'Last refresh checked ' + st.checked + ' proxies, found ' + st.newAlive + ' new working ones and dropped ' + st.dropped + ' (took ' + Math.round(st.durationMs / 1000) + ' s).' + (st.geoErrors ? ' Country lookup had ' + st.geoErrors + ' errors: use "Test country lookup".' : '') : 'No refresh has run yet. Add a source, then click Refresh now.' });
+    var refBtn = h('button', { class: 'adm-btn pri', text: 'Refresh now', onclick: async function () {
+      refBtn.disabled = true; refBtn.textContent = 'Refreshing… up to a minute';
+      var r = await safe(function () { return api('proxyRefresh'); }); refBtn.disabled = false; refBtn.textContent = 'Refresh now';
+      if (r) { toast('Checked ' + r.checked + ' proxies, ' + r.newAlive + ' new working.'); vProxies(); }
+    } });
+    var geoBtn = h('button', { class: 'adm-btn', text: 'Test country lookup', onclick: async function () {
+      geoBtn.disabled = true; var r = await safe(function () { return api('proxyGeoTest'); }); geoBtn.disabled = false;
+      if (r) toast(r.ok ? 'Country lookup works (' + r.provider + ', ' + r.ms + ' ms).' : 'Country lookup failed (' + r.provider + '). Proxies are still listed, just without a country.', !r.ok);
+    } });
+    main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: 'Refresh' }), info,
+      h('div', { class: 'adm-bar' }, refBtn, geoBtn),
+      h('p', { class: 'adm-sub', text: 'This also happens by itself: when someone opens the free proxy page and the list is older than 20 minutes, and once a day on a schedule.' })));
+    main.appendChild(h('div', { class: 'adm-sub', text: ' ' }));
+
+    // add form
+    var nm = h('input', { type: 'text', placeholder: 'e.g. TheSpeedX SOCKS5', maxlength: 80 });
+    var ur = h('input', { type: 'text', placeholder: 'https://raw.githubusercontent.com/.../socks5.txt' }); ur.className = 'adm-wide';
+    var pr = h('select', null, PROTO_OPTIONS.map(function (o) { return h('option', { value: o[0], text: o[1] }); }));
+    var cs = h('input', { type: 'checkbox', checked: true }), ca = h('input', { type: 'checkbox', checked: true });
+    var res = h('p', { class: 'adm-sub', text: '' });
+    var testBtn = h('button', { class: 'adm-btn', text: 'Test link', onclick: async function () {
+      testBtn.disabled = true; res.textContent = 'Downloading…';
+      var r = await safe(function () { return api('proxySourceTest', { url: ur.value, protocol: pr.value }); }); testBtn.disabled = false;
+      res.textContent = r ? 'Found ' + r.found + ' valid proxies (' + Object.keys(r.byProtocol).map(function (k) { return r.byProtocol[k] + ' ' + (PROTO_LABEL[k] || k); }).join(', ') + ')' + (r.invalid ? ', skipped ' + r.invalid + ' invalid or private lines' : '') + '. Example: ' + r.sample[0] : 'The link could not be read (see the message).';
+    } });
+    var addBtn = h('button', { class: 'adm-btn pri', text: 'Add source', onclick: async function () {
+      addBtn.disabled = true; var r = await safe(function () { return api('proxySourceSave', { name: nm.value, url: ur.value, protocol: pr.value, enabledSite: cs.checked, enabledApp: ca.checked }); }); addBtn.disabled = false;
+      if (r) { toast('Source added. Click Refresh now to load its proxies.'); vProxies(); }
+    } });
+    main.appendChild(h('div', { class: 'adm-box' }, h('h2', { text: 'Add a source' }),
+      h('label', { class: 'f', text: 'Name' }), nm, h('p', { text: ' ' }),
+      h('label', { class: 'f', text: 'Link to the list (plain text or JSON, one proxy per line like 1.2.3.4:8080)' }), ur, h('p', { text: ' ' }),
+      h('label', { class: 'f', text: 'What does the list contain?' }), pr, h('p', { text: ' ' }),
+      h('label', { class: 'f' }, cs, ' Show on the website'), h('label', { class: 'f' }, ca, ' Offer in the app'),
+      h('div', { class: 'adm-bar' }, testBtn, addBtn), res));
+    main.appendChild(h('div', { class: 'adm-sub', text: ' ' }));
+
+    // sources table
+    if (!d.sources.length) { main.appendChild(h('p', { class: 'adm-sub', text: 'No sources yet. Add your first link above.' })); return; }
+    var tbody = h('tbody');
+    d.sources.forEach(function (s) {
+      function toggle(where, on) { return async function () { var r = await safe(function () { return api('proxySourceToggle', { id: s.id, where: where, value: on }); }); if (r) { toast('Saved.'); vProxies(); } }; }
+      var status = s.lastStatus === 'error' ? h('div', { class: 'adm-bad', text: 'Error: ' + (s.lastError || 'unknown') }) : s.lastStatus === 'ok' ? h('div', { text: s.lastFound + ' in list' }) : h('div', { class: 'adm-sub', text: 'Not fetched yet' });
+      var anyOn = s.enabledSite || s.enabledApp;
+      var acts = h('div', { class: 'adm-acts' },
+        h('button', { class: 'adm-btn sm', text: s.enabledSite ? 'Hide on website' : 'Show on website', onclick: toggle('site', !s.enabledSite) }),
+        h('button', { class: 'adm-btn sm', text: s.enabledApp ? 'Remove from app' : 'Offer in app', onclick: toggle('app', !s.enabledApp) }),
+        h('button', { class: 'adm-btn sm', text: anyOn ? 'Disable' : 'Enable', onclick: toggle('both', !anyOn) }),
+        h('button', { class: 'adm-btn sm', text: 'Edit', onclick: async function () {
+          var r = await modal('Edit source', 'Changes apply at the next refresh. Proxies that only this source listed are dropped if you change the link.', [
+            { name: 'name', label: 'Name', value: s.name }, { name: 'url', label: 'Link', value: s.url },
+            { name: 'protocol', label: 'Contains', type: 'select', options: PROTO_OPTIONS, value: s.protocol },
+            { name: 'site', label: 'Show on the website', type: 'select', options: [['1', 'Yes'], ['0', 'No']], value: s.enabledSite ? '1' : '0' },
+            { name: 'app', label: 'Offer in the app', type: 'select', options: [['1', 'Yes'], ['0', 'No']], value: s.enabledApp ? '1' : '0' }], 'Save');
+          if (!r) return;
+          var out = await safe(function () { return api('proxySourceSave', { id: s.id, name: r.name, url: r.url, protocol: r.protocol, enabledSite: r.site === '1', enabledApp: r.app === '1' }); });
+          if (out) { toast('Saved.'); vProxies(); }
+        } }),
+        h('button', { class: 'adm-btn sm dng', text: 'Delete', onclick: async function () {
+          var r = await modal('Delete "' + s.name + '"?', 'The link is removed and proxies that only this source listed disappear from the website and the app at the next refresh.', [], 'Delete', true);
+          if (!r) return; var out = await safe(function () { return api('proxySourceDelete', { id: s.id }); }); if (out) { toast('Deleted.'); vProxies(); }
+        } }));
+      var link = h('a', { href: s.url, rel: 'noopener', text: s.url }); link.className = 'adm-url';
+      tbody.appendChild(h('tr', null,
+        h('td', null, h('b', { text: s.name }), h('div', null, link)),
+        h('td', { text: PROTO_LABEL[s.protocol] || s.protocol }),
+        h('td', null, h('span', { class: 'badge ' + (s.enabledSite ? 'paid' : ''), text: 'Website: ' + (s.enabledSite ? 'on' : 'off') }), h('span', { class: 'badge ' + (s.enabledApp ? 'paid' : ''), text: 'App: ' + (s.enabledApp ? 'on' : 'off') })),
+        h('td', { text: s.alive }),
+        h('td', null, status, h('div', { class: 'adm-sub', text: s.lastFetchedAt ? ago(s.lastFetchedAt) : '' })),
+        h('td', null, acts)));
+    });
+    main.appendChild(h('div', { class: 'adm-wrap' }, h('table', { class: 'adm-table' }, h('thead', null, h('tr', null, ['Source', 'Contains', 'Where it shows', 'Working', 'Last download', 'Actions'].map(function (c) { return h('th', { text: c }); }))), tbody)));
+    main.appendChild(h('p', { class: 'adm-sub', text: 'A source switched off on both the website and the app is not downloaded at all. "Working" counts proxies that passed our latest check.' }));
   }
 
   // ---- Activity ----
