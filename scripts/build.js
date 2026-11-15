@@ -118,9 +118,11 @@ const header = `<a class="skip" href="#top">Skip to content</a>
   <a class="brand" href="/" aria-label="VertexStealth home"><span class="brandmark"><img src="/logo.svg" alt="" width="36" height="36"></span><span class="brandname">Vertex<span>Stealth</span></span></a>
   <button class="menu" id="menu" aria-expanded="false" aria-controls="links">Menu</button>
   <nav class="links" id="links" aria-label="Main navigation">
-   <a href="/features">Features</a><a href="/antidetect-browser">Antidetect browser</a><a href="/multi-profile-management">Multi-profile</a><a href="/free-proxy-list">Free proxies</a><a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a><a class="m-only" href="/login" data-auth-link>Sign in</a>
+   <div class="dd"><button class="dd-btn" type="button" aria-haspopup="true" aria-expanded="false">Product<svg viewBox="0 0 12 12" width="10" height="10" aria-hidden="true"><path d="M2 4.2l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+    <div class="dd-menu"><a href="/features"><b>Features</b><small>What VertexStealth includes</small></a><a href="/antidetect-browser"><b>Antidetect browser</b><small>Isolated browser profiles</small></a><a href="/multi-profile-management"><b>Multi-profile</b><small>Manage many profiles</small></a><a href="/free-proxy-list"><b>Free proxies</b><small>Browse the free proxy list</small></a></div></div>
+   <a href="/pricing">Pricing</a><a href="/faq">FAQ</a><a href="/blog">Blog</a><a class="m-only" href="/download">Download</a><a class="m-only" href="/login" data-auth-link>Sign in</a>
   </nav>
-  <div class="navright"><a class="login" href="/download">Download</a><a class="login" href="/login" data-auth-link>Sign in</a><a class="btn primary" href="/download">Get VertexStealth <span>↗</span></a></div>
+  <div class="navright"><a class="login" href="/login" data-auth-link>Sign in</a><a class="btn primary" href="/download">Get VertexStealth <span>↗</span></a></div>
  </div>
 </header>`;
 

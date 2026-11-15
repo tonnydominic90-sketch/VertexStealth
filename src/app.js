@@ -18,6 +18,12 @@
 const menu=document.getElementById('menu'), links=document.getElementById('links');
 if(menu&&links){menu.addEventListener('click',()=>{const open=links.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));});
 links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{links.classList.remove('open');menu.setAttribute('aria-expanded','false')}));}
+document.querySelectorAll('.dd').forEach(dd=>{const b=dd.querySelector('.dd-btn');
+ const set=o=>{dd.classList.toggle('open',o);b.setAttribute('aria-expanded',String(o));};
+ b.addEventListener('click',e=>{e.stopPropagation();set(!dd.classList.contains('open'));});
+ document.addEventListener('click',e=>{if(!dd.contains(e.target))set(false);});
+ document.addEventListener('keydown',e=>{if(e.key==='Escape')set(false);});
+ dd.addEventListener('mouseenter',()=>b.setAttribute('aria-expanded','true'));dd.addEventListener('mouseleave',()=>{if(!dd.classList.contains('open'))b.setAttribute('aria-expanded','false');});});
 const yr=document.getElementById('year');if(yr)yr.textContent=new Date().getFullYear();
 const demoData={
  proxy:{title:'Proxy configuration',rows:[['Proxy type','HTTP / HTTPS / SOCKS5'],['Credentials','Optional'],['Connection test','Round-trip check'],['Applied to','Selected profile']]},

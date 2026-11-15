@@ -141,3 +141,35 @@
 .code-input{font-size:28px!important;letter-spacing:.4em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;padding-left:.4em!important}
 .linklike{background:none;border:0;padding:0;color:var(--blue2);text-decoration:underline;text-underline-offset:2px;cursor:pointer;font-size:13px}
 .linklike:disabled{color:var(--muted2);text-decoration:none;cursor:default}
+
+/* header navigation: one clean row, Product dropdown, tidy account area */
+.links a,.navright a,.dd-btn{white-space:nowrap}
+.links{gap:6px}
+.links>a,.dd-btn{display:inline-flex;align-items:center;gap:6px;padding:9px 13px;border-radius:9px;font-size:14px;font-weight:650;color:#2f3d51;background:none;border:0;cursor:pointer;transition:background .15s,color .15s}
+.links>a:hover,.dd-btn:hover,.dd:hover .dd-btn,.dd.open .dd-btn{background:var(--pale2);color:var(--blue2)}
+.dd-btn svg{transition:transform .2s}.dd:hover .dd-btn svg,.dd.open .dd-btn svg{transform:rotate(180deg)}
+.dd{position:relative}
+.dd-menu{position:absolute;left:-8px;top:100%;margin-top:10px;width:290px;padding:8px;background:#fff;border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);opacity:0;visibility:hidden;transform:translateY(-4px);transition:opacity .15s,transform .15s,visibility .15s;z-index:30}
+.dd-menu:before{content:"";position:absolute;left:0;right:0;top:-12px;height:12px}
+.dd:hover .dd-menu,.dd:focus-within .dd-menu,.dd.open .dd-menu{opacity:1;visibility:visible;transform:none}
+.dd-menu a{display:block;padding:10px 12px;border-radius:9px}
+.dd-menu a:hover{background:var(--pale2)}
+.dd-menu b{display:block;font-size:14px;color:var(--ink);font-weight:750}
+.dd-menu small{display:block;font-size:12px;color:var(--muted2);font-weight:550;margin-top:1px}
+.navright{gap:8px}
+.navright .login{padding:9px 14px;border-radius:9px;font-size:14px;font-weight:700;color:#2f3d51;border:1px solid transparent;transition:background .15s,border-color .15s}
+.navright .login:hover{background:var(--pale2);color:var(--blue2)}
+.navright a[href="/account"]{border-color:#cddbe8;background:#fff}
+.navright a[data-signout]{color:var(--muted2);font-weight:650}
+.navright .btn{margin-left:4px}
+@media(max-width:1000px){
+ .links{gap:2px}
+ .links>a,.dd-btn{padding:12px 4px;font-size:15px;border-radius:0}
+ .dd-btn{display:none}
+ .dd-menu{position:static;margin:0;width:auto;padding:0;border:0;box-shadow:none;opacity:1;visibility:visible;transform:none;background:none}
+ .dd-menu:before{display:none}
+ .dd-menu a{padding:12px 4px;border-radius:0}
+ .dd-menu b{font-size:15px;font-weight:650;color:#2f3d51}
+ .dd-menu small{display:none}
+ .links .m-only{padding:12px 4px}
+}
