@@ -15,6 +15,7 @@
     if (/invalid login/i.test(m)) return 'Email or password is incorrect.';
     if (/not confirmed/i.test(m)) return 'Please confirm your email first. Check your inbox for the confirmation link.';
     if (/already registered|already been registered/i.test(m)) return 'An account with this email already exists. Try signing in instead.';
+    if (/token|otp|code/i.test(m) && /(expired|invalid|incorrect)/i.test(m)) return 'That code is incorrect or has expired. Check the code, or request a new one.';
     if (/banned|suspended/i.test(m)) return 'This account is suspended. Contact support for help.';
     if (/rate limit|too many/i.test(m)) return 'Too many attempts. Please wait a few minutes and try again.';
     if (/password/i.test(m) && /(short|least|weak)/i.test(m)) return 'Choose a stronger password (at least 8 characters).';
@@ -56,6 +57,8 @@
       var d = await gotrue('/signup?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/login'), { body: { email: email, password: password, data: meta } });
       return { session: store(d), needsConfirm: !d.access_token };
     },
+    verifyOtp: async function (email, token, type) { var d = await gotrue('/verify', { body: { type: type, email: email, token: token } }); var ss = store(d); if (!ss) throw { message: 'That code is incorrect or has expired. Check the code, or request a new one.' }; return ss; },
+    resendSignup: function (email) { return gotrue('/resend?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/login'), { body: { type: 'signup', email: email } }); },
     recover: function (email) { return gotrue('/recover?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/reset-password'), { body: { email: email } }); },
     updatePassword: async function (password) { var s = await session(); if (!s) throw { message: 'Please sign in again.' }; return gotrue('/user', { method: 'PUT', token: s.access_token, body: { password: password } }); },
     google: function (next) {
@@ -113,16 +116,23 @@
   }
 
   function msg(text, ok) { var m = $('authMsg'); if (!m) return; m.textContent = text; m.className = 'auth-msg' + (ok ? ' ok' : ''); m.hidden = !text; }
-  function busy(on) { var b = document.querySelector('#authForm button[type=submit]'); if (b) { b.disabled = on; b.style.opacity = on ? '.6' : ''; } }
+  function busy(on, id) { var b = document.querySelector('#' + (id || 'authForm') + ' button[type=submit]'); if (b) { b.disabled = on; b.style.opacity = on ? '.6' : ''; } }
   function nextUrl() { var n = new URLSearchParams(location.search).get('next') || ''; if (!n) { try { n = sessionStorage.getItem('vs_next') || ''; sessionStorage.removeItem('vs_next'); } catch (e) {} } return /^\/[A-Za-z0-9\-_\/]*$/.test(n) && n.indexOf('//') !== 0 ? n : '/account'; }
-  function form(handler) {
-    var f = $('authForm'); if (!f) return;
+  function form(handler, id) {
+    var f = $(id || 'authForm'); if (!f) return;
     f.addEventListener('submit', async function (e) {
-      e.preventDefault(); msg(''); busy(true);
+      e.preventDefault(); msg(''); busy(true, id);
       try { await handler(); } catch (err) { msg(nice(err)); }
-      busy(false);
+      busy(false, id);
     });
   }
+  function codeOf(id) { var c = (($(id || 'code') || {}).value || '').replace(/\D/g, ''); if (c.length !== 6) throw { message: 'Enter the 6-digit code from the email.' }; return c; }
+  function cooldown(btn, secs) {
+    if (!btn) return; var left = secs; btn.disabled = true;
+    var t = setInterval(function () { left--; if (left <= 0) { clearInterval(t); btn.disabled = false; btn.textContent = 'Resend code'; } else btn.textContent = 'Resend code (' + left + 's)'; }, 1000);
+    btn.textContent = 'Resend code (' + left + 's)';
+  }
+  function hide(ids) { ids.forEach(function (i) { var e = $(i); if (e) e.hidden = true; }); }
   function val(id) { var el = $(id); return el ? el.value.trim() : ''; }
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
@@ -170,6 +180,14 @@
     });
   } else if (page === 'signup') {
     var rc = $('refcode'), sv = savedRef(); if (rc && sv) rc.value = sv.code;
+    var pendingEmail = '';
+    form(async function () {
+      var ss = await api.verifyOtp(pendingEmail, codeOf('code'), 'signup');
+      api.track(); await claimReferral(ss && ss.user); location.replace(nextUrl());
+    }, 'verifyForm');
+    if ($('resendBtn')) $('resendBtn').addEventListener('click', async function () {
+      msg(''); try { await api.resendSignup(pendingEmail); msg('A new code and link are on their way to ' + pendingEmail + '.', true); cooldown($('resendBtn'), 60); } catch (err) { msg(nice(err)); }
+    });
     form(async function () {
       var email = val('email'), pw = $('password').value;
       if (!validEmail(email)) throw { message: 'Enter a valid email address.' };
@@ -181,7 +199,12 @@
       var r = await api.signUp(email, pw, ref);
       if (ref) { try { localStorage.setItem('vs_ref', JSON.stringify({ code: ref.code, src: ref.src, ts: Date.now() })); } catch (e) {} }
       if (r.session) await claimReferral(r.session.user);
-      if (r.needsConfirm) { msg('Almost done. We sent a confirmation link to ' + email + '. Open it, then sign in here or in the desktop app.', true); $('authForm').hidden = true; }
+      if (r.needsConfirm) {
+        pendingEmail = email; hide(['authForm', 'googleBtn', 'authOr', 'googleNote']);
+        $('verifyEmail').textContent = email; $('verifyBox').hidden = false;
+        msg('Almost done. We sent a 6-digit code and a confirmation link to ' + email + '.', true);
+        $('code').focus(); cooldown($('resendBtn'), 60);
+      }
       else { location.replace('/account'); }
     });
   } else if (page === 'reset') {
@@ -206,10 +229,27 @@
       setTimeout(function () { location.replace('/account'); }, 1800);
     });
   } else if (page === 'forgot') {
+    var forgotEmail = '', recovered = false;
     if (new URLSearchParams(location.search).get('expired')) msg('That reset link has expired or was already used. Enter your email to get a new one.');
     form(async function () {
       var email = val('email'); if (!validEmail(email)) throw { message: 'Enter a valid email address.' };
-      await api.recover(email); msg('If an account exists for ' + email + ', a reset link is on its way.', true);
+      await api.recover(email); forgotEmail = email;
+      hide(['authForm', 'forgotLinks']); $('resetBox').hidden = false; $('resetEmail').textContent = email;
+      msg('If an account exists for ' + email + ', a 6-digit code and a reset link are on their way.', true);
+      $('code').focus(); cooldown($('resendBtn'), 60);
+    });
+    form(async function () {
+      var code = codeOf('code'), pw = $('password').value;
+      if (pw.length < 8) throw { message: 'Use a password with at least 8 characters.' };
+      if (pw !== $('password2').value) throw { message: 'The passwords do not match.' };
+      if (!recovered) { await api.verifyOtp(forgotEmail, code, 'recovery'); recovered = true; }
+      await api.updatePassword(pw);
+      $('password').value = ''; $('password2').value = ''; hide(['resetBox']);
+      msg('Your password has been changed. Taking you to your account...', true);
+      setTimeout(function () { location.replace('/account'); }, 1500);
+    }, 'resetForm');
+    if ($('resendBtn')) $('resendBtn').addEventListener('click', async function () {
+      msg(''); try { await api.recover(forgotEmail); msg('A new code and link are on their way.', true); cooldown($('resendBtn'), 60); } catch (err) { msg(nice(err)); }
     });
   } else if (page === 'account') {
     (async function () {
