@@ -82,6 +82,17 @@
     } catch (e) { fail(e); }
   }
 
+  async function resend(p) {
+    const r = await ask({ title: 'Resend email to ' + p.name + '?', text: 'This sends the welcome email (referral link, code and portal link) to ' + p.email + ' again.', confirm: 'Send email' });
+    if (!r) return;
+    try {
+      const res = await fetch(FN + '/partner-admin-review', { method: 'POST', headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + token }, body: JSON.stringify({ id: p.id, action: 'resend' }) });
+      const j = await res.json().catch(() => ({}));
+      if (!res.ok) throw Object.assign(new Error(j.error || 'Failed'), { status: res.status });
+      msg(j.emailed ? 'Email sent to ' + p.email + '.' : 'Email was NOT sent. Check the email settings (BREVO_API_KEY and EMAIL_FROM) in Supabase.', !j.emailed);
+    } catch (e) { fail(e); }
+  }
+
   const table = (head, rows, numCols) => h('div', { class: 'pp-scroll' }, h('table', { class: 'pp-table' },
     h('thead', {}, h('tr', {}, head.map((x, i) => h('th', numCols && numCols.includes(i) ? { class: 'pa-num' } : {}, x)))), h('tbody', {}, rows)));
   const td = (txt, cls) => h('td', cls ? { class: cls } : {}, txt);
@@ -124,6 +135,7 @@
           h('td', { class: 'pa-actions' },
             h('button', { class: 'pa-btn sm pri', type: 'button', onclick: () => payout(p) }, 'Record payout'),
             h('button', { class: 'pa-btn sm', type: 'button', onclick: () => setPercent(p) }, 'Set %'),
+            h('button', { class: 'pa-btn sm', type: 'button', onclick: () => resend(p) }, 'Resend email'),
             h('button', { class: 'pa-btn sm', type: 'button', onclick: () => setPartner(p, p.status === 'active' ? 'suspended' : 'active') }, p.status === 'active' ? 'Suspend' : 'Activate')))), [4, 5, 6]));
       } else if (tab === 'commissions') {
         const rows = await rpc('admin_partner_commissions', { p_status: $('filter').value || null });

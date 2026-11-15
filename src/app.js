@@ -1,4 +1,20 @@
 'use strict';
+/* Email links from Supabase (password reset, confirm email, Google sign-in) bring the sign-in tokens back in the
+   address after the "#". If Supabase sends the visitor to a page that cannot use them (for example the home page,
+   when the redirect address is not on its allow-list), pass them on to the right page instead of dropping them. */
+(function(){
+ try{
+  var h=location.hash||'', p=location.pathname.replace(/\/+$/,'')||'/';
+  if(p==='/reset-password')return;
+  if(h.indexOf('access_token=')>-1){
+   var t=(new URLSearchParams(h.slice(1))).get('type')||'';
+   if(t==='recovery')location.replace('/reset-password'+h);
+   else if(!/^\/(login|account)$/.test(p))location.replace('/login'+h);
+  }else if(h.indexOf('error_code=')>-1&&h.indexOf('error_description=')>-1&&!/^\/(login|forgot|account)$/.test(p)){
+   location.replace('/forgot?expired=1');
+  }
+ }catch(e){}
+})();
 const menu=document.getElementById('menu'), links=document.getElementById('links');
 if(menu&&links){menu.addEventListener('click',()=>{const open=links.classList.toggle('open');menu.setAttribute('aria-expanded',String(open));});
 links.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{links.classList.remove('open');menu.setAttribute('aria-expanded','false')}));}

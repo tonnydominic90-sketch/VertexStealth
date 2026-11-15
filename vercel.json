@@ -53,7 +53,7 @@
       ]
     },
     {
-      "source": "/(login|signup|forgot|account)",
+      "source": "/(login|signup|forgot|reset-password|account)",
       "headers": [
         {
           "key": "X-Robots-Tag",

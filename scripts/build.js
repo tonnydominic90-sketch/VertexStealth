@@ -809,7 +809,7 @@ const adminJs = emitAsset('admin.js');
 const adminCss = emitAsset('admin.css');
 const accountCss = emitAsset('account.css');
 const authScripts = ['/vs-config.js', authJs];
-const authPage = (slug, title, body) => page({ file: slug + '.html', title: `${title} | ${cfg.name}`, desc: `${title} for your ${cfg.name} account.`, canonicalPath: '/' + slug, index: false, scripts: authScripts, pageId: slug, main: `<section class="auth-wrap"><div class="auth-card">${body}</div></section>` });
+const authPage = (slug, title, body) => page({ file: slug + '.html', title: `${title} | ${cfg.name}`, desc: `${title} for your ${cfg.name} account.`, canonicalPath: '/' + slug, index: false, scripts: authScripts, pageId: slug === 'reset-password' ? 'reset' : slug, main: `<section class="auth-wrap"><div class="auth-card">${body}</div></section>` });
 const authNote = 'Your VertexStealth account works on this website and in the desktop app, with the same email and password.';
 authPage('login', 'Sign in', `<h1>Sign in</h1><p class="auth-sub">${authNote}</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <button class="btn outline google-btn" type="button" id="googleBtn" hidden><svg viewBox="0 0 48 48" width="18" height="18" aria-hidden="true"><path fill="#EA4335" d="M24 9.5c3.5 0 6.6 1.2 9.1 3.6l6.8-6.8C35.8 2.4 30.3 0 24 0 14.6 0 6.5 5.4 2.6 13.2l7.9 6.1C12.4 13.6 17.7 9.5 24 9.5z"/><path fill="#4285F4" d="M46.5 24.5c0-1.6-.1-3.1-.4-4.5H24v9h12.7c-.6 3-2.3 5.5-4.8 7.2l7.5 5.8c4.4-4.1 7.1-10.1 7.1-17.5z"/><path fill="#FBBC05" d="M10.5 28.7a14.5 14.5 0 010-9.4l-7.9-6.1a24 24 0 000 21.6l7.9-6.1z"/><path fill="#34A853" d="M24 48c6.5 0 11.9-2.1 15.9-5.8l-7.5-5.8c-2.1 1.4-4.9 2.3-8.4 2.3-6.3 0-11.6-4.1-13.5-9.8l-7.9 6.1C6.5 42.6 14.6 48 24 48z"/></svg><span>Continue with Google</span></button><p class="auth-or" id="authOr" hidden><span>or use your email</span></p>
@@ -824,6 +824,9 @@ authPage('signup', 'Create account', `<h1>Create your account</h1><p class="auth
 authPage('forgot', 'Reset password', `<h1>Reset your password</h1><p class="auth-sub">Enter your email and we will send you a link to choose a new password.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <form id="authForm" novalidate><label class="field"><span>Email</span><input type="email" id="email" autocomplete="email" required></label><button class="btn primary auth-btn" type="submit">Send reset link</button></form>
 <p class="auth-links"><a href="/login">Back to sign in</a></p>`);
+authPage('reset-password', 'Choose a new password', `<h1>Choose a new password</h1><p class="auth-sub">Enter a new password for your VertexStealth account. It works on this website and in the desktop app.</p><div class="auth-msg" id="authMsg" role="alert" hidden></div>
+<form id="authForm" novalidate hidden><label class="field"><span>New password (at least 8 characters)</span><input type="password" id="password" autocomplete="new-password" minlength="8" required></label><label class="field"><span>Confirm new password</span><input type="password" id="password2" autocomplete="new-password" required></label><button class="btn primary auth-btn" type="submit">Save new password</button></form>
+<p class="auth-links" id="resetBack" hidden><a href="/forgot">Request a new reset link</a><a href="/login">Back to sign in</a></p>`);
 page({ file: 'account.html', title: 'Your account | ' + cfg.name, desc: 'Your VertexStealth account dashboard.', canonicalPath: '/account', index: false, scripts: authScripts, styles: [accountCss], pageId: 'account', main: `<section class="acct-wrap"><div class="wrap">
 <div class="auth-msg" id="authMsg" role="alert" hidden></div>
 <div id="accountBody" hidden>
@@ -853,7 +856,7 @@ page({ file: 'admin.html', title: 'Admin | ' + cfg.name, desc: 'Administration.'
 
 // ---------- robots + sitemap ----------
 fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
-  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /account\nDisallow: /partner$\nDisallow: /partner/\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
+  ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /reset-password\nDisallow: /account\nDisallow: /partner$\nDisallow: /partner/\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
 const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/free-proxy-list', '/partners-program', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];

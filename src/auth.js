@@ -56,7 +56,7 @@
       var d = await gotrue('/signup?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/login'), { body: { email: email, password: password, data: meta } });
       return { session: store(d), needsConfirm: !d.access_token };
     },
-    recover: function (email) { return gotrue('/recover?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/account'), { body: { email: email } }); },
+    recover: function (email) { return gotrue('/recover?redirect_to=' + encodeURIComponent((cfg.siteUrl || location.origin) + '/reset-password'), { body: { email: email } }); },
     updatePassword: async function (password) { var s = await session(); if (!s) throw { message: 'Please sign in again.' }; return gotrue('/user', { method: 'PUT', token: s.access_token, body: { password: password } }); },
     google: function (next) {
       try { if (next) sessionStorage.setItem('vs_next', next); } catch (e) {}
@@ -127,7 +127,7 @@
   function validEmail(v) { return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v); }
 
   var page = document.body.getAttribute('data-page');
-  if (!configured() && /^(login|signup|forgot|account)$/.test(page || '')) { msg('Accounts are not switched on for this website yet. Please check back soon.'); var ff = $('authForm'); if (ff) ff.hidden = true; return; }
+  if (!configured() && /^(login|signup|forgot|reset|account)$/.test(page || '')) { msg('Accounts are not switched on for this website yet. Please check back soon.'); var ff = $('authForm'); if (ff) ff.hidden = true; return; }
 
   // capture tokens from Supabase email links (#access_token=...&type=recovery|signup)
   var hashSession = null, hashType = '';
@@ -143,7 +143,10 @@
   if (location.hash.indexOf('error_description=') > -1) {
     var eh = new URLSearchParams(location.hash.slice(1));
     history.replaceState(null, '', location.pathname + location.search);
-    setTimeout(function () { msg(nice({ message: (eh.get('error_description') || '').replace(/\+/g, ' ') }) || 'Sign-in was cancelled.'); }, 0);
+    setTimeout(function () {
+      if (page === 'reset') { var rf = $('authForm'); if (rf) rf.hidden = true; if ($('resetBack')) $('resetBack').hidden = false; msg('This reset link has expired or was already used. Request a new one below.'); return; }
+      msg(nice({ message: (eh.get('error_description') || '').replace(/\+/g, ' ') }) || 'Sign-in was cancelled.');
+    }, 0);
   }
 
   // "Continue with Google": shown only when the Google provider is switched on in Supabase
@@ -181,7 +184,29 @@
       if (r.needsConfirm) { msg('Almost done. We sent a confirmation link to ' + email + '. Open it, then sign in here or in the desktop app.', true); $('authForm').hidden = true; }
       else { location.replace('/account'); }
     });
+  } else if (page === 'reset') {
+    (async function () {
+      var s = hashSession || await session();
+      var f = $('authForm');
+      if (!s || (hashType && hashType !== 'recovery')) {
+        f.hidden = true; $('resetBack').hidden = false;
+        msg('This reset link has expired or was already used. Request a new one below.');
+        return;
+      }
+      f.hidden = false; $('password').focus();
+    })();
+    form(async function () {
+      var pw = $('password').value;
+      if (pw.length < 8) throw { message: 'Use a password with at least 8 characters.' };
+      if (pw !== $('password2').value) throw { message: 'The passwords do not match.' };
+      await api.updatePassword(pw);
+      $('password').value = ''; $('password2').value = '';
+      $('authForm').hidden = true;
+      msg('Your password has been changed. Taking you to your account…', true);
+      setTimeout(function () { location.replace('/account'); }, 1800);
+    });
   } else if (page === 'forgot') {
+    if (new URLSearchParams(location.search).get('expired')) msg('That reset link has expired or was already used. Enter your email to get a new one.');
     form(async function () {
       var email = val('email'); if (!validEmail(email)) throw { message: 'Enter a valid email address.' };
       await api.recover(email); msg('If an account exists for ' + email + ', a reset link is on its way.', true);

@@ -55,12 +55,13 @@
       const a = await window.VS.session(); if (!a) return 'none';
       const r = await api('account_login', { access_token: a.access_token });
       if (r.ok && r.data && r.data.session) { setSession(r.data.session); return 'ok'; }
-      return { signedIn: (a.user && a.user.email) || 'your account' };
+      return { signedIn: (a.user && a.user.email) || 'your account', notPartner: r.status === 403 };
     } catch (e) { return 'none'; }
   }
   function loginView(info) {
     const note = $('acct-note'), btn = $('acct-btn');
-    if (info && info.signedIn) { note.className = 'pp-status err'; note.textContent = 'You are signed in as ' + info.signedIn + ', but that email is not linked to an approved partner account. Partners sign in with the email address they applied with.'; btn.textContent = 'Use a different account'; }
+    if (info && info.signedIn && info.notPartner) { note.className = 'pp-status err'; note.textContent = 'You are signed in as ' + info.signedIn + ', but that email is not linked to an approved partner account. Partners sign in with the email address they applied with.'; btn.textContent = 'Use a different account'; }
+    else if (info && info.signedIn) { note.className = 'pp-status err'; note.textContent = 'We could not check your partner access just now. Please reload the page, or use the email link below.'; btn.textContent = 'Try again'; btn.href = '/partner'; }
     else { note.className = 'pp-status'; note.textContent = ''; }
     view('login');
   }
