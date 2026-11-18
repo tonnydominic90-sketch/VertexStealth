@@ -7,7 +7,7 @@ const SB = () => env('SUPABASE_URL', 'https://jtvjvogreelngfdseqee.supabase.co')
 const SERVICE = () => env('SUPABASE_SERVICE_ROLE_KEY');
 const SITE = () => env('SITE_URL', 'https://www.vertexstealth.top').replace(/\/$/, '');
 
-class HttpError extends Error { constructor(status, message) { super(message); this.status = status; } }
+class HttpError extends Error { constructor(status, message, extra) { super(message); this.status = status; if (extra) Object.assign(this, extra); } }
 
 function send(res, status, body, headers = {}) {
   res.statusCode = status;
@@ -93,4 +93,20 @@ const unsubSecret = () => env('UNSUB_SECRET') || SERVICE();
 const unsubToken = (email) => crypto.createHmac('sha256', unsubSecret()).update(email.toLowerCase()).digest('hex');
 const unsubLink = (email) => `${SITE()}/api/unsub?e=${b64u(email.toLowerCase())}&t=${unsubToken(email)}`;
 
-module.exports = { MAP, env, SB, SERVICE, SITE, HttpError, send, readBody, sb, gotrueAdmin, userFromToken, bearer, requireAdmin, listAllAuthUsers, isBannedNow, isPaid, audit, b64u, fromB64u, unsubToken, unsubLink };
+// ---- rate limiting (database-backed, so it holds across serverless instances) ----
+const clientIp = (req) => String(((req && req.headers) || {})['x-forwarded-for'] || '').split(',')[0].trim() || 'unknown';
+const rateSalt = () => env('RATE_LIMIT_SALT') || env('UNSUB_SECRET') || SERVICE() || 'vertexstealth';
+const rateKey = (req, scope) => scope + ':' + crypto.createHash('sha256').update(rateSalt() + '|' + clientIp(req)).digest('hex').slice(0, 32);
+
+// Counts one request for this visitor in `scope`. Throws a 429 HttpError once more than `max` requests were made
+// in `windowSeconds`. If the database function is not installed yet (supabase/rate-limits.sql) or the call fails,
+// it lets the request through: rate limiting must never lock out real users.
+async function rateLimit(req, scope, max, windowSeconds) {
+  let allowed = true;
+  try {
+    allowed = await sb('/rpc/hit_rate_limit', { method: 'POST', body: { p_key: rateKey(req, scope), p_max: max, p_window_seconds: windowSeconds } });
+  } catch (e) { return; }
+  if (allowed === false) throw new HttpError(429, 'Too many requests. Please wait a minute and try again.', { retryAfter: windowSeconds });
+}
+
+module.exports = { clientIp, rateLimit, MAP, env, SB, SERVICE, SITE, HttpError, send, readBody, sb, gotrueAdmin, userFromToken, bearer, requireAdmin, listAllAuthUsers, isBannedNow, isPaid, audit, b64u, fromB64u, unsubToken, unsubLink };

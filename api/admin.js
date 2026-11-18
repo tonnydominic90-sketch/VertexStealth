@@ -398,6 +398,8 @@ function buildEmail(r, subjectT, bodyT, category) {
 module.exports = async (req, res) => {
   if (req.method !== 'POST') return C.send(res, 405, { error: 'POST only' });
   try {
+    // Counted before any sign-in check, so hammering the endpoint with bad or missing tokens is limited too.
+    await C.rateLimit(req, 'admin', 120, 60);
     const admin = await C.requireAdmin(req);
     const body = await C.readBody(req);
     const fn = ACTIONS[body.action];
@@ -406,7 +408,8 @@ module.exports = async (req, res) => {
   } catch (e) {
     const status = e instanceof HttpError ? e.status : 500;
     if (!(e instanceof HttpError)) console.error('admin api error', e);
-    return C.send(res, status, { error: e instanceof HttpError ? e.message : 'Server error. Check the Vercel function logs.' });
+    const extra = status === 429 && e.retryAfter ? { 'Retry-After': String(e.retryAfter) } : {};
+    return C.send(res, status, { error: e instanceof HttpError ? e.message : 'Server error. Check the Vercel function logs.' }, extra);
   }
 };
 module.exports._test = { buildEmail, resolveRecipients, ACTIONS };

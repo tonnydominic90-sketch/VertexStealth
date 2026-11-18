@@ -1,13 +1,30 @@
 'use strict';
 // Privacy-friendly analytics beacon. Stores country/region/city from Vercel's edge headers, never the IP address and no cookies.
-const { sb, userFromToken, bearer, readBody, send } = require('./_lib/common');
+const { sb, userFromToken, bearer, readBody, send, SITE, env } = require('./_lib/common');
 
 const hits = new Map(); // tiny in-memory throttle per instance (the IP is only a transient key, never stored)
 let windowStart = Date.now();
 const EVENTS = new Set(['pageview', 'signin', 'app_launch']);
 
+// Which websites may send analytics from a browser: this site (with and without www) plus any extra origins listed in the
+// TRACK_ALLOWED_ORIGINS environment variable (comma separated, e.g. a preview URL). Requests with no Origin header
+// (servers, the desktop app's main process) are not browser cross-site requests and are accepted. The literal origin "null"
+// is what a file:// page such as the desktop app window sends, so it is accepted too.
+function allowedOrigins() {
+  const site = SITE();
+  const set = new Set([site, site.replace('://www.', '://'), site.replace('://', '://www.')]);
+  env('TRACK_ALLOWED_ORIGINS').split(',').map((x) => x.trim().replace(/\/$/, '')).filter(Boolean).forEach((x) => set.add(x));
+  if (!/^https:\/\/(www\.)?vertexstealth\.top$/.test(site)) set.add('http://localhost:3000');
+  return set;
+}
+
 module.exports = async (req, res) => {
-  res.setHeader('Access-Control-Allow-Origin', '*');
+  const origin = String(req.headers.origin || '');
+  if (origin) {
+    if (origin !== 'null' && !allowedOrigins().has(origin)) return send(res, 403, { error: 'Origin not allowed' }, { Vary: 'Origin' });
+    res.setHeader('Access-Control-Allow-Origin', origin);
+    res.setHeader('Vary', 'Origin');
+  }
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   if (req.method === 'OPTIONS') return send(res, 204);

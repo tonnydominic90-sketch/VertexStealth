@@ -22,7 +22,7 @@ const db = {
   site_events: [], user_locations: [{ user_id: 'u1', country: 'KE' }, { user_id: 'u2', country: 'US' }], admin_audit_log: [], email_campaigns: [], email_optouts: [{ email: 'paid.person@x.com' }], site_settings: [],
 };
 for (let i = 0; i < 30; i++) db.site_events.push({ created_at: iso(now - (i % 5) * 864e5), event: 'pageview', path: i % 2 ? '/pricing' : '/', country: i % 3 ? 'KE' : 'US', referrer_host: i % 4 ? '' : 'google.com', device: 'desktop' });
-const sent = []; const banUntil = {};
+const sent = []; const banUntil = {}; const rlDb = {};
 const json = (o, s = 200) => ({ ok: s < 300, status: s, text: async () => JSON.stringify(o), json: async () => o });
 global.fetch = async (url, opt = {}) => {
   const u = new URL(url); const m = opt.method || 'GET'; const auth = (opt.headers || {}).Authorization || '';
@@ -37,6 +37,7 @@ global.fetch = async (url, opt = {}) => {
   if (u.pathname === '/auth/v1/admin/users') return json({ users: db.users });
   const gm = u.pathname.match(/^\/auth\/v1\/admin\/users\/(.+)$/);
   if (gm) { const usr = db.users.find((x) => x.id === gm[1]); if (!usr) return json({ msg: 'nf' }, 404); if (m === 'PUT') { const b = JSON.parse(opt.body); if (b.ban_duration) { banUntil[usr.id] = b.ban_duration; usr.banned_until = b.ban_duration === 'none' ? null : iso(now + 1e12); } return json(usr); } return json(usr); }
+  if (u.pathname === '/rest/v1/rpc/hit_rate_limit') { if (!global.__rl) return json({ message: 'function not found' }, 404); const b = JSON.parse(opt.body); rlDb[b.p_key] = (rlDb[b.p_key] || 0) + 1; return json(rlDb[b.p_key] <= b.p_max); }
   const rm = u.pathname.match(/^\/rest\/v1\/([a-z_]+)$/);
   if (rm) {
     const t = rm[1]; if (!db[t]) return json({ message: 'relation does not exist' }, 404);
@@ -125,6 +126,37 @@ const call = async (handler, body, token = 'tok-a1', method = 'POST', headers = 
   r = await call(track, { event: 'signin', path: '/login' }, 'tok-u2', 'POST', { 'x-vercel-ip-country': 'GB', 'user-agent': 'Mozilla/5.0' }); assert.strictEqual(db.user_locations.find((l) => l.user_id === 'u2').country, 'GB');
   const n2 = db.site_events.length; await call(track, { path: '/' }, '', 'POST', { 'user-agent': 'Googlebot' }); assert.strictEqual(db.site_events.length, n2, 'bots ignored');
   console.log('tracking OK');
+
+  // tracking: browser origins (CORS)
+  const evs = db.site_events.length;
+  r = await call(track, { path: '/' }, '', 'OPTIONS', { origin: 'https://www.vertexstealth.top' }); assert.strictEqual(r.status, 204);
+  const okRes = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end() {} };
+  await track({ method: 'POST', headers: { origin: 'https://www.vertexstealth.top', 'user-agent': 'Mozilla/5.0' }, body: { path: '/faq' }, url: '/x' }, okRes);
+  assert.strictEqual(okRes.statusCode, 204); assert.strictEqual(okRes.headers['Access-Control-Allow-Origin'], 'https://www.vertexstealth.top'); assert.strictEqual(okRes.headers.Vary, 'Origin');
+  r = await call(track, { path: '/' }, '', 'POST', { origin: 'https://evil.example', 'user-agent': 'Mozilla/5.0' }); assert.strictEqual(r.status, 403, 'other websites are refused');
+  r = await call(track, { path: '/' }, '', 'OPTIONS', { origin: 'https://evil.example' }); assert.strictEqual(r.status, 403, 'preflight from other websites refused');
+  assert.strictEqual(db.site_events.length, evs + 1, 'only the allowed origin was recorded');
+  r = await call(track, { path: '/app' }, '', 'POST', { origin: 'null', 'user-agent': 'Electron VertexStealth' }); assert.strictEqual(r.status, 204, 'desktop app window (null origin) accepted');
+  r = await call(track, { path: '/app2' }, '', 'POST', { 'user-agent': 'VertexStealth' }); assert.strictEqual(r.status, 204, 'no Origin header accepted');
+  console.log('tracking origins OK');
+
+  // rate limiting
+  global.__rl = true;
+  for (let i = 0; i < 120; i++) assert.strictEqual((await call(admin, { action: 'me' })).status, 200, 'under the limit');
+  const rlRes = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end(b) { this.body = b; } };
+  await admin({ method: 'POST', headers: { authorization: 'Bearer tok-a1' }, body: { action: 'me' }, url: '/x' }, rlRes);
+  assert.strictEqual(rlRes.statusCode, 429, 'admin limited after 120 requests a minute'); assert.strictEqual(rlRes.headers['Retry-After'], '60');
+  assert.strictEqual((await call(admin, { action: 'me' }, '')).status, 429, 'bad tokens count too');
+  const rl2 = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end(b) { this.body = b; } };
+  await admin({ method: 'POST', headers: { authorization: 'Bearer tok-a1', 'x-forwarded-for': '203.0.113.9' }, body: { action: 'me' }, url: '/x' }, rl2);
+  assert.strictEqual(rl2.statusCode, 200, 'another visitor is not affected');
+  const ul = new URL(common.unsubLink('trial.user@x.com'));
+  let last;
+  for (let i = 0; i < 21; i++) { last = { headers: {}, setHeader(k, v) { this.headers[k] = v; }, end(b) { this.body = b; } }; await unsub({ method: 'GET', headers: { 'x-forwarded-for': '198.51.100.7' }, url: ul.pathname + ul.search }, last); }
+  assert.strictEqual(last.statusCode, 429, 'unsubscribe limited after 20 requests a minute'); assert.strictEqual(last.headers['Retry-After'], '60');
+  global.__rl = false;
+  r = await call(admin, { action: 'me' }); assert.strictEqual(r.status, 200, 'fails open when the SQL has not been run');
+  console.log('rate limits OK');
 
   // releases / download link
   r = await call(download, {}, '', 'GET'); assert.strictEqual(r.data.url, null, 'nothing set yet');

@@ -42,3 +42,10 @@ The website records a location when someone signs in on the site. To also learn 
 - Send "product news" only to people who would expect it; service notices (price changes need 30 days' notice, terms changes 14 days under your Terms) are fine for everyone.
 - Keep `SUPABASE_SERVICE_ROLE_KEY` and `BREVO_API_KEY` only in Vercel. If either leaks, rotate it immediately.
 - Run `node scripts/test-api.js` after changing anything in `/api`.
+
+## Rate limiting and analytics origins
+
+1. In the Supabase SQL editor, run `supabase/rate-limits.sql` once. Until you do, rate limiting is skipped (nobody is blocked).
+2. Limits: `/api/admin` allows 120 requests per minute per visitor, `/api/unsub` allows 20 per minute. Past that the API answers 429 with a `Retry-After` header. Visitors are counted by a salted hash of their address, never the address itself.
+3. Optional Vercel environment variable `RATE_LIMIT_SALT` (any long random text). If it is not set, `UNSUB_SECRET` or the service key is used.
+4. `/api/track` now accepts browser requests only from your own site (`SITE_URL`, with and without `www`), the desktop app window, and requests with no Origin header. To allow another site, such as a Vercel preview URL, set `TRACK_ALLOWED_ORIGINS` to a comma separated list, for example `https://my-preview.vercel.app`.

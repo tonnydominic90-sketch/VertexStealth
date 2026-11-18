@@ -1,16 +1,18 @@
 'use strict';
 const crypto = require('crypto');
-const { sb, fromB64u, unsubToken, SITE } = require('./_lib/common');
+const { sb, fromB64u, unsubToken, rateLimit, SITE } = require('./_lib/common');
 
 function page(res, status, title, text) {
   res.statusCode = status;
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'no-store');
+  if (status === 429) res.setHeader('Retry-After', '60');
   res.end(`<!doctype html><meta charset="utf-8"><meta name="robots" content="noindex"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${title}</title><body style="font-family:Segoe UI,Arial,sans-serif;max-width:520px;margin:12vh auto;padding:0 20px;color:#1b2a3a"><h1 style="font-size:24px">${title}</h1><p style="line-height:1.6">${text}</p><p><a href="${SITE()}" style="color:#0875c9">Back to VertexStealth</a></p></body>`);
 }
 
 module.exports = async (req, res) => {
   try {
+    try { await rateLimit(req, 'unsub', 20, 60); } catch (e) { if (e.status === 429) return page(res, 429, 'Too many requests', 'Please wait a minute and try again.'); throw e; }
     const q = new URL(req.url, 'http://x').searchParams;
     const email = fromB64u(q.get('e') || '').toLowerCase();
     const token = q.get('t') || '';
