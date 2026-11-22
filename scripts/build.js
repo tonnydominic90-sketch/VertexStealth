@@ -147,7 +147,7 @@ const howtoNode = (h) => ({ '@type': 'HowTo', name: h.name, step: h.steps.map(([
 const buildDate = new Date().toISOString().slice(0, 10);
 const faqBlock = (items) => `<h2>Frequently asked questions</h2>\n<div class="faq">\n${items.map(([q, a]) => `<details><summary>${esc(q)}</summary><p>${esc(a)}</p></details>`).join('\n')}\n</div>`;
 
-function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null, index = true, bare = false, scripts = [], styles = [], pageId = '' }) {
+function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null, index = true, bare = false, scripts = [], styles = [], pageId = '', head = '' }) {
   const url = siteUrl + canonicalPath;
   const robots = index && isProd ? 'index,follow,max-image-preview:large' : 'noindex,nofollow';
   const og = `${siteUrl}/og-image.png`;
@@ -168,7 +168,7 @@ function page({ file, title, desc, canonicalPath, main, nodes = [], crumb = null
 <meta name="description" content="${esc(desc)}">
 <meta name="robots" content="${robots}">
 <meta name="theme-color" content="#f7fbff">
-<link rel="canonical" href="${esc(url)}">
+<link rel="canonical" href="${esc(url)}">${head}
 <link rel="icon" href="/favicon.svg" type="image/svg+xml">
 <link rel="icon" href="/favicon.ico" sizes="48x48">
 <link rel="icon" href="/favicon-32.png" sizes="32x32" type="image/png">
@@ -316,16 +316,31 @@ const posts = (fs.existsSync(blogDir) ? fs.readdirSync(blogDir).filter((f) => f.
   return { slug: f.replace(/\.md$/, ''), ...fm, md: m[2], words, mins: Math.max(1, Math.round(words / 200)) };
 }).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
 
-page({
-  file: 'blog.html', title: 'Blog: Antidetect Browser Guides | VertexStealth', canonicalPath: '/blog', crumb: 'Blog',
-  desc: 'Guides on browser fingerprints, proxies and multi-profile browser management from the VertexStealth team.',
-  nodes: [{ '@type': 'Blog', '@id': siteUrl + '/blog#blog', url: siteUrl + '/blog', name: cfg.name + ' Blog', publisher: { '@id': siteUrl + '/#org' } }],
-  main: `<section class="page"><div class="wrap">
-<div class="section-head"><div class="kicker">Blog</div><h1>Guides on profiles, proxies and fingerprints</h1><p class="lead">Practical explainers for managing multiple browser profiles.</p></div>
+// paginated blog index: /blog (page 1), /blog/page/2, /blog/page/3 ... with 10 posts per page
+const POSTS_PER_PAGE = 10;
+const blogPageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
+const blogPath = (n) => (n <= 1 ? '/blog' : '/blog/page/' + n);
+for (let n = 1; n <= blogPageCount; n++) {
+  const slice = posts.slice((n - 1) * POSTS_PER_PAGE, n * POSTS_PER_PAGE);
+  const prevLink = n > 1 ? `<a class="btn outline pager-btn" rel="prev" href="${blogPath(n - 1)}">← Previous page</a>` : '';
+  const nextLink = n < blogPageCount ? `<a class="btn primary pager-btn" rel="next" href="${blogPath(n + 1)}">Next page →</a>` : '';
+  const pager = blogPageCount > 1 ? `<nav class="pager" aria-label="Blog pages">${prevLink}<span class="pager-info">Page ${n} of ${blogPageCount}</span>${nextLink}</nav>` : '';
+  const headTags = (n > 1 ? `\n<link rel="prev" href="${esc(siteUrl + blogPath(n - 1))}">` : '') + (n < blogPageCount ? `\n<link rel="next" href="${esc(siteUrl + blogPath(n + 1))}">` : '');
+  page({
+    file: n === 1 ? 'blog.html' : `blog/page/${n}.html`,
+    title: n === 1 ? 'Blog: Antidetect Browser Guides | VertexStealth' : `Blog: Antidetect Browser Guides, Page ${n} | VertexStealth`,
+    canonicalPath: blogPath(n), crumb: n === 1 ? 'Blog' : [['Blog', '/blog'], ['Page ' + n, blogPath(n)]], head: headTags,
+    desc: n === 1 ? 'Guides on browser fingerprints, proxies and multi-profile browser management from the VertexStealth team.' : `More guides on browser fingerprints, proxies and multi-profile browser management from the VertexStealth team. Page ${n} of ${blogPageCount}.`,
+    nodes: [{ '@type': 'Blog', '@id': siteUrl + '/blog#blog', url: siteUrl + '/blog', name: cfg.name + ' Blog', publisher: { '@id': siteUrl + '/#org' } }],
+    main: `<section class="page"><div class="wrap">
+<div class="section-head"><div class="kicker">Blog</div><h1>${n === 1 ? 'Guides on profiles, proxies and fingerprints' : 'Guides on profiles, proxies and fingerprints: page ' + n}</h1><p class="lead">Practical explainers for managing multiple browser profiles.</p></div>
 <div class="posts">
-${posts.map((p) => `<article class="post-card"><div class="post-meta">${fmt(p.date)} · ${p.mins} min read</div><h2><a href="/blog/${p.slug}">${esc(p.title)}</a></h2><p>${esc(p.description)}</p><a class="textlink" href="/blog/${p.slug}">Read article →</a></article>`).join('\n')}
-</div></div></section>`,
-});
+${slice.map((p) => `<article class="post-card"><div class="post-meta">${fmt(p.date)} · ${p.mins} min read</div><h2><a href="/blog/${p.slug}">${esc(p.title)}</a></h2><p>${esc(p.description)}</p><a class="textlink" href="/blog/${p.slug}">Read article →</a></article>`).join('\n')}
+</div>
+${pager}
+</div></section>`,
+  });
+}
 for (const p of posts) {
   const url = siteUrl + '/blog/' + p.slug;
   const used = new Set(); const heads = [];
@@ -867,7 +882,7 @@ fs.writeFileSync(path.join(dist, 'robots.txt'), isProd
   ? `User-agent: *\nAllow: /\nDisallow: /admin\nDisallow: /api/\nDisallow: /login\nDisallow: /signup\nDisallow: /forgot\nDisallow: /reset-password\nDisallow: /account\nDisallow: /partner$\nDisallow: /partner/\nDisallow: /partner-admin\nDisallow: /r/\n\nSitemap: ${siteUrl}/sitemap.xml\n`
   : 'User-agent: *\nDisallow: /\n');
 const today = new Date().toISOString().slice(0, 10);
-const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/free-proxy-list', '/partners-program', '/download', '/blog', ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
+const urls = ['/', '/features', '/product-preview', '/how-it-works', '/use-cases', '/pricing', '/faq', '/docs', '/system-requirements', '/security', '/acceptable-use', '/about', '/antidetect-browser', '/multi-profile-management', '/free-proxy-list', '/partners-program', '/download', '/blog', ...Array.from({ length: blogPageCount - 1 }, (_, i) => blogPath(i + 2)), ...posts.map((p) => '/blog/' + p.slug), '/terms', '/privacy', '/eula'];
 fs.writeFileSync(path.join(dist, 'sitemap.xml'),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
   urls.map((u) => `  <url><loc>${siteUrl}${u === '/' ? '/' : u}</loc><lastmod>${today}</lastmod></url>`).join('\n') + '\n</urlset>\n');

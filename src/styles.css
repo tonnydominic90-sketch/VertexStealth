@@ -174,3 +174,4 @@
  .links .m-only{padding:12px 4px}
 }
 .badge-strip{padding:26px 0;background:#fff;text-align:center}.badge-strip a{display:inline-block}.badge-strip img{max-width:100%;height:auto;display:block}
+.pager{display:flex;align-items:center;justify-content:center;gap:16px;margin:36px 0 0;flex-wrap:wrap}.pager-info{font-size:13px;font-weight:700;color:var(--muted2)}.pager a.btn{text-decoration:none}.pager a.btn.primary{color:#fff}.pager a.btn.outline{color:#1c2b3b}
