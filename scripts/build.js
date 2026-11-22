@@ -316,8 +316,8 @@ const posts = (fs.existsSync(blogDir) ? fs.readdirSync(blogDir).filter((f) => f.
   return { slug: f.replace(/\.md$/, ''), ...fm, md: m[2], words, mins: Math.max(1, Math.round(words / 200)) };
 }).sort((a, b) => b.date.localeCompare(a.date) || a.slug.localeCompare(b.slug));
 
-// paginated blog index: /blog (page 1), /blog/page/2, /blog/page/3 ... with 10 posts per page
-const POSTS_PER_PAGE = 10;
+// paginated blog index: /blog (page 1), /blog/page/2, /blog/page/3 ... with 12 posts per page
+const POSTS_PER_PAGE = 12;
 const blogPageCount = Math.max(1, Math.ceil(posts.length / POSTS_PER_PAGE));
 const blogPath = (n) => (n <= 1 ? '/blog' : '/blog/page/' + n);
 for (let n = 1; n <= blogPageCount; n++) {
